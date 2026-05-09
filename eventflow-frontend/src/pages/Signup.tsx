@@ -1,15 +1,5 @@
-// ============================================================
-// pages/Signup.tsx — PHASE 2
-// Club signup page at /signup
-// ============================================================
-// TODO Phase 2:
-// - Form: club name, email, password, college (optional)
-// - On submit: POST /auth/signup via api.ts
-// - On success: setToken(token), setStoredClub(club), navigate('/dashboard')
-// - Use react-hook-form + zod for validation
-
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '@/lib/api'
 import { setToken, setStoredClub } from '@/lib/auth'
 
@@ -19,72 +9,90 @@ export default function Signup() {
   const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  const handle = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(p => ({ ...p, [e.target.name]: e.target.value }))
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     try {
       const { data } = await api.post('/auth/signup', form)
       setToken(data.token)
       setStoredClub(data.club)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed')
-    } finally {
-      setLoading(false)
-    }
+      setError(err.response?.data?.error || 'Signup failed. Please try again.')
+    } finally { setLoading(false) }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-xl shadow-sm border w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Create your club account</h1>
-        <p className="text-gray-500 mb-6 text-sm">Free plan — no credit card required</p>
+    <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--surface-2)' }}>
+      {/* Left panel */}
+      <div style={{
+        width: 420, background: '#0f0e1a', display: 'flex', flexDirection: 'column',
+        padding: '40px', flexShrink: 0,
+      }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 'auto' }}>
+          <div style={{ width: 28, height: 28, background: '#6366f1', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, color: 'white' }}>E</div>
+          <span style={{ fontWeight: 700, fontSize: 16, color: 'white', letterSpacing: '-0.3px' }}>EventFlow</span>
+        </Link>
+        <div style={{ paddingBottom: 60 }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: 'white', letterSpacing: '-0.5px', lineHeight: 1.2, marginBottom: 12 }}>
+            Start for free
+          </div>
+          <div style={{ fontSize: 14, color: '#6b6880', lineHeight: 1.7, marginBottom: 28 }}>
+            No credit card. No payment upfront. Get your first event running in minutes.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {['1 free event to start', 'QR codes sent to attendees', 'Mobile gate scanner included', 'Upgrade only when you need to'].map(f => (
+              <div key={f} style={{ display: 'flex', gap: 10, fontSize: 13, color: '#a09cc0' }}>
+                <span style={{ color: '#6366f1' }}>✓</span> {f}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+      {/* Right panel */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.3px', marginBottom: 6 }}>Create your club account</h2>
+          <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 28 }}>
+            Already have an account? <Link to="/login" style={{ color: 'var(--brand)', fontWeight: 500, textDecoration: 'none' }}>Sign in</Link>
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Club Name</label>
-            <input name="name" type="text" value={form.name} onChange={handleChange} required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="IEEE Student Branch" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="club@college.edu" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input name="password" type="password" value={form.password} onChange={handleChange} required minLength={8}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Min 8 characters" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">College <span className="text-gray-400">(optional)</span></label>
-            <input name="college" type="text" value={form.college} onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="IIT BHU" />
-          </div>
-          <button type="submit" disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50">
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
+          {error && (
+            <div style={{ background: 'var(--danger-bg)', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--danger)', marginBottom: 20 }}>
+              {error}
+            </div>
+          )}
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:underline font-medium">Sign in</Link>
-        </p>
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label className="label">Club Name</label>
+              <input className="input" name="name" type="text" required autoFocus
+                value={form.name} onChange={handle} placeholder="IEEE Student Branch" />
+            </div>
+            <div>
+              <label className="label">Email address</label>
+              <input className="input" name="email" type="email" required
+                value={form.email} onChange={handle} placeholder="club@college.edu" />
+            </div>
+            <div>
+              <label className="label">Password <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(min 8 characters)</span></label>
+              <input className="input" name="password" type="password" required minLength={8}
+                value={form.password} onChange={handle} placeholder="••••••••" />
+            </div>
+            <div>
+              <label className="label">College <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional)</span></label>
+              <input className="input" name="college" type="text"
+                value={form.college} onChange={handle} placeholder="IIT BHU, Varanasi" />
+            </div>
+            <button type="submit" disabled={loading} className="btn btn-primary btn-lg" style={{ marginTop: 4 }}>
+              {loading ? 'Creating account…' : 'Create account'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

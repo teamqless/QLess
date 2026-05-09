@@ -1,71 +1,154 @@
-// ============================================================
-// pages/Dashboard.tsx — PHASE 2
-// Club admin home page at /dashboard
-// ============================================================
-// TODO Phase 2:
-// - Fetch GET /dashboard using useDashboard() hook
-// - Show 4 stat cards: Total Events, Live Events, Total Registrations, Pending Approvals
-// - Recent events list with status badges
-// - Recent registrations list
-// - Quick action: "Create New Event" button
-
-import { useDashboard } from '@/hooks/useDashboard'
 import { Link } from 'react-router-dom'
+import { useDashboard } from '@/hooks/useDashboard'
+import { getStoredClub } from '@/lib/auth'
+import EventStatusBadge from '@/components/events/EventStatusBadge'
+import type { EventStatus } from '@/types'
+
+function SkeletonCard() {
+  return (
+    <div className="stat-card">
+      <div className="shimmer" style={{ height: 14, width: 80, marginBottom: 10 }} />
+      <div className="shimmer" style={{ height: 32, width: 60 }} />
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const { data, isLoading } = useDashboard()
-
-  if (isLoading) return <div className="p-8 text-gray-500">Loading dashboard...</div>
+  const club = getStoredClub()
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <Link to="/events/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+    <div>
+      {/* Greeting */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Good to see you, {club?.name?.split(' ')[0]} 👋</h1>
+          <p className="page-subtitle">Here's what's happening with your events</p>
+        </div>
+        <Link to="/events/new" className="btn btn-primary">
           + New Event
         </Link>
       </div>
 
-      {/* Stat cards — Phase 2: replace with real StatsCard components */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: 'Total Events',         value: data?.stats.total_events ?? 0 },
-          { label: 'Live Events',          value: data?.stats.live_events ?? 0 },
-          { label: 'Total Registrations',  value: data?.stats.total_registrations ?? 0 },
-          { label: 'Pending Approvals',    value: data?.stats.pending_approvals ?? 0, alert: true },
-        ].map(s => (
-          <div key={s.label} className={`bg-white border rounded-xl p-5 ${s.alert && s.value > 0 ? 'border-amber-300' : ''}`}>
-            <p className="text-sm text-gray-500">{s.label}</p>
-            <p className={`text-3xl font-bold mt-1 ${s.alert && s.value > 0 ? 'text-amber-600' : 'text-gray-900'}`}>
-              {s.value}
-            </p>
-          </div>
-        ))}
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 32 }}>
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+        ) : (
+          <>
+            <div className="stat-card">
+              <div className="stat-label">Total Events</div>
+              <div className="stat-value">{data?.stats.total_events ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Live Now</div>
+              <div className="stat-value" style={{ color: data?.stats.live_events ? 'var(--success)' : undefined }}>
+                {data?.stats.live_events ?? 0}
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Total Registrations</div>
+              <div className="stat-value">{data?.stats.total_registrations ?? 0}</div>
+            </div>
+            <div className="stat-card" style={{ borderColor: (data?.stats.pending_approvals ?? 0) > 0 ? '#fcd34d' : undefined }}>
+              <div className="stat-label">Pending Approvals</div>
+              <div className="stat-value" style={{ color: (data?.stats.pending_approvals ?? 0) > 0 ? 'var(--warning)' : undefined }}>
+                {data?.stats.pending_approvals ?? 0}
+              </div>
+              {(data?.stats.pending_approvals ?? 0) > 0 && (
+                <div className="stat-sub" style={{ color: 'var(--warning)' }}>Needs your attention</div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Recent events — Phase 2: replace with EventCard components */}
-      <div className="bg-white border rounded-xl p-6">
-        <h2 className="font-semibold text-gray-900 mb-4">Recent Events</h2>
-        {data?.recent_events?.length === 0 && (
-          <p className="text-gray-400 text-sm">No events yet. <Link to="/events/new" className="text-indigo-600">Create your first event →</Link></p>
-        )}
-        <div className="space-y-3">
-          {data?.recent_events?.map(event => (
-            <Link key={event.id} to={`/events/${event.id}`}
-              className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium text-sm text-gray-900">{event.title}</p>
-                <p className="text-xs text-gray-400">{event.venue || 'No venue set'}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+
+        {/* Recent events */}
+        <div className="card">
+          <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>Recent Events</span>
+            <Link to="/events" style={{ fontSize: 13, color: 'var(--brand)', textDecoration: 'none', fontWeight: 500 }}>View all →</Link>
+          </div>
+          <div style={{ padding: '8px 0' }}>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} style={{ padding: '12px 20px', display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div className="shimmer" style={{ flex: 1, height: 14 }} />
+                  <div className="shimmer" style={{ width: 50, height: 20, borderRadius: 100 }} />
+                </div>
+              ))
+            ) : data?.recent_events?.length === 0 ? (
+              <div style={{ padding: '28px 20px', textAlign: 'center' }}>
+                <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 12 }}>No events yet</p>
+                <Link to="/events/new" className="btn btn-primary btn-sm">Create your first event</Link>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium
-                ${event.status === 'published' ? 'bg-green-100 text-green-700' :
-                  event.status === 'draft' ? 'bg-gray-100 text-gray-600' :
-                  'bg-blue-100 text-blue-700'}`}>
-                {event.status}
-              </span>
-            </Link>
-          ))}
+            ) : (
+              data?.recent_events?.map(event => (
+                <Link key={event.id} to={`/events/${event.id}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', textDecoration: 'none', transition: 'background 0.1s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = '')}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {event.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
+                      {event.venue || 'No venue'}
+                    </div>
+                  </div>
+                  <EventStatusBadge status={event.status as EventStatus} />
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Recent registrations */}
+        <div className="card">
+          <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>Recent Registrations</span>
+          </div>
+          <div style={{ padding: '8px 0' }}>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} style={{ padding: '12px 20px', display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div className="shimmer" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                  <div style={{ flex: 1 }}>
+                    <div className="shimmer" style={{ height: 13, width: '60%', marginBottom: 6 }} />
+                    <div className="shimmer" style={{ height: 11, width: '40%' }} />
+                  </div>
+                </div>
+              ))
+            ) : data?.recent_registrations?.length === 0 ? (
+              <div style={{ padding: '28px 20px', textAlign: 'center' }}>
+                <p style={{ fontSize: 13, color: 'var(--text-3)' }}>Registrations will appear here</p>
+              </div>
+            ) : (
+              data?.recent_registrations?.map(reg => (
+                <div key={reg.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px' }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: '50%',
+                    background: 'var(--surface-3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 600, color: 'var(--text-2)', flexShrink: 0,
+                  }}>
+                    {reg.attendee_name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {reg.attendee_name}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {(reg as any).events?.title}
+                    </div>
+                  </div>
+                  <span className={`badge badge-${reg.status}`}>{reg.status}</span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

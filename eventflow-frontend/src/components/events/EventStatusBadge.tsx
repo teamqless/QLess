@@ -1,12 +1,18 @@
-// ============================================================
-// components/events/EventStatusBadge.tsx — PHASE 2
-// ============================================================
-// Props: status: EventStatus
-// draft      → gray  background, "Draft" label
-// published  → green background, "Live" label
-// closed     → amber background, "Closed" label
-// completed  → blue  background, "Completed" label
+import type { EventStatus } from '@/types'
 
-export default function EventStatusBadge() {
-  return null // TODO Phase 2
+const CONFIG: Record<EventStatus, { label: string; dot: string }> = {
+  draft:      { label: 'Draft',      dot: '#9896b0' },
+  published:  { label: 'Live',       dot: '#16a34a' },
+  closed:     { label: 'Closed',     dot: '#d97706' },
+  completed:  { label: 'Completed',  dot: '#2563eb' },
+}
+
+export default function EventStatusBadge({ status }: { status: EventStatus }) {
+  const { label, dot } = CONFIG[status] ?? CONFIG.draft
+  return (
+    <span className={`badge badge-${status}`}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: dot, display: 'inline-block' }} />
+      {label}
+    </span>
+  )
 }

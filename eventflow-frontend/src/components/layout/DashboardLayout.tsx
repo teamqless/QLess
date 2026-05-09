@@ -1,19 +1,17 @@
-// ============================================================
-// components/layout/DashboardLayout.tsx — PHASE 2
-// Wraps all authenticated /dashboard/* pages
-// ============================================================
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
 export default function DashboardLayout() {
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--surface-2)' }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
         <Header />
-        <main className="flex-1 overflow-y-auto">
-          <Outlet />
+        <main style={{ flex: 1, overflowY: 'auto', padding: '32px 36px' }}>
+          <div className="fade-in">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

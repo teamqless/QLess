@@ -1,220 +1,216 @@
-// ============================================================
-// pages/EventCreate.tsx — PHASE 2
-// Multi-step event creation at /events/new
-// ============================================================
-// TODO Phase 2: Build as a 3-step wizard:
-//
-// Step 1 — Basic Info:
-//   Fields: title, description, venue, event_date,
-//           registration_deadline, entry_fee, capacity,
-//           banner_url (upload), theme_color (color picker)
-//
-// Step 2 — Form Builder (FormBuilder.tsx component):
-//   - Add/remove/reorder form fields
-//   - Each field: label, type (text/email/phone/select/file/checkbox), required toggle
-//   - Note: Name + Email fields are auto-injected by backend if missing
-//
-// Step 3 — Preview & Create:
-//   - Preview how the registration form will look
-//   - Submit button calls POST /events via useCreateEvent()
-//   - On success: navigate to /events/:id
-//
-// Use react-hook-form for form state across steps
-
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCreateEvent } from '@/hooks/useEvents'
+import FormBuilder from '@/components/events/FormBuilder'
+import EventStatusBadge from '@/components/events/EventStatusBadge'
 import type { FormField } from '@/types'
 
-export default function EventCreate() {
-  const navigate      = useNavigate()
-  const createEvent   = useCreateEvent()
-  const [step, setStep] = useState(1)
+const STEPS = ['Basic Info', 'Registration Form', 'Preview']
 
-  const [basicInfo, setBasicInfo] = useState({
+export default function EventCreate() {
+  const navigate    = useNavigate()
+  const createEvent = useCreateEvent()
+  const [step, setStep] = useState(0)
+  const [error, setError] = useState('')
+
+  const [basic, setBasic] = useState({
     title: '', description: '', venue: '',
-    event_date: '', entry_fee: 0, capacity: '',
+    event_date: '', registration_deadline: '',
+    entry_fee: 0, capacity: '',
     theme_color: '#6366f1', banner_url: '',
   })
 
-  // Phase 2: replace with FormBuilder component
-  const [formFields] = useState<FormField[]>([
-    { id: 'attendee_name',  label: 'Full Name',      type: 'text',  required: true },
-    { id: 'attendee_email', label: 'Email Address',  type: 'email', required: true },
-    { id: 'phone',          label: 'Phone Number',   type: 'phone', required: false },
-    { id: 'branch',         label: 'Branch / Dept',  type: 'text',  required: false },
-  ])
+  const [fields, setFields] = useState<FormField[]>([])
 
-  const handleSubmit = async () => {
+  const handleBasic = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setBasic(p => ({ ...p, [e.target.name]: e.target.value }))
+
+  const submit = async () => {
+    setError('')
     try {
       const event = await createEvent.mutateAsync({
-        ...basicInfo,
-        entry_fee:  Number(basicInfo.entry_fee),
-        capacity:   basicInfo.capacity ? Number(basicInfo.capacity) : undefined,
-        form_fields: formFields,
+        ...basic,
+        entry_fee: Number(basic.entry_fee),
+        capacity:  basic.capacity ? Number(basic.capacity) : undefined,
+        form_fields: fields,
       } as any)
       navigate(`/events/${event.id}`)
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to create event')
+      setError(err.response?.data?.error || 'Failed to create event')
     }
   }
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Event</h1>
-
-      {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-8">
-        {['Basic Info', 'Registration Form', 'Preview'].map((label, i) => (
-          <div key={label} className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-              ${step > i + 1 ? 'bg-green-500 text-white' :
-                step === i + 1 ? 'bg-indigo-600 text-white' :
-                'bg-gray-200 text-gray-500'}`}>
-              {step > i + 1 ? '✓' : i + 1}
+    <div style={{ maxWidth: 660, margin: '0 auto' }}>
+      {/* Step progress */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 36 }}>
+        {STEPS.map((label, i) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 700, flexShrink: 0,
+                background: step > i ? 'var(--success)' : step === i ? 'var(--brand)' : 'var(--surface-3)',
+                color: step >= i ? 'white' : 'var(--text-3)',
+                transition: 'all 0.2s',
+              }}>
+                {step > i ? '✓' : i + 1}
+              </div>
+              <span style={{ fontSize: 13, fontWeight: step === i ? 600 : 400, color: step === i ? 'var(--text-1)' : 'var(--text-3)' }}>
+                {label}
+              </span>
             </div>
-            <span className={`text-sm ${step === i + 1 ? 'font-medium text-gray-900' : 'text-gray-400'}`}>
-              {label}
-            </span>
-            {i < 2 && <div className="w-8 h-px bg-gray-200 mx-1" />}
+            {i < STEPS.length - 1 && (
+              <div style={{ flex: 1, height: 1, background: step > i ? 'var(--success)' : 'var(--border)', margin: '0 12px', transition: 'background 0.2s' }} />
+            )}
           </div>
         ))}
       </div>
 
-      {/* Step 1 — Basic Info */}
-      {step === 1 && (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
-            <input type="text" value={basicInfo.title}
-              onChange={e => setBasicInfo(p => ({ ...p, title: e.target.value }))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="TechFest 2026" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea value={basicInfo.description}
-              onChange={e => setBasicInfo(p => ({ ...p, description: e.target.value }))}
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Tell attendees about your event..." />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+      {/* Step 0 — Basic Info */}
+      {step === 0 && (
+        <div className="card" style={{ padding: 28 }}>
+          <h2 style={{ fontSize: 17, fontWeight: 600, marginBottom: 24, color: 'var(--text-1)' }}>Event Details</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-              <input type="text" value={basicInfo.venue}
-                onChange={e => setBasicInfo(p => ({ ...p, venue: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Auditorium, Block A" />
+              <label className="label">Event Title *</label>
+              <input className="input" name="title" value={basic.title} onChange={handleBasic}
+                placeholder="e.g. TechFest 2026" autoFocus />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Entry Fee (₹)</label>
-              <input type="number" value={basicInfo.entry_fee} min={0}
-                onChange={e => setBasicInfo(p => ({ ...p, entry_fee: Number(e.target.value) }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="0 = free" />
+              <label className="label">Description</label>
+              <textarea className="input" name="description" value={basic.description}
+                onChange={handleBasic as any} rows={3}
+                placeholder="Tell attendees what this event is about…" style={{ resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label className="label">Venue</label>
+                <input className="input" name="venue" value={basic.venue} onChange={handleBasic}
+                  placeholder="Auditorium, Block A" />
+              </div>
+              <div>
+                <label className="label">Entry Fee (₹)</label>
+                <input className="input" name="entry_fee" type="number" min={0}
+                  value={basic.entry_fee} onChange={handleBasic} placeholder="0 = free" />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label className="label">Event Date & Time</label>
+                <input className="input" name="event_date" type="datetime-local"
+                  value={basic.event_date} onChange={handleBasic} />
+              </div>
+              <div>
+                <label className="label">Registration Deadline</label>
+                <input className="input" name="registration_deadline" type="datetime-local"
+                  value={basic.registration_deadline} onChange={handleBasic} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label className="label">Capacity <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional)</span></label>
+                <input className="input" name="capacity" type="number" min={1}
+                  value={basic.capacity} onChange={handleBasic} placeholder="Leave blank for unlimited" />
+              </div>
+              <div>
+                <label className="label">Theme Color</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input type="color" name="theme_color" value={basic.theme_color}
+                    onChange={handleBasic}
+                    style={{ width: 42, height: 36, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer', padding: 2 }} />
+                  <span style={{ fontSize: 13, color: 'var(--text-3)', fontFamily: 'DM Mono, monospace' }}>{basic.theme_color}</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Event Date & Time</label>
-              <input type="datetime-local" value={basicInfo.event_date}
-                onChange={e => setBasicInfo(p => ({ ...p, event_date: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
-              <input type="number" value={basicInfo.capacity} min={1}
-                onChange={e => setBasicInfo(p => ({ ...p, capacity: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Leave blank for unlimited" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Theme Color</label>
-            <div className="flex items-center gap-3">
-              <input type="color" value={basicInfo.theme_color}
-                onChange={e => setBasicInfo(p => ({ ...p, theme_color: e.target.value }))}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-300" />
-              <span className="text-sm text-gray-500">{basicInfo.theme_color}</span>
-            </div>
-          </div>
-          <div className="flex justify-end pt-4">
-            <button onClick={() => setStep(2)} disabled={!basicInfo.title}
-              className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 28 }}>
+            <button onClick={() => setStep(1)} disabled={!basic.title.trim()}
+              className="btn btn-primary">
               Next: Registration Form →
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 2 — Form Builder */}
-      {step === 2 && (
-        <div>
-          <p className="text-sm text-gray-500 mb-4">
-            These are the fields attendees will fill when registering.
-            <br />
-            <strong>Full Name</strong> and <strong>Email</strong> are always included automatically.
+      {/* Step 1 — Form Builder */}
+      {step === 1 && (
+        <div className="card" style={{ padding: 28 }}>
+          <h2 style={{ fontSize: 17, fontWeight: 600, marginBottom: 6, color: 'var(--text-1)' }}>Registration Form</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 24, lineHeight: 1.5 }}>
+            Design the form attendees will fill out. Full Name and Email are always included automatically.
           </p>
-
-          {/* Phase 2: Replace this list with FormBuilder.tsx drag-and-drop component */}
-          <div className="space-y-2 mb-6">
-            {formFields.map(field => (
-              <div key={field.id}
-                className="flex items-center justify-between bg-white border rounded-lg px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{field.label}</p>
-                  <p className="text-xs text-gray-400">{field.type} {field.required ? '• required' : '• optional'}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3">
-            Phase 2: FormBuilder.tsx component will go here — with drag/drop reordering,
-            add field button, field type selector, and required toggle.
-          </p>
-
-          <div className="flex justify-between pt-6">
-            <button onClick={() => setStep(1)}
-              className="border border-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50">
-              ← Back
-            </button>
-            <button onClick={() => setStep(3)}
-              className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">
-              Next: Preview →
-            </button>
+          <FormBuilder value={fields} onChange={setFields} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28 }}>
+            <button onClick={() => setStep(0)} className="btn btn-ghost">← Back</button>
+            <button onClick={() => setStep(2)} className="btn btn-primary">Next: Preview →</button>
           </div>
         </div>
       )}
 
-      {/* Step 3 — Preview & Create */}
-      {step === 3 && (
+      {/* Step 2 — Preview */}
+      {step === 2 && (
         <div>
-          <div className="bg-white border rounded-xl overflow-hidden mb-6">
-            <div className="h-16 w-full" style={{ backgroundColor: basicInfo.theme_color }} />
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900">{basicInfo.title}</h2>
-              {basicInfo.venue && <p className="text-sm text-gray-500 mt-1">📍 {basicInfo.venue}</p>}
-              {basicInfo.event_date && (
-                <p className="text-sm text-gray-500 mt-1">
-                  📅 {new Date(basicInfo.event_date).toLocaleString('en-IN')}
-                </p>
-              )}
-              <p className="text-sm text-gray-500 mt-1">
-                {basicInfo.entry_fee === 0 ? '🎟️ Free entry' : `🎟️ ₹${basicInfo.entry_fee}`}
+          {/* Preview card */}
+          <div className="card" style={{ overflow: 'hidden', marginBottom: 20 }}>
+            <div style={{ height: 8, background: basic.theme_color }} />
+            <div style={{ padding: '24px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.3px' }}>{basic.title}</h2>
+                  {basic.description && <p style={{ fontSize: 14, color: 'var(--text-3)', marginTop: 6, lineHeight: 1.5 }}>{basic.description}</p>}
+                </div>
+                <EventStatusBadge status="draft" />
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                {basic.venue && <span style={{ fontSize: 13, color: 'var(--text-3)' }}>📍 {basic.venue}</span>}
+                {basic.event_date && <span style={{ fontSize: 13, color: 'var(--text-3)' }}>📅 {new Date(basic.event_date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>}
+                <span style={{ fontSize: 13, color: 'var(--text-3)' }}>🎟️ {basic.entry_fee === 0 ? 'Free entry' : `₹${basic.entry_fee}`}</span>
+                {basic.capacity && <span style={{ fontSize: 13, color: 'var(--text-3)' }}>👥 {basic.capacity} seats</span>}
+              </div>
+            </div>
+
+            {/* Form preview */}
+            <div style={{ padding: '0 28px 24px', borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 14 }}>
+                Registration Form Preview
               </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  { label: 'Full Name', type: 'text', required: true },
+                  { label: 'Email Address', type: 'email', required: true },
+                  ...fields,
+                ].map((f, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', marginBottom: 5 }}>
+                      {f.label} {f.required && <span style={{ color: 'var(--danger)' }}>*</span>}
+                    </div>
+                    <div style={{ height: 36, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6 }} />
+                  </div>
+                ))}
+                {basic.entry_fee > 0 && (
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', marginBottom: 5 }}>
+                      Payment Screenshot <span style={{ color: 'var(--danger)' }}>*</span>
+                    </div>
+                    <div style={{ height: 36, background: 'var(--surface-2)', border: '1px dashed var(--border)', borderRadius: 6 }} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-between">
-            <button onClick={() => setStep(2)}
-              className="border border-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50">
-              ← Back
-            </button>
-            <button onClick={handleSubmit} disabled={createEvent.isPending}
-              className="bg-indigo-600 text-white px-8 py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50">
-              {createEvent.isPending ? 'Creating...' : 'Create Event'}
+          {error && (
+            <div style={{ background: 'var(--danger-bg)', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--danger)', marginBottom: 16 }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button onClick={() => setStep(1)} className="btn btn-ghost">← Back</button>
+            <button onClick={submit} disabled={createEvent.isPending} className="btn btn-primary btn-lg">
+              {createEvent.isPending ? 'Creating…' : 'Create Event'}
             </button>
           </div>
         </div>

@@ -1,68 +1,70 @@
-// ============================================================
-// pages/EventList.tsx — PHASE 2
-// All club events at /events
-// ============================================================
-// TODO Phase 2:
-// - Fetch events using useEvents() hook
-// - Tab filter: All | Draft | Published | Completed
-// - EventCard grid for each event
-// - Empty state with create CTA
-
-import { useEvents } from '@/hooks/useEvents'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useEvents } from '@/hooks/useEvents'
+import EventCard from '@/components/events/EventCard'
+import type { EventStatus } from '@/types'
+
+const TABS: { value: EventStatus | 'all'; label: string }[] = [
+  { value: 'all',       label: 'All' },
+  { value: 'published', label: 'Live' },
+  { value: 'draft',     label: 'Draft' },
+  { value: 'completed', label: 'Completed' },
+]
 
 export default function EventList() {
-  const { data: events, isLoading } = useEvents()
-
-  if (isLoading) return <div className="p-8 text-gray-500">Loading events...</div>
+  const [tab, setTab] = useState<EventStatus | 'all'>('all')
+  const { data: events, isLoading } = useEvents(tab === 'all' ? undefined : tab)
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Events</h1>
-        <Link to="/events/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
-          + New Event
-        </Link>
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Events</h1>
+          <p className="page-subtitle">Manage all your club events</p>
+        </div>
+        <Link to="/events/new" className="btn btn-primary">+ New Event</Link>
       </div>
 
-      {/* Phase 2: Add status tab filters here */}
-
-      {events?.length === 0 && (
-        <div className="text-center py-20">
-          <p className="text-gray-400 mb-4">No events yet</p>
-          <Link to="/events/new" className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">
-            Create your first event
-          </Link>
-        </div>
-      )}
-
-      {/* Phase 2: Replace with EventCard components */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {events?.map(event => (
-          <Link key={event.id} to={`/events/${event.id}`}
-            className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
-            {event.banner_url && (
-              <img src={event.banner_url} alt={event.title}
-                className="w-full h-32 object-cover rounded-lg mb-4" />
-            )}
-            <div className="flex items-start justify-between">
-              <h3 className="font-semibold text-gray-900">{event.title}</h3>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ml-2 shrink-0
-                ${event.status === 'published' ? 'bg-green-100 text-green-700' :
-                  event.status === 'draft'     ? 'bg-gray-100 text-gray-600' :
-                  event.status === 'closed'    ? 'bg-amber-100 text-amber-700' :
-                                                 'bg-blue-100 text-blue-700'}`}>
-                {event.status}
-              </span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">{event.venue || 'No venue'}</p>
-            <p className="text-xs text-gray-400 mt-1">
-              {event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}
-            </p>
-          </Link>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: 'var(--surface-3)', borderRadius: 9, padding: 4, width: 'fit-content' }}>
+        {TABS.map(t => (
+          <button key={t.value} onClick={() => setTab(t.value)}
+            style={{
+              padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer',
+              background: tab === t.value ? 'var(--surface)' : 'transparent',
+              color: tab === t.value ? 'var(--text-1)' : 'var(--text-3)',
+              boxShadow: tab === t.value ? 'var(--shadow-sm)' : 'none',
+              transition: 'all 0.15s',
+            }}>
+            {t.label}
+          </button>
         ))}
       </div>
+
+      {/* Grid */}
+      {isLoading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="card" style={{ padding: 18 }}>
+              <div className="shimmer" style={{ height: 6, borderRadius: 3, marginBottom: 16 }} />
+              <div className="shimmer" style={{ height: 16, width: '70%', marginBottom: 10 }} />
+              <div className="shimmer" style={{ height: 13, width: '50%', marginBottom: 6 }} />
+              <div className="shimmer" style={{ height: 13, width: '40%' }} />
+            </div>
+          ))}
+        </div>
+      ) : events?.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '64px 0' }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>◈</div>
+          <p style={{ fontSize: 15, color: 'var(--text-2)', fontWeight: 500, marginBottom: 6 }}>No events yet</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 24 }}>Create your first event to get started</p>
+          <Link to="/events/new" className="btn btn-primary">Create event</Link>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          {events?.map(event => <EventCard key={event.id} event={event} />)}
+        </div>
+      )}
     </div>
   )
 }
