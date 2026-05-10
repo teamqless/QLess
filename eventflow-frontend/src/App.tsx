@@ -26,27 +26,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Routes>
-      {/* ── Public ─────────────────────────────────────── */}
       <Route path="/"                       element={<Landing />} />
       <Route path="/register/:slug"         element={<Register />} />
       <Route path="/register/:slug/success" element={<RegisterSuccess />} />
       <Route path="/scanner/login"          element={<ScannerLogin />} />
       <Route path="/scanner/:eventId"       element={<Scanner />} />
 
-      {/* ── Auth pages ─────────────────────────────────── */}
       <Route element={<AuthLayout />}>
         <Route path="/login"  element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Route>
 
-      {/* ── Protected dashboard ────────────────────────── */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
+      <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route path="/dashboard"  element={<Dashboard />} />
         <Route path="/events"     element={<EventList />} />
         <Route path="/events/new" element={<EventCreate />} />

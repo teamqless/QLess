@@ -1,37 +1,35 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useScan, useLiveDashboard, getVolunteerToken, clearVolunteerSession } from '@/hooks/useScanner'
+import { useEventSocket } from '@/hooks/useSocket'
 import type { ScanResponse } from '@/types'
-
-// Dynamically import html5-qrcode only on client
-let Html5QrcodeScanner: any = null
 
 type ScanResult = ScanResponse & { _ts?: number }
 
 const RESULT_CONFIG = {
   success: {
-    bg:    'linear-gradient(135deg,#15803d,#16a34a)',
+    bg:    'linear-gradient(160deg,#14532d,#15803d)',
+    border:'#22c55e',
     icon:  '✓',
     title: 'Entry Granted',
-    sub:   (r: ScanResult) => r.attendee?.name || '',
   },
   already_scanned: {
-    bg:    'linear-gradient(135deg,#b45309,#d97706)',
+    bg:    'linear-gradient(160deg,#78350f,#b45309)',
+    border:'#f59e0b',
     icon:  '⚠',
     title: 'Already Used',
-    sub:   (r: ScanResult) => `Scanned at ${r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString('en-IN') : ''}`,
   },
   rejected: {
-    bg:    'linear-gradient(135deg,#b91c1c,#dc2626)',
+    bg:    'linear-gradient(160deg,#7f1d1d,#b91c1c)',
+    border:'#ef4444',
     icon:  '✗',
     title: 'Not Approved',
-    sub:   (r: ScanResult) => r.attendee?.name || '',
   },
   invalid: {
-    bg:    'linear-gradient(135deg,#1e1b4b,#312e81)',
+    bg:    'linear-gradient(160deg,#1e1b4b,#312e81)',
+    border:'#6366f1',
     icon:  '✗',
-    title: 'Invalid QR Code',
-    sub:   () => 'This QR was not recognised',
+    title: 'Invalid QR',
   },
 }
 
@@ -39,13 +37,23 @@ export default function Scanner() {
   const { eventId }    = useParams<{ eventId: string }>()
   const navigate       = useNavigate()
   const scan           = useScan()
-  const { data: live } = useLiveDashboard(eventId!)
+  const { data: initialLive } = useLiveDashboard(eventId!)   // initial load only
 
   const [result, setResult]     = useState<ScanResult | null>(null)
   const [scanning, setScanning] = useState(true)
   const [ready, setReady]       = useState(false)
-  const scannerRef              = useRef<any>(null)
-  const timerRef                = useRef<ReturnType<typeof setTimeout>>()
+  const [liveStats, setLiveStats] = useState<{ scanned_in: number; total_approved: number } | null>(null)
+  const [recentEntries, setRecentEntries] = useState<any[]>([])
+  const scannerRef = useRef<any>(null)
+  const timerRef   = useRef<ReturnType<typeof setTimeout>>()
+
+  // Seed from REST on first load
+  useEffect(() => {
+    if (initialLive && !liveStats) {
+      setLiveStats(initialLive.stats)
+      setRecentEntries(initialLive.recent_entries || [])
+    }
+  }, [initialLive])
 
   // Redirect if no token
   useEffect(() => {
@@ -55,13 +63,22 @@ export default function Scanner() {
   // Load html5-qrcode dynamically
   useEffect(() => {
     import('html5-qrcode').then(m => {
-      Html5QrcodeScanner = m.Html5QrcodeScanner
+      ;(window as any).__Html5QrcodeScanner = m.Html5QrcodeScanner
       setReady(true)
     })
   }, [])
 
+  // ── WebSocket: receive live stats pushed from server ─────────────────────
+  useEventSocket({
+    eventId: eventId!,
+    useVolunteerToken: true,
+    onLiveStats: (stats) => setLiveStats(stats),
+  })
+
   useEffect(() => {
     if (!ready || !scanning) return
+    const Html5QrcodeScanner = (window as any).__Html5QrcodeScanner
+    if (!Html5QrcodeScanner) return
 
     const scanner = new Html5QrcodeScanner(
       'qr-reader',
@@ -87,20 +104,26 @@ export default function Scanner() {
         res._ts = Date.now()
         setResult(res)
 
+        if (res.result === 'success') {
+          setRecentEntries(prev => [{
+            registrations: { attendee_name: res.attendee?.name },
+            scanned_at: new Date().toISOString(),
+          }, ...prev].slice(0, 8))
+        }
+
         clearTimeout(timerRef.current)
         timerRef.current = setTimeout(() => {
           setResult(null)
           setScanning(true)
-        }, 3500)
+        }, 3200)
       },
-      () => {} // ignore decode errors
+      () => {}
     )
 
     scannerRef.current = scanner
     return () => {
       clearTimeout(timerRef.current)
       scanner.clear().catch(() => {})
-      scannerRef.current = null
     }
   }, [ready, scanning])
 
@@ -110,9 +133,9 @@ export default function Scanner() {
   }
 
   const cfg = result ? RESULT_CONFIG[result.result] : null
-  const pct = live
-    ? Math.round((live.stats.scanned_in / Math.max(live.stats.total_approved, 1)) * 100)
-    : 0
+  const scannedIn     = liveStats?.scanned_in     ?? 0
+  const totalApproved = liveStats?.total_approved  ?? 0
+  const pct           = totalApproved > 0 ? Math.round((scannedIn / totalApproved) * 100) : 0
 
   return (
     <div style={{ minHeight: '100vh', background: '#080714', fontFamily: 'DM Sans, sans-serif', color: '#f0eeff' }}>
@@ -124,24 +147,19 @@ export default function Scanner() {
       }}>
         <div>
           <div style={{ fontSize: 15, fontWeight: 700 }}>Gate Scanner</div>
-          <div style={{ fontSize: 12, color: '#5e5a80', marginTop: 1 }}>Point camera at attendee's QR code</div>
+          <div style={{ fontSize: 12, color: '#5e5a80', marginTop: 1 }}>
+            {scanning ? 'Ready — point camera at QR code' : 'Processing…'}
+          </div>
         </div>
 
         {/* Live counter */}
-        {live && (
-          <div style={{ textAlign: 'center', margin: '0 auto' }}>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#818cf8', lineHeight: 1 }}>
-              {live.stats.scanned_in}
-            </div>
-            <div style={{ fontSize: 11, color: '#5e5a80' }}>
-              of {live.stats.total_approved} in
-            </div>
-            {/* Progress bar */}
-            <div style={{ width: 80, height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 10, marginTop: 5, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: '#6366f1', borderRadius: 10, transition: 'width 0.4s' }} />
-            </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 30, fontWeight: 900, color: '#818cf8', lineHeight: 1 }}>{scannedIn}</div>
+          <div style={{ fontSize: 11, color: '#5e5a80' }}>of {totalApproved} in</div>
+          <div style={{ width: 70, height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 10, marginTop: 5, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#6366f1,#8b5cf6)', borderRadius: 10, transition: 'width 0.5s' }} />
           </div>
-        )}
+        </div>
 
         <button onClick={logout} style={{
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -153,13 +171,11 @@ export default function Scanner() {
       </div>
 
       {/* Scanner area */}
-      <div style={{ position: 'relative', minHeight: 380 }}>
-        {/* QR reader element */}
+      <div style={{ position: 'relative', minHeight: 340 }}>
         <div id="qr-reader" style={{ width: '100%' }} />
-
         {!ready && (
           <div style={{ padding: 40, textAlign: 'center', color: '#5e5a80', fontSize: 14 }}>
-            Loading camera…
+            Initialising camera…
           </div>
         )}
 
@@ -168,41 +184,47 @@ export default function Scanner() {
           <div style={{
             position: 'absolute', inset: 0,
             background: cfg.bg,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            animation: 'fadeInScale 0.25s ease',
+            border: `2px solid ${cfg.border}`,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            animation: 'fadeInScale 0.2s ease',
           }}>
             <style>{`
               @keyframes fadeInScale {
-                from { opacity: 0; transform: scale(0.96); }
+                from { opacity: 0; transform: scale(0.95); }
                 to   { opacity: 1; transform: scale(1); }
               }
             `}</style>
-
-            <div style={{ fontSize: 72, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{cfg.icon}</div>
-            <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>{cfg.title}</div>
-            <div style={{ fontSize: 16, opacity: 0.85, marginBottom: 4 }}>{cfg.sub(result)}</div>
-            {result.attendee?.email && (
-              <div style={{ fontSize: 13, opacity: 0.6 }}>{result.attendee.email}</div>
+            <div style={{ fontSize: 80, fontWeight: 900, lineHeight: 1, marginBottom: 10 }}>{cfg.icon}</div>
+            <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>{cfg.title}</div>
+            {result.attendee?.name && (
+              <div style={{ fontSize: 20, opacity: 0.9, fontWeight: 600 }}>{result.attendee.name}</div>
             )}
-            <div style={{ fontSize: 12, opacity: 0.45, marginTop: 20 }}>
-              Scanner resumes in 3 seconds…
-            </div>
+            {result.attendee?.email && (
+              <div style={{ fontSize: 14, opacity: 0.6, marginTop: 4 }}>{result.attendee.email}</div>
+            )}
+            {result.result === 'already_scanned' && result.scanned_at && (
+              <div style={{ fontSize: 13, opacity: 0.7, marginTop: 8, background: 'rgba(0,0,0,0.2)', padding: '4px 12px', borderRadius: 6 }}>
+                Scanned at {new Date(result.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}
+              </div>
+            )}
+            <div style={{ fontSize: 12, opacity: 0.4, marginTop: 20 }}>Resuming in 3 seconds…</div>
           </div>
         )}
       </div>
 
       {/* Recent entries */}
-      {live?.recent_entries?.length > 0 && (
-        <div style={{ padding: '16px 20px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#3d3a5c', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>
+      {recentEntries.length > 0 && (
+        <div style={{ padding: '14px 18px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#3d3a5c', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
             Recent entries
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {live.recent_entries.slice(0, 6).map((entry: any, i: number) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {recentEntries.map((entry: any, i: number) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: 8, padding: '9px 14px',
+                borderRadius: 8, padding: '8px 14px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
