@@ -7,6 +7,7 @@ import AuthLayout       from '@/components/layout/AuthLayout'
 import Landing          from '@/pages/Landing'
 import Login            from '@/pages/Login'
 import Signup           from '@/pages/Signup'
+import Pricing          from '@/pages/Pricing'
 import Dashboard        from '@/pages/Dashboard'
 import EventList        from '@/pages/EventList'
 import EventCreate      from '@/pages/EventCreate'
@@ -26,17 +27,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Routes>
+      {/* ── Public ─────────────────────────────────── */}
       <Route path="/"                       element={<Landing />} />
+      <Route path="/pricing"                element={<Pricing />} />
       <Route path="/register/:slug"         element={<Register />} />
       <Route path="/register/:slug/success" element={<RegisterSuccess />} />
       <Route path="/scanner/login"          element={<ScannerLogin />} />
       <Route path="/scanner/:eventId"       element={<Scanner />} />
 
+      {/* ── Auth ───────────────────────────────────── */}
       <Route element={<AuthLayout />}>
         <Route path="/login"  element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Route>
 
+      {/* ── Protected dashboard ────────────────────── */}
       <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route path="/dashboard"  element={<Dashboard />} />
         <Route path="/events"     element={<EventList />} />
