@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormField, FieldType } from '@/types'
-import { v4 as uuidv4 } from 'uuid'
+// Inline ID generator — no uuid package needed
+const uuidv4 = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
 
 const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: 'text',     label: 'Text' },

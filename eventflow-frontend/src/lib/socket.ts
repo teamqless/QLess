@@ -1,10 +1,13 @@
 // ============================================================
 // lib/socket.ts — Socket.IO client
-// Manages WebSocket connection to the backend.
-// Components subscribe to events using useSocket hook.
 // ============================================================
 import { io, Socket } from 'socket.io-client'
-import { getToken, getVolunteerToken } from './auth'
+import { getToken } from './auth'
+
+// FIX: getVolunteerToken lives in useScanner, not auth.
+// Read directly from localStorage here to avoid circular imports.
+const getVolunteerToken = () =>
+  localStorage.getItem('eventflow_volunteer_token')
 
 let socket: Socket | null = null
 
@@ -28,10 +31,6 @@ export const disconnectSocket = () => {
   if (socket?.connected) socket.disconnect()
 }
 
-/**
- * Join an event room to receive real-time scan + registration events.
- * Uses club token for admin view, volunteer token for scanner view.
- */
 export const joinEventRoom = (eventId: string, useVolunteer = false) => {
   const s = connectSocket()
   const token = useVolunteer ? getVolunteerToken() : getToken()
