@@ -27,21 +27,24 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Routes>
-      {/* ── Public ─────────────────────────────────── */}
+      {/* ── Public ────────────────────────────────────── */}
       <Route path="/"                       element={<Landing />} />
       <Route path="/pricing"                element={<Pricing />} />
       <Route path="/register/:slug"         element={<Register />} />
       <Route path="/register/:slug/success" element={<RegisterSuccess />} />
       <Route path="/scanner/login"          element={<ScannerLogin />} />
+
+      {/* Scanner with optional eventId — /scanner/ready for club-wide volunteers */}
+      <Route path="/scanner/ready"          element={<Scanner />} />
       <Route path="/scanner/:eventId"       element={<Scanner />} />
 
-      {/* ── Auth ───────────────────────────────────── */}
+      {/* ── Auth ──────────────────────────────────────── */}
       <Route element={<AuthLayout />}>
         <Route path="/login"  element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Route>
 
-      {/* ── Protected dashboard ────────────────────── */}
+      {/* ── Protected dashboard ───────────────────────── */}
       <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route path="/dashboard"  element={<Dashboard />} />
         <Route path="/events"     element={<EventList />} />
