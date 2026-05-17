@@ -69,8 +69,26 @@ router.post('/:id/approve', requireAuth, async (req, res) => {
     await supabase.from('registrations').update({ status: 'approved', approved_at: new Date().toISOString() }).eq('id', reg.id)
     const event = reg.events
     const { data: existingQR } = await supabase.from('qr_codes').select('*').eq('registration_id', reg.id).single()
-    const qrCode = existingQR || await generateQRCode(reg.id, event.id)
-    await sendQREmail({ registration: reg, event, qrCode })
+    let qrCode = existingQR
+    if (!qrCode) {
+      try {
+        qrCode = await generateQRCode(reg.id, event.id)
+      } catch (qrErr) {
+        console.error('QR generation failed:', qrErr)
+        return res.status(500).json({ error: 'Registration approved but QR generation failed. Try resending QR.' })
+      }
+    }
+    try {
+      await sendQREmail({ registration: reg, event, qrCode })
+    } catch (emailErr) {
+      console.error('QR email failed:', emailErr.message)
+      // Don't fail the approval — QR was generated, admin can resend
+      return res.json({
+        message: 'Registration approved and QR generated, but email delivery failed. Use "Resend QR" to retry.',
+        registration_id: reg.id,
+        email_error: emailErr.message,
+      })
+    }
     return res.json({ message: 'Registration approved and QR code sent', registration_id: reg.id })
   } catch (err) { console.error('Approve error:', err); return res.status(500).json({ error: 'Failed to approve registration' }) }
 })
