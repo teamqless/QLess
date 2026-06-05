@@ -8,53 +8,42 @@ export default function EventCard({ event }: { event: Event }) {
     : null
 
   return (
-    <Link
-      to={`/events/${event.id}`}
-      style={{ textDecoration: 'none' }}
-    >
-      <div className="card" style={{
-        overflow: 'hidden',
-        transition: 'box-shadow 0.15s, transform 0.15s',
-        cursor: 'pointer',
-      }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow)'
-          ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.boxShadow = ''
-          ;(e.currentTarget as HTMLElement).style.transform = ''
-        }}
-      >
+    <Link to={`/events/${event.id}`} className="block no-underline">
+      <div className="card overflow-hidden hover:shadow-glass hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col">
         {/* Color stripe / banner */}
-        <div style={{
-          height: 6,
-          background: event.banner_url
-            ? `url(${event.banner_url}) center/cover no-repeat`
-            : event.theme_color,
-        }} />
+        <div 
+          className="h-1.5 w-full shrink-0" 
+          style={{
+            background: event.banner_url
+              ? `url(${event.banner_url}) center/cover no-repeat`
+              : event.theme_color,
+          }} 
+        />
 
-        <div style={{ padding: '16px 18px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)', lineHeight: 1.3 }}>
+        <div className="p-4 sm:p-5 flex-1 flex flex-col">
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <h3 className="text-[15px] font-semibold text-white leading-snug line-clamp-2">
               {event.title}
             </h3>
             <EventStatusBadge status={event.status} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div className="flex flex-col gap-2 mt-auto">
             {event.venue && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-3)' }}>
-                <span>📍</span> {event.venue}
+              <div className="flex items-center gap-2 text-[13px] text-gray-400">
+                <span className="shrink-0 text-gray-500">📍</span> 
+                <span className="truncate">{event.venue}</span>
               </div>
             )}
             {dateStr && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-3)' }}>
-                <span>📅</span> {dateStr}
+              <div className="flex items-center gap-2 text-[13px] text-gray-400">
+                <span className="shrink-0 text-gray-500">📅</span> 
+                <span>{dateStr}</span>
               </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-3)' }}>
-              <span>🎟️</span> {event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}
+            <div className="flex items-center gap-2 text-[13px] text-gray-400">
+              <span className="shrink-0 text-gray-500">🎟️</span> 
+              <span>{event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}</span>
             </div>
           </div>
         </div>

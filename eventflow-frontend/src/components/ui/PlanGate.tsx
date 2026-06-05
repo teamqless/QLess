@@ -7,35 +7,19 @@ interface PlanGateProps {
 
 export default function PlanGate({ feature, message }: PlanGateProps) {
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
-      border: '1px solid #c4b5fd',
-      borderRadius: 16,
-      padding: '32px 28px',
-      textAlign: 'center',
-      maxWidth: 480,
-      margin: '40px auto',
-    }}>
-      <div style={{ fontSize: 36, marginBottom: 14 }}>🔒</div>
-      <h3 style={{ fontSize: 18, fontWeight: 700, color: '#4c1d95', marginBottom: 8, letterSpacing: '-0.3px' }}>
+    <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-purple-500/30 rounded-2xl p-8 sm:p-10 text-center max-w-lg mx-auto my-10 shadow-lg backdrop-blur-sm">
+      <div className="text-4xl mb-4">🔒</div>
+      <h3 className="text-xl font-bold text-purple-300 mb-3 tracking-tight">
         {feature} is a Pro feature
       </h3>
-      <p style={{ fontSize: 14, color: '#7c3aed', lineHeight: 1.65, marginBottom: 24 }}>
+      <p className="text-sm text-purple-200/80 leading-relaxed mb-8">
         {message || 'Upgrade to Club Pro to unlock this feature and run unlimited events with no attendee caps.'}
       </p>
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link to="/pricing" style={{
-          padding: '10px 22px', background: '#7c3aed', color: 'white',
-          borderRadius: 9, textDecoration: 'none', fontSize: 14, fontWeight: 600,
-          boxShadow: '0 4px 14px rgba(124,58,237,0.35)',
-        }}>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <Link to="/pricing" className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl no-underline text-sm font-semibold shadow-lg shadow-purple-600/30 transition-all hover:-translate-y-0.5">
           View plans →
         </Link>
-        <Link to="/settings" style={{
-          padding: '10px 18px', background: 'rgba(124,58,237,0.1)', color: '#7c3aed',
-          borderRadius: 9, textDecoration: 'none', fontSize: 14, fontWeight: 500,
-          border: '1px solid #c4b5fd',
-        }}>
+        <Link to="/settings" className="px-6 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 rounded-xl no-underline text-sm font-medium border border-purple-500/30 transition-all">
           Settings
         </Link>
       </div>

@@ -8,26 +8,30 @@ type ScanResult = ScanResponse & { _ts?: number }
 
 const RESULT_CONFIG = {
   success: {
-    bg:    '#14532d',
-    accent:'#22c55e',
+    bg:    'bg-green-950/90',
+    accent:'border-green-500',
+    iconBg:'bg-green-500',
     icon:  '✓',
     title: 'Entry Granted',
   },
   already_scanned: {
-    bg:    '#78350f',
-    accent:'#f59e0b',
+    bg:    'bg-amber-950/90',
+    accent:'border-amber-500',
+    iconBg:'bg-amber-500',
     icon:  '⚠',
     title: 'Already Used',
   },
   rejected: {
-    bg:    '#7f1d1d',
-    accent:'#ef4444',
+    bg:    'bg-red-950/90',
+    accent:'border-red-500',
+    iconBg:'bg-red-500',
     icon:  '✗',
     title: 'Not Approved',
   },
   invalid: {
-    bg:    '#1e1b4b',
-    accent:'#818cf8',
+    bg:    'bg-indigo-950/90',
+    accent:'border-indigo-400',
+    iconBg:'bg-indigo-400',
     icon:  '?',
     title: 'Invalid QR',
   },
@@ -148,129 +152,88 @@ export default function Scanner() {
   const pct           = totalApproved > 0 ? Math.round((scannedIn / totalApproved) * 100) : 0
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      background: '#080714',
-      fontFamily: 'DM Sans, sans-serif',
-      color: '#f0eeff',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <div className="min-h-[100dvh] bg-[#080714] text-[#f0eeff] font-sans flex flex-col relative overflow-hidden">
+      
+      {/* Background Glow */}
+      <div className="absolute top-[20%] left-[-20%] w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Header */}
-      <div style={{
-        background: '#10102a',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexShrink: 0,
-      }}>
+      <div className="bg-[#10102a]/80 backdrop-blur-md border-b border-white/10 px-4 py-3 flex items-center justify-between shrink-0 z-10">
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#f0eeff' }}>Gate Scanner</div>
-          <div style={{ fontSize: 11, color: '#5e5a80', marginTop: 2 }}>
-            {scanning ? '● Ready' : '⏳ Processing…'}
+          <div className="text-[15px] font-bold text-[#f0eeff] tracking-tight">Gate Scanner</div>
+          <div className="text-[11px] text-[#5e5a80] mt-0.5 font-medium flex items-center gap-1.5">
+            {scanning ? (
+              <><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Ready</>
+            ) : (
+              <><span className="animate-spin text-[10px]">⏳</span> Processing…</>
+            )}
           </div>
         </div>
 
-        {/* Live counter — only shown if we have event stats */}
+        {/* Live counter */}
         {eventId && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 28, fontWeight: 900, color: '#818cf8', lineHeight: 1 }}>
+          <div className="text-center flex flex-col items-center">
+            <div className="text-[28px] font-black text-indigo-400 leading-none tracking-tighter">
               {scannedIn}
             </div>
-            <div style={{ fontSize: 10, color: '#5e5a80', marginTop: 2 }}>
+            <div className="text-[10px] text-[#5e5a80] mt-0.5 uppercase tracking-wider font-bold">
               of {totalApproved} in
             </div>
-            <div style={{
-              width: 64, height: 3,
-              background: 'rgba(255,255,255,0.08)',
-              borderRadius: 10, marginTop: 4, overflow: 'hidden',
-            }}>
-              <div style={{
-                height: '100%', width: `${pct}%`,
-                background: 'linear-gradient(90deg,#6366f1,#8b5cf6)',
-                borderRadius: 10, transition: 'width 0.5s',
-              }} />
+            <div className="w-16 h-[3px] bg-white/10 rounded-full mt-1.5 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" 
+                style={{ width: `${pct}%` }} 
+              />
             </div>
           </div>
         )}
 
         <button
           onClick={logout}
-          style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#9893b8', borderRadius: 8,
-            padding: '8px 14px', fontSize: 13,
-            cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-          }}
+          className="bg-white/5 border border-white/10 text-[#9893b8] rounded-lg px-3.5 py-2 text-[13px] font-medium hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
         >
           Logout
         </button>
       </div>
 
       {/* Scanner area */}
-      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
-        <div id="qr-reader" style={{ width: '100%' }} />
+      <div className="relative flex-1 min-h-0 flex flex-col z-10 bg-black/20">
+        <div id="qr-reader" className="w-full h-full object-cover [&>video]:object-cover" />
 
         {!ready && (
-          <div style={{
-            padding: 60, textAlign: 'center', color: '#5e5a80', fontSize: 14,
-          }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>📷</div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-[#5e5a80] text-sm font-medium">
+            <div className="text-4xl mb-3 animate-pulse">📷</div>
             Loading camera…
           </div>
         )}
 
         {/* Result overlay */}
         {result && cfg && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: cfg.bg,
-            border: `3px solid ${cfg.accent}`,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: 24,
-            animation: 'resultFadeIn 0.2s ease',
-          }}>
-            <style>{`
-              @keyframes resultFadeIn {
-                from { opacity: 0; transform: scale(0.95); }
-                to   { opacity: 1; transform: scale(1); }
-              }
-            `}</style>
-            <div style={{
-              width: 80, height: 80,
-              background: cfg.accent,
-              borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 40, fontWeight: 900, color: 'white',
-              marginBottom: 16,
-            }}>
+          <div className={`absolute inset-0 ${cfg.bg} backdrop-blur-md border-[3px] ${cfg.accent} flex flex-col items-center justify-center p-6 animate-[resultFadeIn_0.2s_ease-out_forwards]`}>
+            <div className={`w-20 h-20 rounded-full ${cfg.iconBg} flex items-center justify-center text-[40px] font-black text-white mb-4 shadow-xl`}>
               {cfg.icon}
             </div>
-            <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 8, textAlign: 'center' }}>{cfg.title}</div>
+            <div className="text-[26px] font-black mb-2 text-center text-white tracking-tight">{cfg.title}</div>
+            
             {result.attendee?.name && (
-              <div style={{ fontSize: 18, opacity: 0.9, fontWeight: 600, textAlign: 'center' }}>
+              <div className="text-lg font-bold text-white/90 text-center">
                 {result.attendee.name}
               </div>
             )}
+            
             {result.attendee?.email && (
-              <div style={{ fontSize: 13, opacity: 0.6, marginTop: 4, textAlign: 'center' }}>
+              <div className="text-[13px] text-white/60 mt-1 text-center font-medium">
                 {result.attendee.email}
               </div>
             )}
+            
             {result.result === 'already_scanned' && result.scanned_at && (
-              <div style={{
-                marginTop: 12, background: 'rgba(0,0,0,0.25)',
-                padding: '6px 14px', borderRadius: 8, fontSize: 13, opacity: 0.8,
-              }}>
+              <div className="mt-4 bg-black/40 px-3.5 py-1.5 rounded-lg text-[13px] font-medium text-white/80 border border-white/10">
                 Scanned at {new Date(result.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}
               </div>
             )}
-            <div style={{ fontSize: 11, opacity: 0.4, marginTop: 20 }}>
+            
+            <div className="text-[11px] font-medium text-white/40 mt-6 tracking-wide uppercase">
               Resuming in 3 seconds…
             </div>
           </div>
@@ -279,38 +242,22 @@ export default function Scanner() {
 
       {/* Recent entries */}
       {recentEntries.length > 0 && (
-        <div style={{
-          padding: '12px 16px',
-          background: '#0c0c20',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          flexShrink: 0,
-        }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#3d3a5c', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+        <div className="p-4 bg-[#0c0c20]/90 backdrop-blur-md border-t border-white/5 flex-shrink-0 z-10">
+          <div className="text-[10px] font-bold text-[#3d3a5c] uppercase tracking-[0.07em] mb-3">
             Recent entries
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="flex flex-col gap-1.5">
             {recentEntries.slice(0, 5).map((entry: any, i: number) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: 8, padding: '8px 12px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{
-                    width: 26, height: 26,
-                    background: 'rgba(99,102,241,0.2)',
-                    borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, color: '#818cf8', flexShrink: 0,
-                  }}>
+              <div key={i} className="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-lg px-3 py-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 bg-indigo-500/20 rounded-full flex items-center justify-center text-[11px] font-bold text-indigo-400 shrink-0">
                     {entry.registrations?.attendee_name?.charAt(0)?.toUpperCase() || '?'}
                   </div>
-                  <span style={{ fontSize: 13, color: '#c4bfe0' }}>
+                  <span className="text-[13px] font-medium text-[#c4bfe0]">
                     {entry.registrations?.attendee_name || 'Unknown'}
                   </span>
                 </div>
-                <span style={{ fontSize: 11, color: '#3d3a5c' }}>
+                <span className="text-[11px] font-medium text-[#5e5a80]">
                   {new Date(entry.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}
                 </span>
               </div>
@@ -318,6 +265,25 @@ export default function Scanner() {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes resultFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        /* Override html5-qrcode default ugly styles */
+        #qr-reader { border: none !important; }
+        #qr-reader__dashboard_section_csr span { color: #5e5a80 !important; }
+        #qr-reader__dashboard_section_swaplink { color: #818cf8 !important; text-decoration: none !important; }
+        #qr-reader button { 
+          background: rgba(99,102,241,0.2) !important;
+          color: #818cf8 !important;
+          border: 1px solid rgba(99,102,241,0.3) !important;
+          border-radius: 8px !important;
+          padding: 6px 12px !important;
+          font-family: inherit !important;
+        }
+      `}</style>
     </div>
   )
 }

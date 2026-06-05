@@ -7,8 +7,8 @@ import type { EventStatus } from '@/types'
 function SkeletonCard() {
   return (
     <div className="stat-card">
-      <div className="shimmer" style={{ height: 14, width: 80, marginBottom: 10 }} />
-      <div className="shimmer" style={{ height: 32, width: 60 }} />
+      <div className="shimmer h-3.5 w-20 mb-2.5" />
+      <div className="shimmer h-8 w-16" />
     </div>
   )
 }
@@ -19,29 +19,24 @@ function PlanBanner({ plan, eventCount }: { plan: string; eventCount: number }) 
   const atLimit = eventCount >= 1
 
   return (
-    <div style={{
-      background: atLimit
-        ? 'linear-gradient(135deg, #fef3c7, #fde68a)'
-        : 'linear-gradient(135deg, #eff6ff, #dbeafe)',
-      border: `1px solid ${atLimit ? '#fde68a' : '#bfdbfe'}`,
-      borderRadius: 12, padding: '14px 20px', marginBottom: 24,
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-    }}>
+    <div className={`p-4 mb-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border shadow-sm ${
+      atLimit
+        ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-yellow-200'
+        : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
+    }`}>
       <div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: atLimit ? '#92400e' : '#1e40af', marginBottom: 3 }}>
+        <div className={`text-sm font-semibold mb-1 ${atLimit ? 'text-amber-800' : 'text-blue-800'}`}>
           {atLimit ? '⚠ Free plan limit reached' : '🎉 You are on the Free plan'}
         </div>
-        <div style={{ fontSize: 13, color: atLimit ? '#b45309' : '#2563eb' }}>
+        <div className={`text-sm ${atLimit ? 'text-amber-700' : 'text-blue-600'}`}>
           {atLimit
             ? 'You have used your 1 free event. Upgrade to Club Pro to create unlimited events.'
             : `${1 - eventCount} free event remaining. Upgrade anytime to unlock unlimited events.`}
         </div>
       </div>
-      <Link to="/pricing" style={{
-        padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-        background: atLimit ? '#d97706' : '#2563eb', color: 'white',
-        textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-      }}>
+      <Link to="/pricing" className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white whitespace-nowrap shrink-0 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${
+        atLimit ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'
+      }`}>
         Upgrade →
       </Link>
     </div>
@@ -53,7 +48,7 @@ export default function Dashboard() {
   const club = getStoredClub()
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto">
       <div className="page-header">
         <div>
           <h1 className="page-title">Good to see you, {club?.name?.split(' ')[0]} 👋</h1>
@@ -68,7 +63,7 @@ export default function Dashboard() {
       )}
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 28 }}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
@@ -77,14 +72,14 @@ export default function Dashboard() {
               <div className="stat-label">Total Events</div>
               <div className="stat-value">{data?.stats.total_events ?? 0}</div>
               {club?.plan === 'free' && (
-                <div className="stat-sub" style={{ color: (data?.stats.total_events ?? 0) >= 1 ? 'var(--warning)' : undefined }}>
+                <div className={`stat-sub ${(data?.stats.total_events ?? 0) >= 1 ? 'text-warning font-medium' : ''}`}>
                   {(data?.stats.total_events ?? 0) >= 1 ? 'Limit reached' : '1 free remaining'}
                 </div>
               )}
             </div>
             <div className="stat-card">
               <div className="stat-label">Live Now</div>
-              <div className="stat-value" style={{ color: (data?.stats.live_events ?? 0) > 0 ? 'var(--success)' : undefined }}>
+              <div className={`stat-value ${(data?.stats.live_events ?? 0) > 0 ? 'text-success bg-none' : ''}`}>
                 {data?.stats.live_events ?? 0}
               </div>
             </div>
@@ -92,55 +87,49 @@ export default function Dashboard() {
               <div className="stat-label">Total Registrations</div>
               <div className="stat-value">{data?.stats.total_registrations ?? 0}</div>
             </div>
-            <div className="stat-card" style={{ borderColor: (data?.stats.pending_approvals ?? 0) > 0 ? '#fcd34d' : undefined }}>
+            <div className={`stat-card ${(data?.stats.pending_approvals ?? 0) > 0 ? 'border-warning/50 bg-warning/5' : ''}`}>
               <div className="stat-label">Pending Approvals</div>
-              <div className="stat-value" style={{ color: (data?.stats.pending_approvals ?? 0) > 0 ? 'var(--warning)' : undefined }}>
+              <div className={`stat-value ${(data?.stats.pending_approvals ?? 0) > 0 ? 'text-warning bg-none' : ''}`}>
                 {data?.stats.pending_approvals ?? 0}
               </div>
               {(data?.stats.pending_approvals ?? 0) > 0 && (
-                <div className="stat-sub" style={{ color: 'var(--warning)' }}>Needs attention</div>
+                <div className="stat-sub text-warning font-medium">Needs attention</div>
               )}
             </div>
           </>
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Recent events */}
-        <div className="card">
-          <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>Recent Events</span>
-            <Link to="/events" style={{ fontSize: 13, color: 'var(--brand)', textDecoration: 'none', fontWeight: 500 }}>View all →</Link>
+        <div className="glass flex flex-col overflow-hidden">
+          <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between bg-white/40">
+            <span className="text-sm font-semibold text-text-1">Recent Events</span>
+            <Link to="/events" className="text-sm font-medium text-brand hover:text-brand-dark transition-colors">View all →</Link>
           </div>
-          <div style={{ padding: '8px 0' }}>
+          <div className="py-2 flex-1 overflow-y-auto max-h-[300px]">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} style={{ padding: '12px 20px', display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <div className="shimmer" style={{ flex: 1, height: 14 }} />
-                  <div className="shimmer" style={{ width: 50, height: 20, borderRadius: 100 }} />
+                <div key={i} className="px-5 py-3 flex gap-3 items-center">
+                  <div className="shimmer flex-1 h-3.5" />
+                  <div className="shimmer w-12 h-5 rounded-full" />
                 </div>
               ))
             ) : !data?.recent_events?.length ? (
-              <div style={{ padding: '28px 20px', textAlign: 'center' }}>
-                <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 12 }}>No events yet</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-text-3 mb-3">No events yet</p>
                 <Link to="/events/new" className="btn btn-primary btn-sm">Create your first event</Link>
               </div>
             ) : (
               data.recent_events.map(event => (
                 <Link key={event.id} to={`/events/${event.id}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', textDecoration: 'none', transition: 'background 0.1s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '')}>
-                  <div style={{
-                    width: 6, height: 32, borderRadius: 3, flexShrink: 0,
-                    background: (event as any).theme_color || 'var(--brand)',
-                  }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  className="flex items-center gap-3 px-5 py-3 text-decoration-none transition-colors hover:bg-white/60 group">
+                  <div className="w-1.5 h-8 rounded-full shrink-0" style={{ background: (event as any).theme_color || 'var(--brand)' }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-text-1 truncate group-hover:text-brand transition-colors">
                       {event.title}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1 }}>
+                    <div className="text-xs text-text-3 mt-0.5 truncate">
                       {(event as any).entry_fee === 0 ? 'Free entry' : `₹${(event as any).entry_fee}`}
                       {event.venue ? ` · ${event.venue}` : ''}
                     </div>
@@ -153,43 +142,40 @@ export default function Dashboard() {
         </div>
 
         {/* Recent registrations */}
-        <div className="card">
-          <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>Recent Registrations</span>
+        <div className="glass flex flex-col overflow-hidden">
+          <div className="px-5 py-4 border-b border-border/50 bg-white/40">
+            <span className="text-sm font-semibold text-text-1">Recent Registrations</span>
           </div>
-          <div style={{ padding: '8px 0' }}>
+          <div className="py-2 flex-1 overflow-y-auto max-h-[300px]">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} style={{ padding: '12px 20px', display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <div className="shimmer" style={{ width: 32, height: 32, borderRadius: '50%' }} />
-                  <div style={{ flex: 1 }}>
-                    <div className="shimmer" style={{ height: 13, width: '60%', marginBottom: 6 }} />
-                    <div className="shimmer" style={{ height: 11, width: '40%' }} />
+                <div key={i} className="px-5 py-3 flex gap-3 items-center">
+                  <div className="shimmer w-8 h-8 rounded-full" />
+                  <div className="flex-1">
+                    <div className="shimmer h-3 w-3/5 mb-1.5" />
+                    <div className="shimmer h-2.5 w-2/5" />
                   </div>
                 </div>
               ))
             ) : !data?.recent_registrations?.length ? (
-              <div style={{ padding: '28px 20px', textAlign: 'center' }}>
-                <p style={{ fontSize: 13, color: 'var(--text-3)' }}>Registrations will appear here</p>
+              <div className="p-8 text-center">
+                <p className="text-sm text-text-3">Registrations will appear here</p>
               </div>
             ) : (
               data.recent_registrations.map(reg => (
-                <div key={reg.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px' }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: reg.status === 'approved' ? '#dcfce7' : reg.status === 'pending' ? '#fef9c3' : '#fee2e2',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 700,
-                    color: reg.status === 'approved' ? '#16a34a' : reg.status === 'pending' ? '#ca8a04' : '#dc2626',
-                    flexShrink: 0,
-                  }}>
+                <div key={reg.id} className="flex items-center gap-3 px-5 py-3 hover:bg-white/60 transition-colors">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                    reg.status === 'approved' ? 'bg-green-100 text-green-600' : 
+                    reg.status === 'pending' ? 'bg-yellow-100 text-yellow-600' : 
+                    'bg-red-100 text-red-600'
+                  }`}>
                     {reg.attendee_name?.charAt(0).toUpperCase()}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-text-1 truncate">
                       {reg.attendee_name}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div className="text-xs text-text-3 truncate">
                       {(reg as any).events?.title}
                     </div>
                   </div>
@@ -202,19 +188,17 @@ export default function Dashboard() {
       </div>
 
       {/* Quick links */}
-      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { to: '/events/new',  icon: '◈', label: 'Create Event',      sub: 'Launch a new event' },
           { to: '/volunteers',  icon: '◉', label: 'Manage Volunteers', sub: 'Add scanning volunteers' },
           { to: '/pricing',     icon: '✦', label: 'View Plans',        sub: 'Upgrade for more features' },
         ].map(item => (
-          <Link key={item.to} to={item.to} style={{ textDecoration: 'none' }}>
-            <div className="card" style={{ padding: '16px 18px', cursor: 'pointer', transition: 'box-shadow 0.15s' }}
-              onMouseEnter={e => (e.currentTarget.style.boxShadow = 'var(--shadow)')}
-              onMouseLeave={e => (e.currentTarget.style.boxShadow = '')}>
-              <div style={{ fontSize: 20, marginBottom: 8 }}>{item.icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', marginBottom: 3 }}>{item.label}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{item.sub}</div>
+          <Link key={item.to} to={item.to} className="text-decoration-none group">
+            <div className="glass p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-glass-hover bg-gradient-to-br from-white/60 to-white/30">
+              <div className="text-2xl mb-2 text-brand group-hover:scale-110 transition-transform origin-left">{item.icon}</div>
+              <div className="text-sm font-semibold text-text-1 mb-1">{item.label}</div>
+              <div className="text-xs text-text-3">{item.sub}</div>
             </div>
           </Link>
         ))}

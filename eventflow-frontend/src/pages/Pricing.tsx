@@ -110,86 +110,85 @@ export default function Pricing() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080714', fontFamily: 'DM Sans, sans-serif', color: '#eeeaf8' }}>
-
+    <div className="min-h-screen bg-[#080714] text-[#eeeaf8] font-sans">
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 64px', height: 60, background: 'rgba(8,7,20,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <div style={{ width: 28, height: 28, background: '#6366f1', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, color: 'white' }}>E</div>
-          <span style={{ fontWeight: 700, fontSize: 16, color: '#f0eeff' }}>EventFlow</span>
+      <nav className="sticky top-0 z-[100] flex items-center justify-between px-6 md:px-16 h-16 bg-[#080714]/85 backdrop-blur-md border-b border-white/5">
+        <Link to="/" className="flex items-center gap-2 no-underline">
+          <div className="w-7 h-7 bg-indigo-500 rounded-md flex items-center justify-center font-extrabold text-sm text-white">E</div>
+          <span className="font-bold text-base text-[#f0eeff]">EventFlow</span>
         </Link>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex gap-2 items-center">
           {authed
-            ? <Link to="/dashboard" style={{ padding: '7px 18px', background: '#6366f1', color: 'white', borderRadius: 8, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>Dashboard</Link>
+            ? <Link to="/dashboard" className="px-4 py-1.5 bg-indigo-500 text-white rounded-lg text-sm font-semibold transition hover:bg-indigo-600">Dashboard</Link>
             : <>
-                <Link to="/login"  style={{ padding: '7px 16px', color: '#9893b8', textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
-                <Link to="/signup" style={{ padding: '7px 18px', background: '#6366f1', color: 'white', borderRadius: 8, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>Get started</Link>
+                <Link to="/login" className="px-4 py-1.5 text-[#9893b8] hover:text-white transition text-sm">Sign in</Link>
+                <Link to="/signup" className="px-4 py-1.5 bg-indigo-500 text-white rounded-lg text-sm font-semibold transition hover:bg-indigo-600">Get started</Link>
               </>
           }
         </div>
       </nav>
 
       {/* Hero */}
-      <div style={{ textAlign: 'center', padding: '64px 24px 48px' }}>
-        <h1 style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-1.5px', marginBottom: 12 }}>Simple, transparent pricing</h1>
-        <p style={{ fontSize: 16, color: '#6b6690', maxWidth: 440, margin: '0 auto' }}>
+      <div className="text-center pt-16 pb-12 px-6">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Simple, transparent pricing</h1>
+        <p className="text-base text-[#6b6690] max-w-md mx-auto">
           Pay per event, not per month. Fits how college clubs actually budget.
         </p>
       </div>
 
-      {/* Plan cards */}
+      {/* Error */}
       {error && (
-        <div style={{ maxWidth: 500, margin: '0 auto 24px', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 10, padding: '12px 18px', fontSize: 14, color: '#f87171', textAlign: 'center' }}>
+        <div className="max-w-xl mx-auto mb-6 bg-red-500/10 border border-red-500/30 rounded-xl px-5 py-3 text-sm text-red-400 text-center mx-6">
           {error}
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 20, maxWidth: 980, margin: '0 auto', padding: '0 24px 80px', flexWrap: 'wrap', justifyContent: 'center' }}>
+      {/* Plan cards */}
+      <div className="flex flex-col md:flex-row flex-wrap gap-5 max-w-5xl mx-auto px-6 pb-20 justify-center">
         {PLANS.map(plan => (
-          <div key={plan.id} style={{
-            flex: '1 1 280px', maxWidth: 320,
-            padding: '32px 28px', borderRadius: 18,
-            border: `1px solid ${plan.highlight ? 'rgba(99,102,241,0.55)' : 'rgba(255,255,255,0.08)'}`,
-            background: plan.highlight ? 'rgba(99,102,241,0.09)' : 'rgba(255,255,255,0.02)',
-            position: 'relative',
-            boxShadow: plan.highlight ? '0 0 40px rgba(99,102,241,0.12)' : 'none',
-          }}>
+          <div key={plan.id} className={`
+            flex-1 min-w-[280px] max-w-sm p-8 rounded-[1.25rem] relative transition-transform duration-300 hover:-translate-y-1
+            ${plan.highlight ? 'border border-indigo-500/50 bg-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.12)]' : 'border border-white/10 bg-white/5'}
+          `}>
             {plan.highlight && (
-              <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 100, whiteSpace: 'nowrap' }}>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-[11px] font-bold px-3.5 py-1 rounded-full whitespace-nowrap tracking-wide">
                 Most popular
               </div>
             )}
             {club?.plan === plan.id && (
-              <div style={{ position: 'absolute', top: 16, right: 16, background: '#dcfce7', color: '#16a34a', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>
+              <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[11px] font-bold px-2.5 py-1 rounded-full">
                 Current
               </div>
             )}
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#8884a8', marginBottom: 6 }}>{plan.name}</div>
-            <div style={{ fontSize: 40, fontWeight: 900, letterSpacing: '-1px', marginBottom: 2, color: '#f0eeff' }}>
+            <div className="text-sm font-semibold text-[#8884a8] mb-1.5">{plan.name}</div>
+            <div className="text-4xl md:text-5xl font-black tracking-tight mb-1 text-[#f0eeff]">
               {plan.price === 0 ? '₹0' : `₹${plan.price.toLocaleString('en-IN')}`}
             </div>
-            <div style={{ fontSize: 13, color: '#56527a', marginBottom: 10 }}>{plan.per}</div>
-            <div style={{ fontSize: 13, color: '#6b6690', marginBottom: 24, lineHeight: 1.5 }}>{plan.desc}</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 9 }}>
+            <div className="text-sm text-[#56527a] mb-2.5">{plan.per}</div>
+            <div className="text-sm text-[#6b6690] mb-6 leading-relaxed min-h-[40px]">{plan.desc}</div>
+            
+            <ul className="flex flex-col gap-2.5 mb-8">
               {plan.features.map(f => (
-                <li key={f} style={{ display: 'flex', gap: 9, fontSize: 13, color: '#b0abc8', lineHeight: 1.4 }}>
-                  <span style={{ color: plan.highlight ? '#818cf8' : '#6366f1', fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
+                <li key={f} className="flex gap-2.5 text-sm text-[#b0abc8] leading-snug items-start">
+                  <span className={`font-bold shrink-0 ${plan.highlight ? 'text-indigo-400' : 'text-indigo-500'}`}>✓</span> 
+                  <span>{f}</span>
                 </li>
               ))}
             </ul>
+            
             <button
               onClick={() => !plan.disabled && handleUpgrade(plan.id)}
               disabled={plan.disabled || loading === plan.id || club?.plan === plan.id}
-              style={{
-                display: 'block', width: '100%', padding: '11px 16px', textAlign: 'center',
-                borderRadius: 9, fontSize: 14, fontWeight: 600, border: 'none', cursor: plan.disabled || club?.plan === plan.id ? 'default' : 'pointer',
-                background: plan.disabled || club?.plan === plan.id
-                  ? 'rgba(255,255,255,0.04)'
-                  : plan.highlight ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'rgba(255,255,255,0.06)',
-                color: plan.disabled || club?.plan === plan.id ? '#56527a' : plan.highlight ? 'white' : '#b0abc8',
-                boxShadow: plan.highlight && !plan.disabled ? '0 4px 16px rgba(99,102,241,0.35)' : 'none',
-                opacity: loading && loading !== plan.id ? 0.6 : 1,
-              }}>
+              className={`
+                block w-full py-3 text-center rounded-xl text-sm font-semibold transition-all duration-300
+                ${plan.disabled || club?.plan === plan.id 
+                  ? 'bg-white/5 text-[#56527a] cursor-not-allowed' 
+                  : plan.highlight 
+                    ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.35)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.5)]' 
+                    : 'bg-white/10 text-[#b0abc8] hover:bg-white/20'
+                }
+                ${loading && loading !== plan.id ? 'opacity-60' : 'opacity-100'}
+              `}>
               {loading === plan.id ? 'Opening payment…' : club?.plan === plan.id ? 'Current plan' : plan.cta}
             </button>
           </div>
@@ -197,34 +196,34 @@ export default function Pricing() {
       </div>
 
       {/* FAQ */}
-      <div style={{ maxWidth: 620, margin: '0 auto', padding: '0 24px 80px' }}>
-        <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.4px', marginBottom: 28, textAlign: 'center' }}>Frequently asked questions</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="max-w-2xl mx-auto px-6 pb-20">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8 text-center">Frequently asked questions</h2>
+        <div className="flex flex-col gap-2">
           {FAQ.map((item, i) => (
-            <div key={i} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
+            <div key={i} className="border border-white/10 rounded-xl overflow-hidden transition-colors duration-300">
               <button
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                style={{
-                  width: '100%', textAlign: 'left', padding: '16px 20px',
-                  background: openFaq === i ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
-                  border: 'none', cursor: 'pointer', color: '#ddd9f5', fontSize: 14,
-                  fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                {item.q}
-                <span style={{ color: '#6366f1', fontSize: 18, lineHeight: 1 }}>{openFaq === i ? '−' : '+'}</span>
+                className={`w-full text-left px-5 py-4 flex justify-between items-center transition-colors
+                  ${openFaq === i ? 'bg-indigo-500/10' : 'bg-white/[0.02] hover:bg-white/[0.04]'}
+                `}>
+                <span className="text-sm font-semibold text-[#ddd9f5] pr-4">{item.q}</span>
+                <span className="text-indigo-500 text-lg leading-none shrink-0 transition-transform duration-300">
+                  {openFaq === i ? '−' : '+'}
+                </span>
               </button>
-              {openFaq === i && (
-                <div style={{ padding: '0 20px 16px', fontSize: 13, color: '#6b6690', lineHeight: 1.65 }}>{item.a}</div>
-              )}
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${openFaq === i ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-5 pb-4 pt-1 text-sm text-[#6b6690] leading-relaxed">
+                  {item.a}
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 64px', textAlign: 'center', fontSize: 12, color: '#3a3758' }}>
-        © 2026 EventFlow · <a href="mailto:hello@eventflow.app" style={{ color: '#3a3758' }}>hello@eventflow.app</a>
+      <div className="border-t border-white/5 py-6 px-6 text-center text-xs text-[#3a3758]">
+        © 2026 EventFlow · <a href="mailto:hello@eventflow.app" className="text-[#3a3758] hover:text-[#56527a] transition-colors">hello@eventflow.app</a>
       </div>
     </div>
   )

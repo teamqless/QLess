@@ -12,20 +12,16 @@ const MOBILE_NAV = [
 
 export default function DashboardLayout() {
   return (
-    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: 'var(--surface-2)' }}>
-
+    <div className="flex h-[100dvh] overflow-hidden bg-surface-2 text-text-1">
       {/* Desktop sidebar */}
-      <div className="sidebar-desktop" style={{ flexShrink: 0 }}>
+      <div className="sidebar-desktop shrink-0">
         <Sidebar />
       </div>
 
       {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-transparent">
         <Header />
-        <main
-          className="dashboard-main fade-in"
-          style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}
-        >
+        <main className="dashboard-main fade-in flex-1 overflow-y-auto p-4 md:p-8">
           <Outlet />
         </main>
       </div>

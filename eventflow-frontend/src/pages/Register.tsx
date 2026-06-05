@@ -15,19 +15,8 @@ function FieldInput({
   onChange: (val: string) => void
   themeColor: string
 }) {
-  const base: React.CSSProperties = {
-    width: '100%',
-    border: '1px solid #d1d5db',
-    borderRadius: 8,
-    padding: '10px 13px',
-    fontSize: 14,
-    fontFamily: 'DM Sans, sans-serif',
-    color: '#0f0e1a',
-    background: '#fff',
-    outline: 'none',
-    transition: 'border-color 0.15s, box-shadow 0.15s',
-  }
-
+  const baseClasses = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-sans text-gray-900 bg-white/70 backdrop-blur-sm outline-none transition-all duration-200 focus:bg-white"
+  
   const focusStyle = (e: React.FocusEvent<any>) => {
     e.target.style.borderColor = themeColor
     e.target.style.boxShadow = `0 0 0 3px ${themeColor}22`
@@ -39,7 +28,7 @@ function FieldInput({
 
   if (field.type === 'textarea') return (
     <textarea
-      style={{ ...base, resize: 'vertical', minHeight: 80 }}
+      className={`${baseClasses} resize-y min-h-[80px]`}
       required={field.required}
       placeholder={field.placeholder}
       value={value}
@@ -51,7 +40,7 @@ function FieldInput({
 
   if (field.type === 'select') return (
     <select
-      style={{ ...base, cursor: 'pointer' }}
+      className={`${baseClasses} cursor-pointer`}
       required={field.required}
       value={value}
       onChange={e => onChange(e.target.value)}
@@ -63,21 +52,22 @@ function FieldInput({
   )
 
   if (field.type === 'checkbox') return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+    <label className="flex items-center gap-2.5 cursor-pointer group">
       <input
         type="checkbox"
         required={field.required}
         checked={value === 'true'}
         onChange={e => onChange(e.target.checked ? 'true' : 'false')}
-        style={{ width: 18, height: 18, accentColor: themeColor, flexShrink: 0 }}
+        className="w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105"
+        style={{ accentColor: themeColor }}
       />
-      <span style={{ fontSize: 14, color: '#374151' }}>{field.placeholder || 'Yes'}</span>
+      <span className="text-sm text-gray-700">{field.placeholder || 'Yes'}</span>
     </label>
   )
 
   return (
     <input
-      style={base}
+      className={baseClasses}
       type={field.type === 'phone' ? 'tel' : field.type === 'number' ? 'number' : field.type === 'email' ? 'email' : 'text'}
       required={field.required}
       placeholder={field.placeholder}
@@ -129,12 +119,8 @@ function PaymentUpload({
 
   return (
     <div>
-      <div style={{
-        background: '#fffbeb', border: '1px solid #fde68a',
-        borderRadius: 8, padding: '12px 14px', marginBottom: 14,
-        fontSize: 13, color: '#92400e', lineHeight: 1.5,
-      }}>
-        💳 This event requires a fee of <strong>₹{fee}</strong>. Pay via UPI/bank transfer and upload your payment screenshot below.
+      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3.5 py-3 mb-3.5 text-[13px] text-amber-900 leading-relaxed shadow-sm">
+        💳 This event requires a fee of <strong className="font-bold">₹{fee}</strong>. Pay via UPI/bank transfer and upload your payment screenshot below.
       </div>
 
       {!preview ? (
@@ -146,45 +132,36 @@ function PaymentUpload({
             const file = e.dataTransfer.files[0]
             if (file) handleFile(file)
           }}
-          style={{
-            border: `2px dashed ${dragging ? themeColor : '#d1d5db'}`,
-            borderRadius: 10, padding: '28px 20px', textAlign: 'center',
-            background: dragging ? `${themeColor}08` : '#fafafa',
-            cursor: 'pointer', transition: 'all 0.15s',
-          }}
+          className={`border-2 border-dashed rounded-xl p-7 text-center cursor-pointer transition-all duration-200 ${dragging ? 'bg-indigo-50/50 scale-[1.02]' : 'bg-gray-50 hover:bg-gray-100/50 hover:border-gray-400'}`}
+          style={{ borderColor: dragging ? themeColor : '#d1d5db', backgroundColor: dragging ? `${themeColor}08` : undefined }}
           onClick={() => document.getElementById('payment-file-input')?.click()}
         >
-          <div style={{ fontSize: 28, marginBottom: 8 }}>📸</div>
-          <div style={{ fontSize: 14, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
-            Drop your screenshot here, or <span style={{ color: themeColor, textDecoration: 'underline' }}>browse</span>
+          <div className="text-3xl mb-2 animate-bounce">📸</div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            Drop your screenshot here, or <span className="underline decoration-2 underline-offset-2" style={{ color: themeColor }}>browse</span>
           </div>
-          <div style={{ fontSize: 12, color: '#9ca3af' }}>JPG, PNG, WEBP up to 5MB</div>
+          <div className="text-xs text-gray-400">JPG, PNG, WEBP up to 5MB</div>
           <input
             id="payment-file-input"
             type="file"
             accept="image/*"
-            style={{ display: 'none' }}
+            className="hidden"
             onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
           />
         </div>
       ) : (
-        <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-          <img src={preview} alt="Payment screenshot" style={{ width: '100%', maxHeight: 220, objectFit: 'cover' }} />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: uploaded ? 'rgba(22,163,74,0.75)' : 'rgba(0,0,0,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexDirection: 'column', gap: 6,
-          }}>
+        <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm group">
+          <img src={preview} alt="Payment screenshot" className="w-full max-h-[220px] object-cover" />
+          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-1.5 transition-colors duration-300 ${uploaded ? 'bg-green-600/75' : 'bg-black/40'}`}>
             {upload.isPending ? (
               <>
-                <div style={{ fontSize: 28 }}>⏳</div>
-                <div style={{ color: 'white', fontWeight: 600, fontSize: 14 }}>Uploading…</div>
+                <div className="text-3xl animate-spin">⏳</div>
+                <div className="text-white font-semibold text-sm drop-shadow-md">Uploading…</div>
               </>
             ) : uploaded ? (
               <>
-                <div style={{ fontSize: 32 }}>✓</div>
-                <div style={{ color: 'white', fontWeight: 700, fontSize: 15 }}>Uploaded successfully</div>
+                <div className="text-4xl text-white drop-shadow-lg scale-110">✓</div>
+                <div className="text-white font-bold text-[15px] drop-shadow-md">Uploaded successfully</div>
               </>
             ) : null}
           </div>
@@ -192,17 +169,14 @@ function PaymentUpload({
             <button
               type="button"
               onClick={() => { setPreview(null); setUploaded(false) }}
-              style={{
-                position: 'absolute', top: 8, right: 8,
-                background: 'rgba(0,0,0,0.6)', color: 'white',
-                border: 'none', borderRadius: 6, padding: '4px 10px',
-                fontSize: 12, cursor: 'pointer',
-              }}
-            >Remove</button>
+              className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white border-none rounded-md px-2.5 py-1 text-xs cursor-pointer transition-colors backdrop-blur-sm opacity-0 group-hover:opacity-100"
+            >
+              Remove
+            </button>
           )}
         </div>
       )}
-      {err && <p style={{ fontSize: 12, color: '#dc2626', marginTop: 6 }}>{err}</p>}
+      {err && <p className="text-xs text-red-600 mt-1.5 font-medium">{err}</p>}
     </div>
   )
 }
@@ -219,21 +193,20 @@ export default function Register() {
   const [submitting, setSubmitting]         = useState(false)
 
   if (isLoading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8fc' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 14px' }} />
-        <p style={{ color: '#9ca3af', fontSize: 14 }}>Loading event…</p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f8f8fc] to-[#f0f0f5]">
+      <div className="text-center">
+        <div className="w-9 h-9 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3.5" />
+        <p className="text-gray-400 text-sm font-medium">Loading event…</p>
       </div>
     </div>
   )
 
   if (isError || !event) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8fc' }}>
-      <div style={{ textAlign: 'center', maxWidth: 400, padding: 24 }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: '#0f0e1a', marginBottom: 8 }}>Event not found</h2>
-        <p style={{ color: '#6b7280', fontSize: 14, lineHeight: 1.6 }}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f8f8fc] to-[#f0f0f5] p-6">
+      <div className="text-center max-w-sm p-8 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
+        <div className="text-5xl mb-4">🔍</div>
+        <h2 className="text-[22px] font-bold text-gray-900 mb-2">Event not found</h2>
+        <p className="text-gray-500 text-sm leading-relaxed">
           This event may have closed, the link may be incorrect, or the deadline has passed.
         </p>
       </div>
@@ -266,49 +239,54 @@ export default function Register() {
     : null
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f8fc', fontFamily: 'DM Sans, sans-serif' }}>
-      {/* Top color bar */}
-      <div style={{ height: 5, background: themeColor }} />
+    <div className="min-h-screen bg-[#f8f8fc] font-sans relative overflow-x-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-[300px] opacity-20 pointer-events-none" style={{ background: `linear-gradient(to bottom, ${themeColor}, transparent)` }} />
+      <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] rounded-full blur-[100px] opacity-20 pointer-events-none" style={{ backgroundColor: themeColor }} />
+      <div className="absolute top-[20%] right-[-50px] w-[200px] h-[200px] rounded-full blur-[80px] opacity-15 pointer-events-none" style={{ backgroundColor: themeColor }} />
 
-      <div style={{ maxWidth: 560, margin: '0 auto', padding: '40px 20px 80px' }}>
+      {/* Top color bar */}
+      <div className="h-1.5 w-full sticky top-0 z-50 shadow-sm" style={{ background: themeColor }} />
+
+      <div className="max-w-[600px] mx-auto px-4 md:px-6 pt-10 pb-20 relative z-10">
 
         {/* Event info card */}
-        <div style={{
-          background: '#fff', borderRadius: 16, border: '1px solid #e5e7eb',
-          overflow: 'hidden', marginBottom: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-        }}>
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white overflow-hidden mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-transform hover:-translate-y-1 duration-300">
           {event.banner_url && (
-            <img src={event.banner_url} alt={event.title} style={{ width: '100%', height: 160, objectFit: 'cover' }} />
+            <div className="relative">
+              <img src={event.banner_url} alt={event.title} className="w-full h-40 md:h-48 object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            </div>
           )}
-          <div style={{ padding: '24px 28px' }}>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f0e1a', letterSpacing: '-0.4px', marginBottom: 8 }}>
+          <div className="p-6 md:p-8">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-2 leading-tight">
               {event.title}
             </h1>
             {event.description && (
-              <p style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6, marginBottom: 16 }}>{event.description}</p>
+              <p className="text-[15px] text-gray-600 leading-relaxed mb-5 whitespace-pre-wrap">{event.description}</p>
             )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+            
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-2">
               {event.venue && (
-                <div style={{ display: 'flex', gap: 6, fontSize: 13, color: '#6b7280', alignItems: 'center' }}>
+                <div className="flex gap-2 text-[13px] text-gray-600 items-center bg-gray-50/50 rounded-lg px-3 py-1.5 border border-gray-100">
                   <span>📍</span> {event.venue}
                 </div>
               )}
               {eventDate && (
-                <div style={{ display: 'flex', gap: 6, fontSize: 13, color: '#6b7280', alignItems: 'center' }}>
+                <div className="flex gap-2 text-[13px] text-gray-600 items-center bg-gray-50/50 rounded-lg px-3 py-1.5 border border-gray-100">
                   <span>📅</span> {eventDate}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 6, fontSize: 13, alignItems: 'center' }}>
+              <div className={`flex gap-2 text-[13px] items-center rounded-lg px-3 py-1.5 border font-semibold
+                ${event.entry_fee === 0 ? 'bg-green-50/50 text-green-700 border-green-100' : 'bg-gray-50/50 text-gray-900 border-gray-100'}
+              `}>
                 <span>🎟️</span>
-                <span style={{
-                  fontWeight: 600,
-                  color: event.entry_fee === 0 ? '#16a34a' : '#0f0e1a',
-                }}>
+                <span>
                   {event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}
                 </span>
               </div>
               {event.capacity && (
-                <div style={{ display: 'flex', gap: 6, fontSize: 13, color: '#6b7280', alignItems: 'center' }}>
+                <div className="flex gap-2 text-[13px] text-gray-600 items-center bg-gray-50/50 rounded-lg px-3 py-1.5 border border-gray-100">
                   <span>👥</span> {event.capacity} seats
                 </div>
               )}
@@ -317,31 +295,25 @@ export default function Register() {
         </div>
 
         {/* Registration form card */}
-        <div style={{
-          background: '#fff', borderRadius: 16, border: '1px solid #e5e7eb',
-          padding: '28px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-        }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: '#0f0e1a', marginBottom: 6 }}>Registration Form</h2>
-          <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 24 }}>
-            Fill in your details below. Fields marked <span style={{ color: '#dc2626' }}>*</span> are required.
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <h2 className="text-xl font-bold text-gray-900 mb-1.5 tracking-tight">Registration Form</h2>
+          <p className="text-[13px] text-gray-500 mb-6">
+            Fill in your details below. Fields marked <span className="text-red-500 font-bold">*</span> are required.
           </p>
 
           {error && (
-            <div style={{
-              background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8,
-              padding: '12px 14px', fontSize: 13, color: '#dc2626', marginBottom: 20, lineHeight: 1.5,
-            }}>
+            <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl p-3.5 text-[13px] text-red-600 mb-5 leading-relaxed font-medium shadow-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {event.form_fields.map((field: FormField) => (
-              <div key={field.id}>
+              <div key={field.id} className="group">
                 {field.type !== 'checkbox' && (
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 7 }}>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 group-focus-within:text-indigo-600 transition-colors">
                     {field.label}
-                    {field.required && <span style={{ color: '#dc2626', marginLeft: 3 }}>*</span>}
+                    {field.required && <span className="text-red-500 ml-1">*</span>}
                   </label>
                 )}
                 <FieldInput
@@ -355,9 +327,9 @@ export default function Register() {
 
             {/* Payment upload */}
             {event.entry_fee > 0 && (
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 7 }}>
-                  Payment Screenshot <span style={{ color: '#dc2626' }}>*</span>
+              <div className="mt-2">
+                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
+                  Payment Screenshot <span className="text-red-500">*</span>
                 </label>
                 <PaymentUpload
                   fee={event.entry_fee}
@@ -370,26 +342,33 @@ export default function Register() {
             <button
               type="submit"
               disabled={submitting || (event.entry_fee > 0 && !paymentUrl)}
+              className={`
+                mt-4 py-3.5 px-5 text-[15px] font-bold text-white rounded-xl shadow-lg transition-all duration-300 transform active:scale-[0.98]
+                ${submitting ? 'opacity-80 cursor-not-allowed' : 'hover:-translate-y-0.5 hover:shadow-xl cursor-pointer'}
+              `}
               style={{
-                padding: '13px 20px', fontSize: 15, fontWeight: 700,
-                background: submitting ? '#a5b4fc' : themeColor,
-                color: 'white', border: 'none', borderRadius: 10,
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                marginTop: 4, transition: 'opacity 0.15s',
-                boxShadow: `0 4px 16px ${themeColor}44`,
+                backgroundColor: submitting ? '#a5b4fc' : themeColor,
+                boxShadow: submitting ? 'none' : `0 4px 16px ${themeColor}44`,
               }}
             >
-              {submitting ? 'Submitting…' : 'Submit Registration'}
+              {submitting ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Submitting…</span>
+                </div>
+              ) : (
+                'Submit Registration'
+              )}
             </button>
 
-            <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', lineHeight: 1.5 }}>
+            <p className="text-xs text-gray-400 text-center leading-relaxed mt-2">
               Your QR entry pass will be emailed once the organizer approves your registration.
             </p>
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 12, color: '#d1d5db', marginTop: 24 }}>
-          Powered by <span style={{ color: '#6366f1', fontWeight: 600 }}>EventFlow</span>
+        <p className="text-center text-xs text-gray-400 mt-8 font-medium">
+          Powered by <span className="text-indigo-500 font-bold tracking-tight">EventFlow</span>
         </p>
       </div>
     </div>

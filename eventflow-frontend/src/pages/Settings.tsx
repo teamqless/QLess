@@ -87,29 +87,25 @@ export default function Settings() {
   const isProOrAbove = club?.plan === 'pro' || club?.plan === 'institution'
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div className="page-header" style={{ marginBottom: 24 }}>
+    <div className="w-full max-w-3xl pb-12">
+      <div className="page-header mb-8">
         <div>
-          <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Manage your club account and preferences</p>
+          <h1 className="page-title text-2xl font-bold text-white tracking-tight mb-1">Settings</h1>
+          <p className="page-subtitle text-sm text-gray-400">Manage your club account and preferences</p>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 24, background: 'var(--surface-3)', borderRadius: 9, padding: 4, width: 'fit-content' }}>
+      <div className="flex overflow-x-auto gap-1 mb-8 bg-white/5 backdrop-blur-sm rounded-xl p-1.5 w-max max-w-full scrollbar-hide border border-white/5">
         {TAB_LABELS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            style={{
-              padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500,
-              border: 'none', cursor: 'pointer',
-              background: tab === t.id ? 'var(--surface)' : 'transparent',
-              color: tab === t.id ? 'var(--text-1)' : 'var(--text-3)',
-              boxShadow: tab === t.id ? 'var(--shadow-sm)' : 'none',
-              display: 'flex', alignItems: 'center', gap: 5,
-            }}>
+            className={`
+              whitespace-nowrap px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 flex items-center gap-2
+              ${tab === t.id ? 'bg-white/10 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.03]'}
+            `}>
             {t.label}
             {t.proOnly && !isProOrAbove && (
-              <span style={{ fontSize: 10, background: '#ede9fe', color: '#7c3aed', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>PRO</span>
+              <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded flex-shrink-0 font-bold border border-purple-500/30">PRO</span>
             )}
           </button>
         ))}
@@ -117,11 +113,11 @@ export default function Settings() {
 
       {/* ── Profile tab ── */}
       {tab === 'profile' && (
-        <>
+        <div className="space-y-6">
           {/* Current info */}
-          <div className="card" style={{ padding: 22, marginBottom: 18 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 14 }}>Current Account</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="card p-5 sm:p-6">
+            <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Current Account</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {[
                 { label: 'Club Name', value: club?.name },
                 { label: 'Email',     value: club?.email },
@@ -129,23 +125,24 @@ export default function Settings() {
                 { label: 'Plan',      value: club?.plan === 'free' ? 'Free' : club?.plan === 'pro' ? 'Club Pro' : 'Institution' },
               ].map(f => (
                 <div key={f.label}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>{f.label}</div>
-                  <div style={{ fontSize: 14, color: 'var(--text-1)', fontWeight: 500 }}>{f.value}</div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{f.label}</div>
+                  <div className="text-sm text-gray-200 font-medium">{f.value}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="card" style={{ padding: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 18 }}>Update Profile</div>
-            {profileMsg && <div style={{ background: 'var(--success-bg)', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--success)', marginBottom: 14 }}>{profileMsg}</div>}
-            {profileErr && <div style={{ background: 'var(--danger-bg)',  border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--danger)',  marginBottom: 14 }}>{profileErr}</div>}
-            <form onSubmit={saveProfile} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="card p-5 sm:p-6">
+            <div className="text-base font-semibold text-white mb-4">Update Profile</div>
+            {profileMsg && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-4">{profileMsg}</div>}
+            {profileErr && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 mb-4">{profileErr}</div>}
+            
+            <form onSubmit={saveProfile} className="flex flex-col gap-4">
               <div>
                 <label className="label">New Club Name</label>
                 <input className="input" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} placeholder={club?.name} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="label">College</label>
                   <input className="input" value={profile.college} onChange={e => setProfile(p => ({ ...p, college: e.target.value }))} placeholder={club?.college || 'Your college'} />
@@ -155,21 +152,22 @@ export default function Settings() {
                   <input className="input" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="Contact number" />
                 </div>
               </div>
-              <button type="submit" disabled={saving} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
+              <button type="submit" disabled={saving} className="btn btn-primary mt-2 self-start w-full sm:w-auto">
                 {saving ? 'Saving…' : 'Save Profile'}
               </button>
             </form>
           </div>
-        </>
+        </div>
       )}
 
       {/* ── Password tab ── */}
       {tab === 'password' && (
-        <div className="card" style={{ padding: 24 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 18 }}>Change Password</div>
-          {pwMsg && <div style={{ background: 'var(--success-bg)', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--success)', marginBottom: 14 }}>{pwMsg}</div>}
-          {pwErr && <div style={{ background: 'var(--danger-bg)',  border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--danger)',  marginBottom: 14 }}>{pwErr}</div>}
-          <form onSubmit={changePassword} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className="card p-5 sm:p-6">
+          <div className="text-base font-semibold text-white mb-4">Change Password</div>
+          {pwMsg && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-4">{pwMsg}</div>}
+          {pwErr && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 mb-4">{pwErr}</div>}
+          
+          <form onSubmit={changePassword} className="flex flex-col gap-4">
             <div>
               <label className="label">Current Password</label>
               <input className="input" type="password" value={passwords.currentPassword} onChange={e => setPasswords(p => ({ ...p, currentPassword: e.target.value }))} required />
@@ -178,7 +176,7 @@ export default function Settings() {
               <label className="label">New Password</label>
               <input className="input" type="password" value={passwords.newPassword} onChange={e => setPasswords(p => ({ ...p, newPassword: e.target.value }))} required minLength={8} placeholder="Min 8 characters" />
             </div>
-            <button type="submit" disabled={savingPw} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
+            <button type="submit" disabled={savingPw} className="btn btn-primary mt-2 self-start w-full sm:w-auto">
               {savingPw ? 'Changing…' : 'Change Password'}
             </button>
           </form>
@@ -187,108 +185,104 @@ export default function Settings() {
 
       {/* ── Custom Email (SMTP) tab ── */}
       {tab === 'email' && (
-        <>
-          {(true || isProOrAbove) && (
-            <div className="card" style={{ padding: 24 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Email Settings</div>
+        <div className="card p-5 sm:p-6">
+          <div className="text-base font-semibold text-white mb-3">Email Settings</div>
 
-              {/* Current sender info */}
-              <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 20, fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
-                <strong>Current sending mode:</strong>{' '}
-                {club?.smtp_host
-                  ? <span style={{ color: 'var(--success)' }}>✓ Custom SMTP — emails sent from your club address</span>
-                  : <span>Using EventFlow default sender (<code style={{ fontFamily: 'monospace', background: 'var(--surface-3)', padding: '1px 5px', borderRadius: 4 }}>onboarding@resend.dev</code>). Configure SMTP below to send from your own email.</span>
-                }
-              </div>
+          {/* Current sender info */}
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-5 text-sm text-gray-300 leading-relaxed">
+            <strong className="text-gray-200">Current sending mode:</strong>{' '}
+            {club?.smtp_host
+              ? <span className="text-green-400 font-medium">✓ Custom SMTP — emails sent from your club address</span>
+              : <span>Using EventFlow default sender (<code className="font-mono bg-black/40 px-1.5 py-0.5 rounded text-gray-300 border border-white/5">onboarding@resend.dev</code>). Configure SMTP below to send from your own email.</span>
+            }
+          </div>
 
-              <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 20, lineHeight: 1.5 }}>
-                Configure your club's SMTP settings to send QR passes from your own email address.
-                Works with Gmail (use App Password), Outlook, or any SMTP provider.
-              </p>
+          <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+            Configure your club's SMTP settings to send QR passes from your own email address.
+            Works with Gmail (use App Password), Outlook, or any SMTP provider.
+          </p>
 
-              {smtpMsg && <div style={{ background: 'var(--success-bg)', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--success)', marginBottom: 14 }}>{smtpMsg}</div>}
-              {smtpErr && <div style={{ background: 'var(--danger-bg)',  border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--danger)',  marginBottom: 14 }}>{smtpErr}</div>}
+          {smtpMsg && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-4">{smtpMsg}</div>}
+          {smtpErr && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 mb-4">{smtpErr}</div>}
 
-              {/* Current SMTP status */}
-              {club?.smtp_host && (
-                <div style={{ background: 'var(--success-bg)', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--success)', marginBottom: 16 }}>
-                  ✓ SMTP configured — sending from <strong>{club.smtp_from_email || club.smtp_host}</strong>
-                </div>
-              )}
-
-              <form onSubmit={saveSmtp} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14 }}>
-                  <div>
-                    <label className="label">SMTP Host</label>
-                    <input className="input" value={smtp.smtp_host} onChange={e => setSmtp(p => ({ ...p, smtp_host: e.target.value }))} placeholder="smtp.gmail.com" />
-                  </div>
-                  <div>
-                    <label className="label">Port</label>
-                    <input className="input" value={smtp.smtp_port} onChange={e => setSmtp(p => ({ ...p, smtp_port: e.target.value }))} placeholder="587" />
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  <div>
-                    <label className="label">Username / Email</label>
-                    <input className="input" value={smtp.smtp_user} onChange={e => setSmtp(p => ({ ...p, smtp_user: e.target.value }))} placeholder="yourclub@gmail.com" />
-                  </div>
-                  <div>
-                    <label className="label">Password / App Password</label>
-                    <input className="input" type="password" value={smtp.smtp_pass} onChange={e => setSmtp(p => ({ ...p, smtp_pass: e.target.value }))} placeholder="••••••••••••" />
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  <div>
-                    <label className="label">From Name</label>
-                    <input className="input" value={smtp.smtp_from_name} onChange={e => setSmtp(p => ({ ...p, smtp_from_name: e.target.value }))} placeholder="IEEE Student Branch" />
-                  </div>
-                  <div>
-                    <label className="label">From Email</label>
-                    <input className="input" value={smtp.smtp_from_email} onChange={e => setSmtp(p => ({ ...p, smtp_from_email: e.target.value }))} placeholder="events@yourclub.edu" />
-                  </div>
-                </div>
-
-                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#92400e', lineHeight: 1.6 }}>
-                  💡 For Gmail, use an <strong>App Password</strong> (not your regular password). Go to Google Account → Security → 2-Step Verification → App passwords.
-                </div>
-
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button type="submit" disabled={savingSmtp} className="btn btn-primary">
-                    {savingSmtp ? 'Saving…' : 'Save SMTP Settings'}
-                  </button>
-                  {club?.smtp_host && (
-                    <button type="button" onClick={testSmtp} disabled={testingSmtp} className="btn btn-ghost">
-                      {testingSmtp ? 'Sending…' : 'Send test email'}
-                    </button>
-                  )}
-                </div>
-              </form>
+          {/* Current SMTP status */}
+          {club?.smtp_host && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-5 font-medium">
+              ✓ SMTP configured — sending from <strong className="text-green-300">{club.smtp_from_email || club.smtp_host}</strong>
             </div>
           )}
-        </>
+
+          <form onSubmit={saveSmtp} className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <label className="label">SMTP Host</label>
+                <input className="input" value={smtp.smtp_host} onChange={e => setSmtp(p => ({ ...p, smtp_host: e.target.value }))} placeholder="smtp.gmail.com" />
+              </div>
+              <div>
+                <label className="label">Port</label>
+                <input className="input" value={smtp.smtp_port} onChange={e => setSmtp(p => ({ ...p, smtp_port: e.target.value }))} placeholder="587" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Username / Email</label>
+                <input className="input" value={smtp.smtp_user} onChange={e => setSmtp(p => ({ ...p, smtp_user: e.target.value }))} placeholder="yourclub@gmail.com" />
+              </div>
+              <div>
+                <label className="label">Password / App Password</label>
+                <input className="input" type="password" value={smtp.smtp_pass} onChange={e => setSmtp(p => ({ ...p, smtp_pass: e.target.value }))} placeholder="••••••••••••" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">From Name</label>
+                <input className="input" value={smtp.smtp_from_name} onChange={e => setSmtp(p => ({ ...p, smtp_from_name: e.target.value }))} placeholder="IEEE Student Branch" />
+              </div>
+              <div>
+                <label className="label">From Email</label>
+                <input className="input" value={smtp.smtp_from_email} onChange={e => setSmtp(p => ({ ...p, smtp_from_email: e.target.value }))} placeholder="events@yourclub.edu" />
+              </div>
+            </div>
+
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs text-amber-200/80 leading-relaxed mt-2">
+              💡 For Gmail, use an <strong className="text-amber-200">App Password</strong> (not your regular password). Go to Google Account → Security → 2-Step Verification → App passwords.
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <button type="submit" disabled={savingSmtp} className="btn btn-primary w-full sm:w-auto">
+                {savingSmtp ? 'Saving…' : 'Save SMTP Settings'}
+              </button>
+              {club?.smtp_host && (
+                <button type="button" onClick={testSmtp} disabled={testingSmtp} className="btn btn-ghost w-full sm:w-auto border border-white/10 hover:bg-white/5">
+                  {testingSmtp ? 'Sending…' : 'Send test email'}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
       )}
 
       {/* ── Danger zone tab ── */}
       {tab === 'danger' && (
-        <div className="card" style={{ padding: 24, border: '1px solid #fca5a5' }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--danger)', marginBottom: 8 }}>Danger Zone</div>
-          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 20, lineHeight: 1.6 }}>
+        <div className="card p-5 sm:p-6 border border-red-500/30 bg-red-500/5">
+          <div className="text-base font-semibold text-red-400 mb-2">Danger Zone</div>
+          <p className="text-sm text-gray-400 mb-6 leading-relaxed">
             These actions are permanent and cannot be undone. Proceed with caution.
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--border)' }}>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 gap-4">
               <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-1)' }}>Delete all events</div>
-                <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Removes all draft events. Published events cannot be deleted.</div>
+                <div className="text-sm font-medium text-gray-200">Delete all events</div>
+                <div className="text-xs text-gray-400 mt-1">Removes all draft events. Published events cannot be deleted.</div>
               </div>
-              <button className="btn btn-danger btn-sm" onClick={() => alert('Contact support to perform bulk deletions.')}>Delete drafts</button>
+              <button className="btn btn-danger btn-sm whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support to perform bulk deletions.')}>Delete drafts</button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--border)' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 gap-4">
               <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-1)' }}>Delete account</div>
-                <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Permanently deletes your club and all associated data.</div>
+                <div className="text-sm font-medium text-gray-200">Delete account</div>
+                <div className="text-xs text-gray-400 mt-1">Permanently deletes your club and all associated data.</div>
               </div>
-              <button className="btn btn-danger btn-sm" onClick={() => alert('Contact support at hello@eventflow.app to delete your account.')}>Delete account</button>
+              <button className="btn btn-danger btn-sm whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support at hello@eventflow.app to delete your account.')}>Delete account</button>
             </div>
           </div>
         </div>

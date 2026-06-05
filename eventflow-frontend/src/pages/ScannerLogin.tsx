@@ -40,87 +40,38 @@ export default function ScannerLogin() {
     }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    background: '#1a1a3a',
-    border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 10,
-    padding: '13px 16px',
-    color: '#f0eeff',
-    fontSize: 15,
-    fontFamily: 'DM Sans, sans-serif',
-    outline: 'none',
-    boxSizing: 'border-box',
-    transition: 'border-color 0.15s',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#6b6890',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-  }
-
   return (
-    <div style={{
-      minHeight: '100dvh',  // mobile viewport fix
-      background: '#080714',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'DM Sans, sans-serif',
-      padding: '20px 16px',
-      boxSizing: 'border-box',
-    }}>
-      <div style={{
-        background: '#10102a',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 20,
-        padding: '36px 28px',
-        width: '100%',
-        maxWidth: 400,
-        boxSizing: 'border-box',
-      }}>
+    <div className="min-h-[100dvh] bg-[#080714] flex items-center justify-center font-sans p-5 box-border relative overflow-hidden">
+      
+      {/* Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-purple-500/10 rounded-full blur-[80px] pointer-events-none" />
 
+      <div className="bg-[#10102a]/80 backdrop-blur-xl border border-white/10 rounded-[20px] p-8 w-full max-w-[400px] box-border relative z-10 shadow-2xl">
+        
         {/* Icon + Title */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            width: 60, height: 60,
-            background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
-            borderRadius: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px',
-            fontSize: 28,
-          }}>📷</div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f0eeff', marginBottom: 8 }}>
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-indigo-500/20">📷</div>
+          <h1 className="text-[22px] font-bold text-[#f0eeff] mb-2 tracking-tight">
             Gate Scanner
           </h1>
-          <p style={{ fontSize: 13, color: '#5e5a80', lineHeight: 1.5 }}>
+          <p className="text-[13px] text-[#5e5a80] leading-relaxed">
             Enter your access code to start scanning
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div style={{
-            background: 'rgba(220,38,38,0.12)',
-            border: '1px solid rgba(220,38,38,0.35)',
-            borderRadius: 10, padding: '11px 14px',
-            fontSize: 13, color: '#f87171',
-            marginBottom: 20, lineHeight: 1.5,
-          }}>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-[13px] text-red-400 mb-5 leading-relaxed">
             {error}
           </div>
         )}
 
-        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-
-          {/* Access Code — always shown, most important field */}
+        <form onSubmit={submit} className="flex flex-col gap-5">
+          
+          {/* Access Code */}
           <div>
-            <label style={labelStyle}>Access Code *</label>
+            <label className="block text-[11px] font-bold text-[#6b6890] mb-2 uppercase tracking-widest">Access Code *</label>
             <input
               type="text"
               value={code}
@@ -130,26 +81,17 @@ export default function ScannerLogin() {
               autoComplete="off"
               autoCapitalize="characters"
               placeholder="e.g. TECH-V1"
-              style={{
-                ...inputStyle,
-                textAlign: 'center',
-                fontSize: 22,
-                fontFamily: 'DM Mono, monospace',
-                letterSpacing: '0.2em',
-                fontWeight: 700,
-              }}
-              onFocus={e => (e.target.style.borderColor = 'rgba(99,102,241,0.6)')}
-              onBlur={e  => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+              className="w-full bg-[#1a1a3a] border border-white/10 rounded-xl px-4 py-3.5 text-[#f0eeff] text-[22px] font-mono tracking-[0.2em] font-bold text-center outline-none focus:border-indigo-500/60 focus:bg-[#1a1a3a]/80 transition-all placeholder:text-white/20"
             />
           </div>
 
-          {/* Event ID — optional, shown only if not preset in URL */}
+          {/* Event ID */}
           {!presetEventId && (
             <div>
-              <label style={labelStyle}>
+              <label className="block text-[11px] font-bold text-[#6b6890] mb-2 uppercase tracking-widest">
                 Event ID
-                <span style={{ color: '#3d3a5c', fontWeight: 400, textTransform: 'none', letterSpacing: 0, marginLeft: 6 }}>
-                  (optional — leave blank if not sure)
+                <span className="text-[#3d3a5c] font-normal normal-case tracking-normal ml-1.5">
+                  (optional)
                 </span>
               </label>
               <input
@@ -157,12 +99,10 @@ export default function ScannerLogin() {
                 value={eid}
                 onChange={e => setEid(e.target.value.trim())}
                 placeholder="Paste event ID here if given"
-                style={inputStyle}
-                onFocus={e => (e.target.style.borderColor = 'rgba(99,102,241,0.6)')}
-                onBlur={e  => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+                className="w-full bg-[#1a1a3a] border border-white/10 rounded-xl px-4 py-3 text-[#f0eeff] text-[15px] outline-none focus:border-indigo-500/60 focus:bg-[#1a1a3a]/80 transition-all placeholder:text-white/20"
               />
-              <p style={{ fontSize: 11, color: '#3d3a5c', marginTop: 6 }}>
-                The event admin will share this with you. You can leave it blank for club-wide access.
+              <p className="text-[11px] text-[#3d3a5c] mt-2 leading-relaxed">
+                The event admin will share this with you. Leave blank for club-wide access.
               </p>
             </div>
           )}
@@ -170,28 +110,16 @@ export default function ScannerLogin() {
           <button
             type="submit"
             disabled={login.isPending || !code.trim()}
-            style={{
-              padding: '15px',
-              fontSize: 16,
-              fontWeight: 700,
-              background: login.isPending || !code.trim()
-                ? 'rgba(99,102,241,0.4)'
-                : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 12,
-              cursor: login.isPending || !code.trim() ? 'not-allowed' : 'pointer',
-              boxShadow: '0 4px 20px rgba(99,102,241,0.35)',
-              fontFamily: 'DM Sans, sans-serif',
-              transition: 'opacity 0.15s',
-              marginTop: 4,
-            }}
+            className={`
+              mt-2 p-4 text-base font-bold text-white rounded-xl transition-all duration-300
+              ${(login.isPending || !code.trim()) ? 'bg-indigo-500/40 cursor-not-allowed opacity-70' : 'bg-gradient-to-br from-indigo-500 to-purple-500 hover:shadow-[0_4px_20px_rgba(99,102,241,0.35)] hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'}
+            `}
           >
             {login.isPending ? 'Verifying…' : 'Start Scanning'}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', fontSize: 11, color: '#2a2848', marginTop: 24 }}>
+        <p className="text-center text-[11px] text-[#2a2848] mt-6">
           Contact your event organizer if you don't have an access code
         </p>
       </div>

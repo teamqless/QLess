@@ -2,59 +2,43 @@ import { Link } from 'react-router-dom'
 
 export default function RegisterSuccess() {
   return (
-    <div style={{
-      minHeight: '100vh', background: '#f8f8fc',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'DM Sans, sans-serif', padding: 24,
-    }}>
-      <div style={{
-        background: '#fff', borderRadius: 20, border: '1px solid #e5e7eb',
-        padding: '52px 40px', maxWidth: 440, width: '100%', textAlign: 'center',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
-      }}>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans p-6 relative overflow-hidden">
+      
+      {/* Background Shapes */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+      <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-10 md:p-12 w-full max-w-[480px] text-center shadow-glass relative z-10">
+        
         {/* Animated checkmark */}
-        <div style={{
-          width: 72, height: 72,
-          background: 'linear-gradient(135deg,#dcfce7,#bbf7d0)',
-          borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 24px',
-          boxShadow: '0 0 0 8px #f0fdf4',
-          fontSize: 32,
-        }}>
+        <div className="w-20 h-20 bg-gradient-to-br from-emerald-200 to-green-300 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_0_8px_rgba(240,253,244,1)] text-4xl text-green-700 animate-[bounce_0.5s_ease-out]">
           ✓
         </div>
 
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f0e1a', letterSpacing: '-0.4px', marginBottom: 10 }}>
+        <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-3">
           Registration submitted!
         </h1>
 
-        <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.65, marginBottom: 28 }}>
+        <p className="text-base text-slate-500 leading-relaxed mb-8">
           Your registration is in. Once the organizer reviews your details
           and verifies your payment, you'll receive your{' '}
-          <strong style={{ color: '#0f0e1a' }}>QR entry pass via email</strong>.
+          <strong className="text-slate-900 font-bold">QR entry pass via email</strong>.
         </p>
 
-        <div style={{
-          background: '#f8f8fc', border: '1px solid #e5e7eb',
-          borderRadius: 12, padding: '16px 20px', marginBottom: 28, textAlign: 'left',
-        }}>
+        <div className="bg-slate-100/50 backdrop-blur-md border border-slate-200 rounded-2xl p-5 mb-8 text-left space-y-3">
           {[
             { icon: '📧', text: 'Check your inbox for a confirmation' },
             { icon: '📂', text: 'Also check your spam/promotions folder' },
             { icon: '📱', text: 'Screenshot or save your QR when it arrives' },
           ].map(tip => (
-            <div key={tip.text} style={{ display: 'flex', gap: 10, fontSize: 13, color: '#6b7280', marginBottom: 8, lineHeight: 1.4 }}>
-              <span>{tip.icon}</span> {tip.text}
+            <div key={tip.text} className="flex gap-3 text-[14px] text-slate-600 leading-snug items-start">
+              <span className="text-lg leading-none">{tip.icon}</span> 
+              <span>{tip.text}</span>
             </div>
           ))}
         </div>
 
-        <Link to="/" style={{
-          display: 'inline-block', padding: '10px 24px',
-          background: '#f3f4f6', color: '#374151', borderRadius: 8,
-          textDecoration: 'none', fontSize: 14, fontWeight: 500,
-        }}>
+        <Link to="/" className="inline-block px-6 py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 rounded-xl no-underline text-[15px] font-bold transition-colors">
           ← Back to home
         </Link>
       </div>

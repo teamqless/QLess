@@ -28,9 +28,9 @@ function AnimatedStat({ value, label, color }: { value: number; label: string; c
   }, [value])
 
   return (
-    <div className="stat-card" style={{ padding: '14px 18px' }}>
+    <div className="stat-card p-4">
       <div className="stat-label">{label}</div>
-      <div className="stat-value" style={{ fontSize: 24, color }}>{display}</div>
+      <div className="stat-value text-2xl" style={{ color }}>{display}</div>
     </div>
   )
 }
@@ -82,13 +82,13 @@ export default function EventDetail() {
   })
 
   if (isLoading) return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="flex flex-col gap-4">
       {[80, 60, 400].map((h, i) => (
-        <div key={i} className="shimmer" style={{ height: h, borderRadius: 12 }} />
+        <div key={i} className="shimmer rounded-xl" style={{ height: h }} />
       ))}
     </div>
   )
-  if (!data) return <div style={{ color: 'var(--danger)', fontSize: 14 }}>Event not found</div>
+  if (!data) return <div className="text-danger text-sm">Event not found</div>
 
   const { event, stats } = data
   const regUrl = `${window.location.origin}/register/${event.slug}`
@@ -120,64 +120,52 @@ export default function EventDetail() {
   }
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto">
       {/* Toast */}
       {toast && (
-        <div style={{
-          position: 'fixed', bottom: 24, right: 24, zIndex: 200,
-          background: toast.type === 'success' ? '#16a34a' : toast.type === 'info' ? '#2563eb' : '#dc2626',
-          color: 'white', padding: '12px 20px', borderRadius: 10,
-          fontSize: 14, fontWeight: 500, boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-          animation: 'fadeIn 0.2s ease',
-        }}>
+        <div className={`fixed bottom-6 right-6 z-[200] px-5 py-3 rounded-xl text-sm font-medium text-white shadow-lg animate-fade-in ${
+          toast.type === 'success' ? 'bg-success' : toast.type === 'info' ? 'bg-blue-600' : 'bg-danger'
+        }`}>
           {toast.msg}
         </div>
       )}
 
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-          <div>
-            <div style={{ marginBottom: 6 }}>
-              <Link to="/events" style={{ fontSize: 13, color: 'var(--text-3)', textDecoration: 'none' }}>← Events</Link>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <h1 className="page-title">{event.title}</h1>
-              <EventStatusBadge status={event.status as EventStatus} />
-              {event.status === 'published' && (
-                <span style={{
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  fontSize: 12, color: '#16a34a', fontWeight: 600,
-                  background: '#f0fdf4', border: '1px solid #bbf7d0',
-                  padding: '3px 10px', borderRadius: 100,
-                }}>
-                  <span style={{ width: 6, height: 6, background: '#16a34a', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-                  Live
-                  <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
-                </span>
-              )}
-            </div>
-            <p className="page-subtitle">
-              {event.venue && `${event.venue} · `}
-              {event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}
-              {event.capacity && ` · ${event.capacity} capacity`}
-            </p>
+      <div className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div>
+          <div className="mb-2">
+            <Link to="/events" className="text-sm text-text-3 hover:text-text-2 transition-colors">← Events</Link>
           </div>
-          <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
-            <Link to={`/scanner/login?event=${event.id}`} className="btn btn-ghost btn-sm">📷 Scanner</Link>
-            <button onClick={() => exportCSV(event.id, event.title)} className="btn btn-ghost btn-sm">↓ Export CSV</button>
-            <button
-              onClick={() => publishEvent.mutate()}
-              disabled={publishEvent.isPending}
-              className={`btn btn-sm ${event.status === 'published' ? 'btn-ghost' : 'btn-primary'}`}>
-              {event.status === 'published' ? 'Unpublish' : 'Publish Event'}
-            </button>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="page-title">{event.title}</h1>
+            <EventStatusBadge status={event.status as EventStatus} />
+            {event.status === 'published' && (
+              <span className="flex items-center gap-1.5 text-xs text-green-700 font-semibold bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse" />
+                Live
+              </span>
+            )}
           </div>
+          <p className="page-subtitle mt-2">
+            {event.venue && `${event.venue} · `}
+            {event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}
+            {event.capacity && ` · ${event.capacity} capacity`}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2.5 shrink-0">
+          <Link to={`/scanner/login?event=${event.id}`} className="btn btn-ghost btn-sm">📷 Scanner</Link>
+          <button onClick={() => exportCSV(event.id, event.title)} className="btn btn-ghost btn-sm">↓ Export CSV</button>
+          <button
+            onClick={() => publishEvent.mutate()}
+            disabled={publishEvent.isPending}
+            className={`btn btn-sm ${event.status === 'published' ? 'btn-ghost' : 'btn-primary'}`}>
+            {event.status === 'published' ? 'Unpublish' : 'Publish Event'}
+          </button>
         </div>
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12, marginBottom: 20 }}>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
         <AnimatedStat label="Total"       value={stats.total} />
         <AnimatedStat label="Pending"     value={stats.pending}  color={stats.pending > 0 ? 'var(--warning)' : undefined} />
         <AnimatedStat label="Approved"    value={liveTotalApproved} color="var(--success)" />
@@ -186,38 +174,33 @@ export default function EventDetail() {
       </div>
 
       {/* Capacity progress + registration link */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Entry progress */}
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)' }}>Entry progress</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>{pct}%</span>
+        <div className="glass p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-text-2">Entry progress</span>
+            <span className="text-2xl font-extrabold text-brand">{pct}%</span>
           </div>
-          <div style={{ height: 8, background: 'var(--surface-3)', borderRadius: 100, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${pct}%`,
-              background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
-              borderRadius: 100, transition: 'width 0.5s ease',
-            }} />
+          <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-brand to-purple-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 12, color: 'var(--text-3)' }}>
+          <div className="flex justify-between mt-2 text-xs text-text-3">
             <span>{liveScannedIn} in</span>
             <span>{liveTotalApproved - liveScannedIn} remaining</span>
           </div>
         </div>
 
         {/* Registration link */}
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+        <div className="glass p-5">
+          <div className="text-xs font-semibold text-text-3 uppercase tracking-wider mb-2">
             Registration Link
           </div>
           {event.status === 'published' ? (
             <>
-              <div style={{ fontSize: 13, color: 'var(--brand)', fontFamily: 'DM Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 10 }}>
+              <div className="text-sm text-brand font-mono overflow-hidden text-ellipsis whitespace-nowrap mb-3">
                 {regUrl}
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="flex gap-2.5">
                 <button onClick={() => { navigator.clipboard.writeText(regUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
                   className="btn btn-primary btn-sm">
                   {copiedLink ? '✓ Copied' : 'Copy link'}
@@ -228,31 +211,27 @@ export default function EventDetail() {
               </div>
             </>
           ) : (
-            <div style={{ fontSize: 13, color: 'var(--text-3)' }}>Publish the event to get the registration link</div>
+            <div className="text-sm text-text-3">Publish the event to get the registration link</div>
           )}
         </div>
       </div>
 
       {/* Recent live scans (real-time) */}
       {recentScans.length > 0 && (
-        <div className="card" style={{ padding: '16px 20px', marginBottom: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 8, height: 8, background: '#16a34a', borderRadius: '50%', display: 'inline-block' }} />
+        <div className="glass p-5 mb-6">
+          <div className="text-sm font-semibold text-text-1 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-success rounded-full inline-block animate-pulse" />
             Live scans
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex gap-2 flex-wrap">
             {recentScans.map((s, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'var(--surface-2)', border: '1px solid var(--border)',
-                borderRadius: 8, padding: '7px 12px', fontSize: 13,
-              }}>
-                <span style={{ width: 26, height: 26, background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
+              <div key={i} className="flex items-center gap-2 bg-white/50 border border-border/50 rounded-lg py-1.5 px-3 text-sm">
+                <span className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-xs font-bold text-success shrink-0">
                   {s.attendee?.name?.charAt(0)?.toUpperCase()}
                 </span>
                 <div>
-                  <div style={{ fontWeight: 500, color: 'var(--text-1)' }}>{s.attendee?.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{new Date(s.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}</div>
+                  <div className="font-medium text-text-1 leading-tight">{s.attendee?.name}</div>
+                  <div className="text-[10px] text-text-3 leading-tight">{new Date(s.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}</div>
                 </div>
               </div>
             ))}
@@ -262,8 +241,8 @@ export default function EventDetail() {
 
       {/* Analytics chart */}
       {chartData.length > 1 && (
-        <div className="card" style={{ padding: '20px', marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', marginBottom: 16 }}>Registrations over time</div>
+        <div className="glass p-5 mb-6">
+          <div className="text-sm font-semibold text-text-1 mb-4">Registrations over time</div>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData}>
               <defs>
@@ -285,42 +264,39 @@ export default function EventDetail() {
       )}
 
       {/* Registrations table */}
-      <div className="card">
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)', marginRight: 4 }}>Registrations</span>
-          <div style={{ display: 'flex', gap: 3, background: 'var(--surface-2)', borderRadius: 7, padding: 3 }}>
+      <div className="glass overflow-hidden">
+        <div className="p-4 border-b border-border/50 flex items-center gap-3 flex-wrap bg-white/40">
+          <span className="text-base font-semibold text-text-1 mr-1">Registrations</span>
+          <div className="flex gap-1 bg-surface-2 rounded-lg p-1">
             {STATUS_TABS.map(t => (
               <button key={t.value} onClick={() => setFilter(t.value)}
-                style={{
-                  padding: '4px 11px', borderRadius: 5, fontSize: 12, fontWeight: 500,
-                  border: 'none', cursor: 'pointer',
-                  background: statusFilter === t.value ? 'var(--surface)' : 'transparent',
-                  color: statusFilter === t.value ? 'var(--text-1)' : 'var(--text-3)',
-                  boxShadow: statusFilter === t.value ? 'var(--shadow-sm)' : 'none',
-                }}>
+                className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                  statusFilter === t.value 
+                    ? 'bg-white text-text-1 shadow-sm' 
+                    : 'text-text-3 hover:text-text-2'
+                }`}>
                 {t.label}
               </button>
             ))}
           </div>
-          <input className="input" placeholder="Search name or email…"
-            value={search} onChange={e => setSearch(e.target.value)}
-            style={{ width: 200, marginLeft: 'auto', fontSize: 13 }} />
+          <input className="input w-full md:w-48 ml-auto text-sm bg-white/50" placeholder="Search name or email…"
+            value={search} onChange={e => setSearch(e.target.value)} />
         </div>
 
-        <div className="table-container">
+        <div className="table-container border-none shadow-none bg-transparent">
           {regsLoading ? (
-            <div style={{ padding: 20 }}>
+            <div className="p-5">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="shimmer" style={{ height: 44, borderRadius: 6, marginBottom: 8 }} />
+                <div key={i} className="shimmer h-11 rounded-md mb-2" />
               ))}
             </div>
           ) : !registrations?.length ? (
-            <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-3)', fontSize: 14 }}>
+            <div className="py-10 text-center text-text-3 text-sm">
               No registrations found
             </div>
           ) : (
             <table>
-              <thead>
+              <thead className="bg-white/30">
                 <tr>
                   <th>Attendee</th>
                   <th>Status</th>
@@ -332,39 +308,39 @@ export default function EventDetail() {
               </thead>
               <tbody>
                 {registrations.map(reg => (
-                  <tr key={reg.id}>
+                  <tr key={reg.id} className="hover:bg-white/40">
                     <td>
-                      <div style={{ fontWeight: 500 }}>{reg.attendee_name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{reg.attendee_email}</div>
+                      <div className="font-medium text-text-1">{reg.attendee_name}</div>
+                      <div className="text-xs text-text-3">{reg.attendee_email}</div>
                     </td>
                     <td><span className={`badge badge-${reg.status}`}>{reg.status}</span></td>
                     <td>
                       {reg.payment_screenshot_url ? (
                         <a href={reg.payment_screenshot_url} target="_blank" rel="noreferrer"
-                          style={{ fontSize: 13, color: 'var(--brand)', textDecoration: 'none', fontWeight: 500 }}>
+                          className="text-sm text-brand font-medium hover:underline">
                           View ↗
                         </a>
                       ) : (
-                        <span style={{ fontSize: 13, color: 'var(--text-3)' }}>
+                        <span className="text-sm text-text-3">
                           {event.entry_fee === 0 ? 'Free' : '—'}
                         </span>
                       )}
                     </td>
                     <td>
                       {reg.qr_codes?.[0]?.scanned_at
-                        ? <span style={{ fontSize: 12, color: 'var(--success)', fontWeight: 600 }}>✓ Scanned in</span>
+                        ? <span className="text-xs text-success font-semibold">✓ Scanned in</span>
                         : reg.qr_codes?.[0]?.email_sent
-                          ? <span style={{ fontSize: 12, color: '#2563eb' }}>Email sent</span>
+                          ? <span className="text-xs text-blue-600">Email sent</span>
                           : reg.status === 'approved'
-                            ? <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Generating…</span>
-                            : <span style={{ fontSize: 12, color: 'var(--text-3)' }}>—</span>
+                            ? <span className="text-xs text-text-3">Generating…</span>
+                            : <span className="text-xs text-text-3">—</span>
                       }
                     </td>
-                    <td style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                    <td className="text-xs text-text-3">
                       {new Date(reg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <div className="flex gap-2 flex-wrap">
                         {reg.status === 'pending' && (
                           <>
                             <button onClick={() => { approve.mutate(reg.id); showToast(`Approving ${reg.attendee_name}…`, 'info') }}
@@ -395,22 +371,19 @@ export default function EventDetail() {
 
       {/* Reject modal */}
       {rejectId && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-        }} onClick={() => setRejectId(null)}>
-          <div className="card" style={{ padding: 28, width: 400, maxWidth: '90vw' }}
-            onClick={e => e.stopPropagation()}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Reject Registration</h3>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] animate-fade-in p-4" 
+             onClick={() => setRejectId(null)}>
+          <div className="glass-panel p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4 text-text-1">Reject Registration</h3>
             <div>
-              <label className="label">Reason <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional)</span></label>
+              <label className="label">Reason <span className="text-text-3 font-normal">(optional)</span></label>
               <input className="input" value={rejectReason} onChange={e => setReason(e.target.value)}
                 placeholder="e.g. Payment screenshot unclear" autoFocus />
             </div>
-            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-              <button onClick={() => setRejectId(null)} className="btn btn-ghost" style={{ flex: 1 }}>Cancel</button>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setRejectId(null)} className="btn btn-ghost flex-1">Cancel</button>
               <button onClick={handleReject} disabled={reject.isPending}
-                className="btn btn-danger" style={{ flex: 1 }}>
+                className="btn btn-danger flex-1">
                 {reject.isPending ? 'Rejecting…' : 'Reject'}
               </button>
             </div>
