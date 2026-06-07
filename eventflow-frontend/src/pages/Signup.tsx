@@ -3,136 +3,233 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '@/lib/api'
 import { setToken, setStoredClub } from '@/lib/auth'
 
+const STEPS = [
+  { label: 'Create account', sub: 'Takes 30 seconds' },
+  { label: 'Create your event', sub: 'Set up in minutes' },
+  { label: 'Go live', sub: 'Share & collect registrations' },
+]
+
 export default function Signup() {
   const navigate = useNavigate()
-  const [form, setForm]     = useState({ name: '', email: '', password: '', college: '' })
-  const [error, setError]   = useState('')
+  const [form, setForm]       = useState({ name: '', email: '', password: '', college: '' })
+  const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPw, setShowPw]   = useState(false)
+  const [pwStrength, setPwStrength] = useState(0)
 
-  const handle = (e: React.ChangeEvent<HTMLInputElement>) =>
+  const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }))
+    if (e.target.name === 'password') {
+      const pw = e.target.value
+      let strength = 0
+      if (pw.length >= 8) strength++
+      if (/[A-Z]/.test(pw)) strength++
+      if (/[0-9]/.test(pw)) strength++
+      if (/[^A-Za-z0-9]/.test(pw)) strength++
+      setPwStrength(strength)
+    }
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true); setError('')
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+    setLoading(true)
+    setError('')
     try {
       const { data } = await api.post('/auth/signup', form)
       setToken(data.token)
       setStoredClub(data.club)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed. Please try again.')
-    } finally { setLoading(false) }
+      setError(err.response?.data?.error || 'Failed to create account')
+      setLoading(false)
+    }
+  }
+
+  const pwColors = ['#e4e3f0', '#ef4444', '#f59e0b', '#6366f1', '#16a34a']
+  const pwLabels = ['', 'Weak', 'Fair', 'Good', 'Strong']
+
+  const inputCls: React.CSSProperties = {
+    width: '100%', padding: '12px 14px', fontSize: 14,
+    border: '1.5px solid #e4e3f0', borderRadius: 10,
+    outline: 'none', background: '#fff', color: '#0f0e1a',
+    transition: 'border-color 0.15s, box-shadow 0.15s',
+    boxSizing: 'border-box', fontFamily: 'DM Sans, sans-serif',
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50 font-sans">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[420px] bg-[#0f0e1a] flex-col p-10 shrink-0 relative overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute top-[10%] left-[-20%] w-[400px] h-[400px] bg-[radial-gradient(ellipse,rgba(99,102,241,0.15)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[300px] h-[300px] bg-[radial-gradient(ellipse,rgba(168,85,247,0.15)_0%,transparent_70%)] pointer-events-none" />
+    <>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .auth-input:focus { border-color:#6366f1 !important; box-shadow:0 0 0 3px rgba(99,102,241,0.12) !important; }
+        .auth-submit:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 20px rgba(99,102,241,0.45) !important; }
+        .auth-submit:active:not(:disabled) { transform:translateY(0); }
+        @media (max-width:768px) {
+          .signup-wrap { grid-template-columns: 1fr !important; }
+          .signup-brand { display: none !important; }
+          .signup-form-side { padding: 32px 24px !important; padding-top: 50px !important; }
+        }
+      `}</style>
 
-        <Link to="/" className="flex items-center gap-2 no-underline mb-auto relative z-10 hover:opacity-90 transition-opacity">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-lg shadow-indigo-500/20">E</div>
-          <span className="font-bold text-lg text-white tracking-tight">EventFlow</span>
-        </Link>
-        <div className="pb-16 relative z-10">
-          <div className="text-3xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            Start for free
-          </div>
-          <div className="text-sm text-[#8884a8] leading-relaxed mb-8">
-            No credit card. No payment upfront. Get your first event running in minutes.
-          </div>
-          <div className="flex flex-col gap-4">
-            {['1 free event to start', 'QR codes sent to attendees', 'Mobile gate scanner included', 'Upgrade only when you need to'].map(f => (
-              <div key={f} className="flex gap-3 text-[13px] text-[#a09cc0] items-center bg-white/[0.03] p-3 rounded-lg border border-white/[0.05]">
-                <div className="w-5 h-5 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center text-xs font-bold shrink-0">✓</div> 
-                {f}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <div className="signup-wrap" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', minHeight:'100vh', fontFamily:'DM Sans, sans-serif' }}>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-10 bg-gradient-to-br from-indigo-50/30 to-purple-50/30">
-        
-        {/* Mobile Header */}
-        <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 no-underline">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-md">E</div>
-            <span className="font-bold text-lg text-gray-900 tracking-tight">EventFlow</span>
+        {/* ── Brand panel ── */}
+        <div className="signup-brand" style={{ background:'linear-gradient(145deg,#0f0e1a,#1a1040)', display:'flex', flexDirection:'column', padding:'40px 48px', position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', top:'20%', right:'-5%', width:350, height:350, background:'radial-gradient(circle,rgba(99,102,241,0.2),transparent 70%)', pointerEvents:'none' }} />
+
+          <Link to="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none', zIndex:1 }}>
+            <div style={{ width:34, height:34, background:'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius:9, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:17, color:'white' }}>E</div>
+            <span style={{ fontWeight:700, fontSize:17, color:'#f0eeff', letterSpacing:'-0.3px' }}>EventFlow</span>
           </Link>
+
+          <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', zIndex:1 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:'#6366f1', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:14 }}>
+              Get started in 3 steps
+            </div>
+            <h1 style={{ fontSize:34, fontWeight:800, color:'#f0eeff', letterSpacing:'-0.8px', lineHeight:1.2, margin:'0 0 40px' }}>
+              Your first event<br />
+              <span style={{ color:'#818cf8' }}>in under 5 minutes</span>
+            </h1>
+
+            {/* Steps */}
+            <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+              {STEPS.map((step, i) => (
+                <div key={step.label} style={{ display:'flex', gap:16, paddingBottom: i < STEPS.length - 1 ? 28 : 0, position:'relative' }}>
+                  {/* Line connector */}
+                  {i < STEPS.length - 1 && (
+                    <div style={{ position:'absolute', left:15, top:32, width:2, height:'calc(100% - 4px)', background:'rgba(99,102,241,0.2)' }} />
+                  )}
+                  <div style={{ width:32, height:32, borderRadius:'50%', background:'rgba(99,102,241,0.2)', border:'2px solid rgba(99,102,241,0.5)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:'#818cf8', flexShrink:0, zIndex:1 }}>
+                    {i + 1}
+                  </div>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:600, color:'#ddd9f5', marginBottom:2 }}>{step.label}</div>
+                    <div style={{ fontSize:12, color:'#5e5a80' }}>{step.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Social proof */}
+            <div style={{ marginTop:48, padding:'16px 18px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12 }}>
+              <div style={{ fontSize:13, color:'#9893b8', lineHeight:1.6 }}>
+                ✓ Free to start &nbsp;·&nbsp; ✓ No credit card &nbsp;·&nbsp; ✓ 1 event free
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize:12, color:'#2a2848', zIndex:1 }}>© 2026 EventFlow</div>
         </div>
 
-        <div className="w-full max-w-[440px] bg-white/70 backdrop-blur-xl p-8 md:p-10 rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mt-12 lg:mt-0">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight mb-1.5">Create your club account</h2>
-          <p className="text-sm text-gray-500 mb-8">
-            Already have an account? <Link to="/login" className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">Sign in</Link>
-          </p>
+        {/* ── Form panel ── */}
+        <div className="signup-form-side" style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'40px 48px', background:'#fafafa' }}>
+          <div style={{ width:'100%', maxWidth:420, animation:'fadeUp 0.3s ease' }}>
 
-          {error && (
-            <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 mb-6 font-medium shadow-sm">
-              {error}
-            </div>
-          )}
+            <h2 style={{ fontSize:26, fontWeight:700, color:'#0f0e1a', letterSpacing:'-0.5px', margin:'0 0 6px' }}>
+              Create your club account
+            </h2>
+            <p style={{ fontSize:14, color:'#9896b0', margin:'0 0 28px' }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{ color:'#6366f1', fontWeight:600, textDecoration:'none' }}>Sign in</Link>
+            </p>
 
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Club Name</label>
-              <input 
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                name="name" type="text" required autoFocus
-                value={form.name} onChange={handle} placeholder="IEEE Student Branch" 
-              />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email address</label>
-              <input 
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                name="email" type="email" required
-                value={form.email} onChange={handle} placeholder="club@college.edu" 
-              />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                Password <span className="text-gray-400 font-normal ml-1">(min 8 characters)</span>
-              </label>
-              <input 
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                name="password" type="password" required minLength={8}
-                value={form.password} onChange={handle} placeholder="••••••••" 
-              />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                College <span className="text-gray-400 font-normal ml-1">(optional)</span>
-              </label>
-              <input 
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                name="college" type="text"
-                value={form.college} onChange={handle} placeholder="IIT BHU, Varanasi" 
-              />
-            </div>
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className={`
-                mt-3 py-3 px-4 w-full text-[15px] font-bold text-white rounded-xl shadow-lg transition-all duration-300
-                ${loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-gradient-to-br from-indigo-500 to-purple-500 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]'}
-              `}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating account…</span>
+            {error && (
+              <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:'11px 14px', fontSize:13, color:'#dc2626', marginBottom:20, display:'flex', alignItems:'center', gap:8 }}>
+                <span style={{ flexShrink:0 }}>⚠</span> {error}
+              </div>
+            )}
+
+            <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:15 }}>
+
+              <div>
+                <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#4a4868', marginBottom:7 }}>Club Name *</label>
+                <input className="auth-input" name="name" type="text" required autoFocus
+                  value={form.name} onChange={handle}
+                  placeholder="e.g. IEEE Student Branch"
+                  style={inputCls} />
+              </div>
+
+              <div>
+                <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#4a4868', marginBottom:7 }}>Email address *</label>
+                <input className="auth-input" name="email" type="email" required
+                  value={form.email} onChange={handle}
+                  placeholder="club@college.edu"
+                  style={inputCls} />
+              </div>
+
+              <div>
+                <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#4a4868', marginBottom:7 }}>Password *</label>
+                <div style={{ position:'relative' }}>
+                  <input className="auth-input" name="password" type={showPw ? 'text' : 'password'}
+                    required minLength={8}
+                    value={form.password} onChange={handle}
+                    placeholder="Min 8 characters"
+                    style={{ ...inputCls, paddingRight:44 }} />
+                  <button type="button" onClick={() => setShowPw(p => !p)}
+                    style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:16, color:'#9896b0', padding:4 }}>
+                    {showPw ? '🙈' : '👁'}
+                  </button>
                 </div>
-              ) : 'Create account'}
-            </button>
-          </form>
+                {/* Password strength meter */}
+                {form.password.length > 0 && (
+                  <div style={{ marginTop:8 }}>
+                    <div style={{ display:'flex', gap:4, marginBottom:5 }}>
+                      {[1,2,3,4].map(i => (
+                        <div key={i} style={{ flex:1, height:3, borderRadius:10, background: i <= pwStrength ? pwColors[pwStrength] : '#e4e3f0', transition:'background 0.2s' }} />
+                      ))}
+                    </div>
+                    <div style={{ fontSize:11, color: pwColors[pwStrength] || '#9896b0', fontWeight:500 }}>
+                      {pwLabels[pwStrength]}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#4a4868', marginBottom:7 }}>
+                  College <span style={{ color:'#9896b0', fontWeight:400 }}>(optional)</span>
+                </label>
+                <input className="auth-input" name="college" type="text"
+                  value={form.college} onChange={handle}
+                  placeholder="VIT Bhopal, IIT BHU…"
+                  style={inputCls} />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="auth-submit"
+                style={{
+                  width:'100%', padding:'13px', fontSize:15, fontWeight:700,
+                  color:'white',
+                  background: loading ? '#a5b4fc' : 'linear-gradient(135deg,#6366f1,#4f46e5)',
+                  border:'none', borderRadius:10,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  boxShadow: loading ? 'none' : '0 4px 14px rgba(99,102,241,0.35)',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                  fontFamily:'DM Sans, sans-serif',
+                  marginTop:4, transition:'transform 0.15s, box-shadow 0.15s',
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span style={{ width:16, height:16, border:'2px solid rgba(255,255,255,0.35)', borderTopColor:'white', borderRadius:'50%', animation:'spin 0.7s linear infinite', display:'inline-block', flexShrink:0 }} />
+                    Creating account…
+                  </>
+                ) : 'Create account — it\'s free →'}
+              </button>
+
+              <p style={{ fontSize:12, color:'#9896b0', textAlign:'center', margin:'4px 0 0', lineHeight:1.5 }}>
+                By signing up, you agree to our Terms of Service
+              </p>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -31,6 +31,7 @@ app.use('/scanner',       scanLimiter, require('./routes/scanner'))
 app.use('/upload',                     require('./routes/upload'))
 app.use('/dashboard',                  require('./routes/dashboard'))
 app.use('/billing',                    require('./routes/billing'))
+app.use('/sheets',                     require('./routes/sheets'))
 
 app.get('/health', async (req, res) => {
   try {

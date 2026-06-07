@@ -13,14 +13,26 @@ export default function Sidebar() {
   const navigate = useNavigate()
 
   return (
-    <aside className="w-[260px] bg-white/60 backdrop-blur-xl border-r border-white/50 flex flex-col shrink-0 h-[100dvh] shadow-soft transition-all duration-300">
+    <aside style={{
+      width: 220,
+      background: 'var(--surface)',
+      borderRight: '1px solid var(--border)',
+      display: 'flex',
+      flexDirection: 'column',
+      flexShrink: 0,
+      height: '100vh',
+    }}>
       {/* Logo */}
-      <div className="p-6 border-b border-white/50">
-        <div className="flex items-center gap-3 hover-lift cursor-pointer" onClick={() => navigate('/dashboard')}>
-          <div className="w-9 h-9 bg-gradient-to-br from-brand to-brand-light rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-md">
-            E
-          </div>
-          <span className="font-bold text-xl text-text-1 tracking-tight">
+      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 28, height: 28,
+            background: 'var(--brand)',
+            borderRadius: 7,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', fontSize: 14, fontWeight: 700,
+          }}>E</div>
+          <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-1)', letterSpacing: '-0.3px' }}>
             EventFlow
           </span>
         </div>
@@ -28,16 +40,22 @@ export default function Sidebar() {
 
       {/* Club info */}
       {club && (
-        <div className="p-5 border-b border-white/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-light to-brand-dark flex items-center justify-center text-white text-base font-bold shrink-0 shadow-sm">
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 8,
+              background: 'linear-gradient(135deg, var(--brand-light), var(--brand-dark))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0,
+            }}>
               {club.name.charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-text-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                {club.name}
-              </div>
-              <span className={`badge badge-${club.plan} mt-1 shadow-sm`}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{
+                fontSize: 13, fontWeight: 600, color: 'var(--text-1)',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>{club.name}</div>
+              <span className={`badge badge-${club.plan}`} style={{ marginTop: 2 }}>
                 {club.plan === 'free' ? 'Free' : club.plan === 'pro' ? 'Club Pro' : 'Institution'}
               </span>
             </div>
@@ -46,8 +64,8 @@ export default function Sidebar() {
       )}
 
       {/* Nav */}
-      <nav className="flex-1 px-4 py-6 overflow-y-auto">
-        <div className="text-[11px] font-bold text-text-3 uppercase tracking-wider px-3 pb-3">
+      <nav style={{ flex: 1, padding: '12px 12px 0' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '4px 12px 8px' }}>
           Menu
         </div>
         {NAV.map(item => (
@@ -56,7 +74,7 @@ export default function Sidebar() {
             to={item.to}
             className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
           >
-            <span className="text-xl leading-none w-6 text-center">{item.icon}</span>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>{item.icon}</span>
             {item.label}
           </NavLink>
         ))}
@@ -64,24 +82,25 @@ export default function Sidebar() {
 
       {/* Upgrade CTA for free plan */}
       {club?.plan === 'free' && (
-        <div className="mx-4 mb-4 p-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl border border-white shadow-sm hover-lift cursor-pointer">
-          <div className="text-sm font-bold text-brand-dark mb-1">
+        <div style={{ margin: '12px', padding: '14px', background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', borderRadius: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#5b21b6', marginBottom: 4 }}>
             Upgrade to Pro
           </div>
-          <div className="text-xs text-brand-light leading-relaxed mb-3">
+          <div style={{ fontSize: 11, color: '#7c3aed', lineHeight: 1.4, marginBottom: 10 }}>
             Unlimited attendees, custom email & more
           </div>
-          <div className="text-sm font-extrabold text-brand-dark">₹499 / event</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#5b21b6' }}>₹499 / event</div>
         </div>
       )}
 
       {/* Logout */}
-      <div className="p-4 border-t border-white/50">
+      <div style={{ padding: '12px', borderTop: '1px solid var(--border)' }}>
         <button
           onClick={logout}
-          className="btn btn-ghost w-full justify-start text-sm font-semibold hover:bg-red-50 hover:text-danger hover:border-red-100 transition-colors"
+          className="btn btn-ghost"
+          style={{ width: '100%', justifyContent: 'flex-start', fontSize: 13 }}
         >
-          <span className="text-lg">↩</span> Logout
+          <span>↩</span> Logout
         </button>
       </div>
     </aside>

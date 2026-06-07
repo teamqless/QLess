@@ -3,109 +3,187 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '@/lib/api'
 import { setToken, setStoredClub } from '@/lib/auth'
 
+const FEATURES = [
+  { icon: '◈', text: 'Custom registration forms' },
+  { icon: '◉', text: 'QR codes emailed automatically' },
+  { icon: '▦', text: 'Live entry dashboard' },
+  { icon: '✦', text: 'Mobile gate scanner — no app needed' },
+]
+
 export default function Login() {
   const navigate = useNavigate()
-  const [form, setForm]     = useState({ email: '', password: '' })
-  const [error, setError]   = useState('')
+  const [form, setForm]       = useState({ email: '', password: '' })
+  const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPw, setShowPw]   = useState(false)
 
   const handle = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(p => ({ ...p, [e.target.name]: e.target.value }))
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true); setError('')
+    setLoading(true)
+    setError('')
     try {
       const { data } = await api.post('/auth/login', form)
       setToken(data.token)
       setStoredClub(data.club)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Check your credentials.')
-    } finally { setLoading(false) }
+      setError(err.response?.data?.error || 'Invalid email or password')
+      setLoading(false)
+    }
+  }
+
+  const inputCls: React.CSSProperties = {
+    width: '100%', padding: '12px 14px', fontSize: 14,
+    border: '1.5px solid #e4e3f0', borderRadius: 10,
+    outline: 'none', background: '#fff', color: '#0f0e1a',
+    transition: 'border-color 0.15s, box-shadow 0.15s',
+    boxSizing: 'border-box', fontFamily: 'DM Sans, sans-serif',
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50 font-sans">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[420px] bg-[#0f0e1a] flex-col p-10 shrink-0 relative overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute top-[10%] left-[-20%] w-[400px] h-[400px] bg-[radial-gradient(ellipse,rgba(99,102,241,0.15)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[300px] h-[300px] bg-[radial-gradient(ellipse,rgba(168,85,247,0.15)_0%,transparent_70%)] pointer-events-none" />
+    <>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .auth-wrap { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+        .auth-brand { background: linear-gradient(145deg,#0f0e1a 0%,#1a1040 100%); display:flex; flex-direction:column; padding:40px 48px; position:relative; overflow:hidden; }
+        .auth-form-side { display:flex; align-items:center; justify-content:center; padding:40px 48px; background:#fafafa; }
+        @media (max-width:768px) {
+          .auth-wrap { grid-template-columns: 1fr !important; }
+          .auth-brand { display: none !important; }
+          .auth-form-side { padding: 32px 24px !important; align-items: flex-start !important; padding-top: 60px !important; }
+        }
+        .auth-input:focus { border-color:#6366f1 !important; box-shadow:0 0 0 3px rgba(99,102,241,0.12) !important; }
+        .auth-submit { transition: transform 0.15s, box-shadow 0.15s; }
+        .auth-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.45) !important; }
+        .auth-submit:active:not(:disabled) { transform: translateY(0); }
+      `}</style>
 
-        <Link to="/" className="flex items-center gap-2 no-underline mb-auto relative z-10 hover:opacity-90 transition-opacity">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-lg shadow-indigo-500/20">E</div>
-          <span className="font-bold text-lg text-white tracking-tight">EventFlow</span>
-        </Link>
-        
-        <div className="pb-16 relative z-10">
-          <div className="text-3xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            Welcome back
-          </div>
-          <div className="text-sm text-[#8884a8] leading-relaxed">
-            Sign in to manage your events, review registrations, and track attendance with ease.
-          </div>
-        </div>
-      </div>
+      <div className="auth-wrap" style={{ fontFamily: 'DM Sans, sans-serif' }}>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-10 bg-gradient-to-br from-indigo-50/30 to-purple-50/30">
-        
-        {/* Mobile Header */}
-        <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 no-underline">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-md">E</div>
-            <span className="font-bold text-lg text-gray-900 tracking-tight">EventFlow</span>
+        {/* ── Brand panel ── */}
+        <div className="auth-brand">
+          <div style={{ position:'absolute', top:'25%', left:'10%', width:400, height:400, background:'radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%)', pointerEvents:'none' }} />
+          <div style={{ position:'absolute', bottom:'10%', right:'-10%', width:300, height:300, background:'radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)', pointerEvents:'none' }} />
+
+          <Link to="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none', zIndex:1 }}>
+            <div style={{ width:34, height:34, background:'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius:9, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:17, color:'white' }}>E</div>
+            <span style={{ fontWeight:700, fontSize:17, color:'#f0eeff', letterSpacing:'-0.3px' }}>EventFlow</span>
           </Link>
+
+          <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', zIndex:1 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:'#6366f1', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:14 }}>
+              Club management platform
+            </div>
+            <h1 style={{ fontSize:36, fontWeight:800, color:'#f0eeff', letterSpacing:'-1px', lineHeight:1.15, margin:'0 0 16px' }}>
+              Run your events<br />
+              <span style={{ background:'linear-gradient(135deg,#818cf8,#c084fc)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
+                without the chaos
+              </span>
+            </h1>
+            <p style={{ fontSize:14, color:'#6b6890', lineHeight:1.7, maxWidth:320, margin:'0 0 36px' }}>
+              From registration to gate entry — everything automated.
+            </p>
+
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              {FEATURES.map(f => (
+                <div key={f.text} style={{ display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ width:30, height:30, background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.25)', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, color:'#818cf8', flexShrink:0 }}>
+                    {f.icon}
+                  </div>
+                  <span style={{ fontSize:13, color:'#9893b8' }}>{f.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ fontSize:12, color:'#2a2848', zIndex:1 }}>© 2026 EventFlow</div>
         </div>
 
-        <div className="w-full max-w-[400px] bg-white/70 backdrop-blur-xl p-8 md:p-10 rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight mb-1.5">Sign in to your club</h2>
-          <p className="text-sm text-gray-500 mb-8">
-            Don't have an account? <Link to="/signup" className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">Sign up free</Link>
-          </p>
+        {/* ── Form panel ── */}
+        <div className="auth-form-side">
+          <div style={{ width:'100%', maxWidth:400, animation:'fadeUp 0.3s ease' }}>
 
-          {error && (
-            <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 mb-6 font-medium shadow-sm">
-              {error}
-            </div>
-          )}
+            <h2 style={{ fontSize:26, fontWeight:700, color:'#0f0e1a', letterSpacing:'-0.5px', margin:'0 0 6px' }}>
+              Welcome back
+            </h2>
+            <p style={{ fontSize:14, color:'#9896b0', margin:'0 0 30px' }}>
+              New to EventFlow?{' '}
+              <Link to="/signup" style={{ color:'#6366f1', fontWeight:600, textDecoration:'none' }}>Create a free account</Link>
+            </p>
 
-          <form onSubmit={submit} className="flex flex-col gap-5">
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email address</label>
-              <input 
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                name="email" type="email" required autoFocus
-                value={form.email} onChange={handle} placeholder="club@college.edu" 
-              />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Password</label>
-              <input 
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                name="password" type="password" required
-                value={form.password} onChange={handle} placeholder="••••••••" 
-              />
-            </div>
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className={`
-                mt-2 py-3 px-4 w-full text-[15px] font-bold text-white rounded-xl shadow-lg transition-all duration-300
-                ${loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-gradient-to-br from-indigo-500 to-purple-500 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]'}
-              `}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Signing in…</span>
+            {error && (
+              <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:'11px 14px', fontSize:13, color:'#dc2626', marginBottom:20, display:'flex', alignItems:'center', gap:8, animation:'fadeUp 0.2s ease' }}>
+                <span style={{ flexShrink:0 }}>⚠</span> {error}
+              </div>
+            )}
+
+            <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:16 }}>
+              <div>
+                <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#4a4868', marginBottom:7 }}>Email address</label>
+                <input
+                  className="auth-input"
+                  name="email" type="email" required autoFocus
+                  value={form.email} onChange={handle}
+                  placeholder="club@college.edu"
+                  style={inputCls}
+                />
+              </div>
+
+              <div>
+                <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#4a4868', marginBottom:7 }}>Password</label>
+                <div style={{ position:'relative' }}>
+                  <input
+                    className="auth-input"
+                    name="password" type={showPw ? 'text' : 'password'} required
+                    value={form.password} onChange={handle}
+                    placeholder="••••••••"
+                    style={{ ...inputCls, paddingRight:44 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(p => !p)}
+                    style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:16, color:'#9896b0', padding:4 }}
+                  >{showPw ? '🙈' : '👁'}</button>
                 </div>
-              ) : 'Sign in'}
-            </button>
-          </form>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="auth-submit"
+                style={{
+                  width:'100%', padding:'13px', fontSize:15, fontWeight:700,
+                  color:'white',
+                  background: loading ? '#a5b4fc' : 'linear-gradient(135deg,#6366f1,#4f46e5)',
+                  border:'none', borderRadius:10,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  boxShadow: loading ? 'none' : '0 4px 14px rgba(99,102,241,0.35)',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                  fontFamily:'DM Sans, sans-serif',
+                  marginTop:4,
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span style={{ width:16, height:16, border:'2px solid rgba(255,255,255,0.35)', borderTopColor:'white', borderRadius:'50%', animation:'spin 0.7s linear infinite', display:'inline-block', flexShrink:0 }} />
+                    Signing in…
+                  </>
+                ) : 'Sign in →'}
+              </button>
+            </form>
+
+            <div style={{ marginTop:28, padding:'18px', background:'#f8f8fc', borderRadius:12, border:'1px solid #e4e3f0' }}>
+              <p style={{ fontSize:12, color:'#9896b0', margin:0, lineHeight:1.6, textAlign:'center' }}>
+                Your data is secured with JWT authentication and Supabase Row Level Security.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

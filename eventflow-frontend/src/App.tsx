@@ -18,6 +18,7 @@ import ScannerLogin     from '@/pages/ScannerLogin'
 import Scanner          from '@/pages/Scanner'
 import Volunteers       from '@/pages/Volunteers'
 import Settings         from '@/pages/Settings'
+import SheetImport      from '@/pages/SheetImport'
 import NotFound         from '@/pages/NotFound'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/volunteers" element={<Volunteers />} />
         <Route path="/settings"   element={<Settings />} />
+        <Route path="/import"     element={<SheetImport />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
