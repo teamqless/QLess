@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEvent, usePublishEvent } from '@/hooks/useEvents'
-import { useRegistrations, useApproveRegistration, useRejectRegistration, useResendQR } from '@/hooks/useRegistrations'
+import { useRegistrations, useApproveRegistration, useRejectRegistration, useResendQR, useBulkSendQR } from '@/hooks/useRegistrations'
 import { useEventAnalytics, exportCSV } from '@/hooks/useDashboard'
 import { useEventSocket } from '@/hooks/useSocket'
 import EventStatusBadge from '@/components/events/EventStatusBadge'
@@ -48,12 +48,14 @@ export default function EventDetail() {
   const approve  = useApproveRegistration(id!)
   const reject   = useRejectRegistration(id!)
   const resendQR = useResendQR()
+  const bulkSendQR = useBulkSendQR(id!)
   const [rejectId, setRejectId]    = useState<string | null>(null)
   const [rejectReason, setReason]  = useState('')
   const [copiedLink, setCopied]    = useState(false)
   const [liveStats, setLiveStats]  = useState<any>(null)
   const [recentScans, setScans]    = useState<any[]>([])
   const [toast, setToast]          = useState<{ msg: string; type: string } | null>(null)
+  const [viewImage, setViewImage]  = useState<string | null>(null)
 
   const showToast = (msg: string, type = 'success') => {
     setToast({ msg, type })
@@ -130,6 +132,16 @@ export default function EventDetail() {
         </div>
       )}
 
+      {/* Image Modal */}
+      {viewImage && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4" onClick={() => setViewImage(null)}>
+          <div className="relative max-w-4xl max-h-full" onClick={e => e.stopPropagation()}>
+            <img src={viewImage} className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl border-4 border-white/10" alt="Payment Screenshot" />
+            <button className="absolute -top-4 -right-4 w-10 h-10 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center text-white text-xl backdrop-blur-md transition-colors border border-white/20" onClick={() => setViewImage(null)}>×</button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
@@ -154,7 +166,27 @@ export default function EventDetail() {
         </div>
         <div className="flex flex-wrap gap-2.5 shrink-0">
           <Link to={`/scanner/login?event=${event.id}`} className="btn btn-ghost btn-sm">📷 Scanner</Link>
+          {event.registration_type === 'sheet' && (
+            <Link to={`/import?event=${event.id}`} className="btn btn-ghost btn-sm">🔄 Sync Sheet</Link>
+          )}
           <button onClick={() => exportCSV(event.id, event.title)} className="btn btn-ghost btn-sm">↓ Export CSV</button>
+          
+          <button 
+            onClick={async () => {
+              showToast('Sending QR codes...', 'info')
+              try {
+                const res = await bulkSendQR.mutateAsync()
+                showToast(res.message, 'success')
+              } catch (e: any) {
+                showToast(e.response?.data?.error || 'Failed to send QR codes', 'error')
+              }
+            }}
+            disabled={bulkSendQR.isPending}
+            className="btn btn-ghost btn-sm text-brand"
+          >
+            {bulkSendQR.isPending ? 'Sending...' : '📨 Send Pending QRs'}
+          </button>
+
           <button
             onClick={() => publishEvent.mutate()}
             disabled={publishEvent.isPending}
@@ -196,20 +228,29 @@ export default function EventDetail() {
             Registration Link
           </div>
           {event.status === 'published' ? (
-            <>
-              <div className="text-sm text-brand font-mono overflow-hidden text-ellipsis whitespace-nowrap mb-3">
-                {regUrl}
+            event.registration_type === 'sheet' ? (
+              <div className="text-sm text-text-3">
+                <p className="mb-2">This event uses Google Forms for registration.</p>
+                <Link to={`/import?event=${event.id}`} className="btn btn-ghost btn-sm text-brand border border-brand/20">
+                  Configure Google Sheet Sync ↗
+                </Link>
               </div>
-              <div className="flex gap-2.5">
-                <button onClick={() => { navigator.clipboard.writeText(regUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-                  className="btn btn-primary btn-sm">
-                  {copiedLink ? '✓ Copied' : 'Copy link'}
-                </button>
-                <a href={regUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
-                  Open ↗
-                </a>
-              </div>
-            </>
+            ) : (
+              <>
+                <div className="text-sm text-brand font-mono overflow-hidden text-ellipsis whitespace-nowrap mb-3">
+                  {regUrl}
+                </div>
+                <div className="flex gap-2.5">
+                  <button onClick={() => { navigator.clipboard.writeText(regUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                    className="btn btn-primary btn-sm">
+                    {copiedLink ? '✓ Copied' : 'Copy link'}
+                  </button>
+                  <a href={regUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
+                    Open ↗
+                  </a>
+                </div>
+              </>
+            )
           ) : (
             <div className="text-sm text-text-3">Publish the event to get the registration link</div>
           )}
@@ -308,18 +349,25 @@ export default function EventDetail() {
               </thead>
               <tbody>
                 {registrations.map(reg => (
-                  <tr key={reg.id} className="hover:bg-white/40">
-                    <td>
+                  <tr key={reg.id} className={`transition-colors duration-200 border-b border-border/10 ${
+                    reg.status === 'approved' ? 'bg-green-50/60 hover:bg-green-100/50' : 
+                    reg.status === 'pending' ? 'bg-amber-50/60 hover:bg-amber-100/50' : 
+                    reg.status === 'rejected' ? 'bg-red-50/60 hover:bg-red-100/50' : 
+                    'hover:bg-white/40'
+                  }`}>
+                    <td className="py-3">
                       <div className="font-medium text-text-1">{reg.attendee_name}</div>
                       <div className="text-xs text-text-3">{reg.attendee_email}</div>
                     </td>
-                    <td><span className={`badge badge-${reg.status}`}>{reg.status}</span></td>
-                    <td>
+                    <td className="py-3"><span className={`badge badge-${reg.status}`}>{reg.status}</span></td>
+                    <td className="py-3">
                       {reg.payment_screenshot_url ? (
-                        <a href={reg.payment_screenshot_url} target="_blank" rel="noreferrer"
-                          className="text-sm text-brand font-medium hover:underline">
-                          View ↗
-                        </a>
+                        <button 
+                          onClick={() => setViewImage(reg.payment_screenshot_url!)}
+                          className="flex items-center gap-1.5 text-sm text-brand font-medium hover:text-indigo-700 bg-white/50 px-2.5 py-1.5 rounded-md border border-brand/20 transition-all hover:shadow-sm"
+                        >
+                          <span>👁️</span> View
+                        </button>
                       ) : (
                         <span className="text-sm text-text-3">
                           {event.entry_fee === 0 ? 'Free' : '—'}

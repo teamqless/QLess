@@ -25,6 +25,7 @@ const scanLimiter   = rateLimit({ windowMs: 1*60*1000,  max: 120, message: { err
 app.use(globalLimiter)
 
 app.use('/auth',          authLimiter, require('./routes/auth'))
+app.use('/admin',                      require('./routes/admin'))
 app.use('/events',                     require('./routes/events'))
 app.use('/registrations',              require('./routes/registrations'))
 app.use('/scanner',       scanLimiter, require('./routes/scanner'))

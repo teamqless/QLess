@@ -19,11 +19,10 @@ function PlanBanner({ plan, eventCount }: { plan: string; eventCount: number }) 
   const atLimit = eventCount >= 1
 
   return (
-    <div className={`p-4 mb-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border shadow-sm ${
-      atLimit
+    <div className={`p-4 mb-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border shadow-sm ${atLimit
         ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-yellow-200'
         : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
-    }`}>
+      }`}>
       <div>
         <div className={`text-sm font-semibold mb-1 ${atLimit ? 'text-amber-800' : 'text-blue-800'}`}>
           {atLimit ? '⚠ Free plan limit reached' : '🎉 You are on the Free plan'}
@@ -34,9 +33,8 @@ function PlanBanner({ plan, eventCount }: { plan: string; eventCount: number }) 
             : `${1 - eventCount} free event remaining. Upgrade anytime to unlock unlimited events.`}
         </div>
       </div>
-      <Link to="/pricing" className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white whitespace-nowrap shrink-0 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${
-        atLimit ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'
-      }`}>
+      <Link to="/pricing" className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white whitespace-nowrap shrink-0 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${atLimit ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'
+        }`}>
         Upgrade →
       </Link>
     </div>
@@ -48,7 +46,7 @@ export default function Dashboard() {
   const club = getStoredClub()
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full">
       <div className="page-header">
         <div>
           <h1 className="page-title">Good to see you, {club?.name?.split(' ')[0]} 👋</h1>
@@ -100,12 +98,12 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent events */}
         <div className="glass flex flex-col overflow-hidden">
-          <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between bg-white/40">
-            <span className="text-sm font-semibold text-text-1">Recent Events</span>
-            <Link to="/events" className="text-sm font-medium text-brand hover:text-brand-dark transition-colors">View all →</Link>
+          <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <span className="text-sm font-semibold text-slate-900">Recent Events</span>
+            <Link to="/events" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">View all →</Link>
           </div>
           <div className="py-2 flex-1 overflow-y-auto max-h-[300px]">
             {isLoading ? (
@@ -123,7 +121,7 @@ export default function Dashboard() {
             ) : (
               data.recent_events.map(event => (
                 <Link key={event.id} to={`/events/${event.id}`}
-                  className="flex items-center gap-3 px-5 py-3 text-decoration-none transition-colors hover:bg-white/60 group">
+                  className="flex items-center gap-3 px-5 py-3 text-decoration-none transition-colors hover:bg-slate-50 group">
                   <div className="w-1.5 h-8 rounded-full shrink-0" style={{ background: (event as any).theme_color || 'var(--brand)' }} />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-text-1 truncate group-hover:text-brand transition-colors">
@@ -143,8 +141,8 @@ export default function Dashboard() {
 
         {/* Recent registrations */}
         <div className="glass flex flex-col overflow-hidden">
-          <div className="px-5 py-4 border-b border-border/50 bg-white/40">
-            <span className="text-sm font-semibold text-text-1">Recent Registrations</span>
+          <div className="px-5 py-4 border-b border-slate-200 bg-slate-50">
+            <span className="text-sm font-semibold text-slate-900">Recent Registrations</span>
           </div>
           <div className="py-2 flex-1 overflow-y-auto max-h-[300px]">
             {isLoading ? (
@@ -163,12 +161,11 @@ export default function Dashboard() {
               </div>
             ) : (
               data.recent_registrations.map(reg => (
-                <div key={reg.id} className="flex items-center gap-3 px-5 py-3 hover:bg-white/60 transition-colors">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                    reg.status === 'approved' ? 'bg-green-100 text-green-600' : 
-                    reg.status === 'pending' ? 'bg-yellow-100 text-yellow-600' : 
-                    'bg-red-100 text-red-600'
-                  }`}>
+                <div key={reg.id} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${reg.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                      reg.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                    }`}>
                     {reg.attendee_name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -190,15 +187,15 @@ export default function Dashboard() {
       {/* Quick links */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { to: '/events/new',  icon: '◈', label: 'Create Event',      sub: 'Launch a new event' },
-          { to: '/volunteers',  icon: '◉', label: 'Manage Volunteers', sub: 'Add scanning volunteers' },
-          { to: '/pricing',     icon: '✦', label: 'View Plans',        sub: 'Upgrade for more features' },
+          { to: '/events/new', icon: '◈', label: 'Create Event', sub: 'Launch a new event' },
+          { to: '/volunteers', icon: '◉', label: 'Manage Volunteers', sub: 'Add scanning volunteers' },
+          { to: '/pricing', icon: '✦', label: 'View Plans', sub: 'Upgrade for more features' },
         ].map(item => (
           <Link key={item.to} to={item.to} className="text-decoration-none group">
-            <div className="glass p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-glass-hover bg-gradient-to-br from-white/60 to-white/30">
-              <div className="text-2xl mb-2 text-brand group-hover:scale-110 transition-transform origin-left">{item.icon}</div>
-              <div className="text-sm font-semibold text-text-1 mb-1">{item.label}</div>
-              <div className="text-xs text-text-3">{item.sub}</div>
+            <div className="glass p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md bg-white">
+              <div className="text-2xl mb-2 text-indigo-600 group-hover:scale-110 transition-all origin-left">{item.icon}</div>
+              <div className="text-sm font-semibold text-slate-900 mb-1">{item.label}</div>
+              <div className="text-xs text-slate-500">{item.sub}</div>
             </div>
           </Link>
         ))}

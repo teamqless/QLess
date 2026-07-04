@@ -45,6 +45,19 @@ export const useApproveRegistration = (eventId: string) => {
   })
 }
 
+export function useBulkSendQR(eventId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post(`/events/${eventId}/bulk-qr`)
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['registrations', eventId] })
+    }
+  })
+}
+
 // Reject a registration
 export const useRejectRegistration = (eventId: string) => {
   const qc = useQueryClient()

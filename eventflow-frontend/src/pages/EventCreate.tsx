@@ -5,7 +5,7 @@ import FormBuilder from '@/components/events/FormBuilder'
 import EventStatusBadge from '@/components/events/EventStatusBadge'
 import type { FormField } from '@/types'
 
-const STEPS = ['Basic Info', 'Registration Form', 'Preview']
+const STEPS = ['Basic Info', 'Registration Method', 'Preview']
 
 export default function EventCreate() {
   const navigate    = useNavigate()
@@ -18,6 +18,8 @@ export default function EventCreate() {
     event_date: '', registration_deadline: '',
     entry_fee: 0, capacity: '',
     theme_color: '#6366f1', banner_url: '',
+    registration_type: 'native' as 'native' | 'sheet',
+    sheet_url: '',
   })
 
   const [fields, setFields] = useState<FormField[]>([])
@@ -129,17 +131,75 @@ export default function EventCreate() {
         </div>
       )}
 
-      {/* Step 1 — Form Builder */}
+      {/* Step 1 — Registration Method */}
       {step === 1 && (
         <div className="card p-5 sm:p-7">
-          <h2 className="text-lg font-bold mb-1.5 text-white tracking-tight">Registration Form</h2>
+          <h2 className="text-lg font-bold mb-1.5 text-white tracking-tight">Registration Method</h2>
           <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-            Design the form attendees will fill out. Full Name and Email are always included automatically.
+            Choose how you want to collect registrations.
           </p>
-          <FormBuilder value={fields} onChange={setFields} />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            {/* Native Option */}
+            <div
+              className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
+                basic.registration_type === 'native'
+                  ? 'border-indigo-500 bg-indigo-500/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+              }`}
+              onClick={() => setBasic(p => ({ ...p, registration_type: 'native' }))}
+            >
+              <div className="text-xl mb-2">📝</div>
+              <h3 className="font-bold text-white mb-1">EventFlow Form</h3>
+              <p className="text-xs text-gray-400">Build a custom form. We'll automatically generate QR codes and send tickets.</p>
+            </div>
+
+            {/* Sheet Option */}
+            <div
+              className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
+                basic.registration_type === 'sheet'
+                  ? 'border-indigo-500 bg-indigo-500/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+              }`}
+              onClick={() => setBasic(p => ({ ...p, registration_type: 'sheet' }))}
+            >
+              <div className="text-xl mb-2">📊</div>
+              <h3 className="font-bold text-white mb-1">Google Forms Sync</h3>
+              <p className="text-xs text-gray-400">Use your own Google Form and sync responses from the attached Google Sheet.</p>
+            </div>
+          </div>
+
+          {basic.registration_type === 'native' ? (
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-md font-bold mb-4 text-white">Form Builder</h3>
+              <FormBuilder value={fields} onChange={setFields} />
+            </div>
+          ) : (
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-md font-bold mb-4 text-white">Google Sheet Configuration</h3>
+              <label className="label">Public Google Sheet URL *</label>
+              <input
+                className="input"
+                name="sheet_url"
+                value={basic.sheet_url}
+                onChange={handleBasic}
+                placeholder="https://docs.google.com/spreadsheets/d/..."
+              />
+              <p className="text-xs text-gray-400 mt-2">
+                Make sure the sheet is public ("Anyone with the link can view"). You can map the columns on the event dashboard later.
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row justify-between gap-3 mt-8">
             <button onClick={() => setStep(0)} className="btn btn-ghost order-2 sm:order-1">← Back</button>
-            <button onClick={() => setStep(2)} className="btn btn-primary order-1 sm:order-2">Next: Preview →</button>
+            <button
+              onClick={() => setStep(2)}
+              disabled={basic.registration_type === 'sheet' && !basic.sheet_url}
+              className="btn btn-primary order-1 sm:order-2"
+            >
+              Next: Preview →
+            </button>
           </div>
         </div>
       )}
@@ -170,31 +230,43 @@ export default function EventCreate() {
 
             {/* Form preview */}
             <div className="px-5 pb-6 sm:px-7 sm:pb-7 border-t border-white/10 pt-5 sm:pt-6 bg-white/[0.02]">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-                Registration Form Preview
-              </p>
-              <div className="flex flex-col gap-4">
-                {[
-                  { label: 'Full Name', type: 'text', required: true },
-                  { label: 'Email Address', type: 'email', required: true },
-                  ...fields,
-                ].map((f, i) => (
-                  <div key={i}>
-                    <div className="text-sm font-semibold text-gray-300 mb-1.5">
-                      {f.label} {f.required && <span className="text-red-500">*</span>}
-                    </div>
-                    <div className="h-10 bg-black/20 border border-white/10 rounded-lg" />
+              {basic.registration_type === 'native' ? (
+                <>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+                    Registration Form Preview
+                  </p>
+                  <div className="flex flex-col gap-4">
+                    {[
+                      { label: 'Full Name', type: 'text', required: true },
+                      { label: 'Email Address', type: 'email', required: true },
+                      ...fields,
+                    ].map((f, i) => (
+                      <div key={i}>
+                        <div className="text-sm font-semibold text-gray-300 mb-1.5">
+                          {f.label} {f.required && <span className="text-red-500">*</span>}
+                        </div>
+                        <div className="h-10 bg-black/20 border border-white/10 rounded-lg" />
+                      </div>
+                    ))}
+                    {basic.entry_fee > 0 && (
+                      <div>
+                        <div className="text-sm font-semibold text-gray-300 mb-1.5">
+                          Payment Screenshot <span className="text-red-500">*</span>
+                        </div>
+                        <div className="h-10 bg-black/20 border border-dashed border-white/20 rounded-lg" />
+                      </div>
+                    )}
                   </div>
-                ))}
-                {basic.entry_fee > 0 && (
-                  <div>
-                    <div className="text-sm font-semibold text-gray-300 mb-1.5">
-                      Payment Screenshot <span className="text-red-500">*</span>
-                    </div>
-                    <div className="h-10 bg-black/20 border border-dashed border-white/20 rounded-lg" />
-                  </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-3">📊</div>
+                  <h3 className="text-lg font-bold text-white mb-2">Google Forms Sync Enabled</h3>
+                  <p className="text-sm text-gray-400">
+                    Attendees will register on your Google Form. You will sync responses from your Google Sheet.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

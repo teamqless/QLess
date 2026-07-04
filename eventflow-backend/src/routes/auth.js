@@ -7,47 +7,19 @@ const { requireAuth } = require('../middleware/auth')
 
 const router = express.Router()
 
-const signupSchema = z.object({
-  name:     z.string().min(2),
-  email:    z.string().email(),
-  password: z.string().min(8),
-  college:  z.string().optional(),
-  phone:    z.string().optional(),
-})
-
 const loginSchema = z.object({
-  email:    z.string().email(),
+  email:    z.string().min(1), // can be email or admin username
   password: z.string().min(1),
 })
 
 const generateToken = (club, expiresIn = '7d') =>
   jwt.sign({ clubId: club.id, email: club.email, name: club.name, plan: club.plan }, process.env.JWT_SECRET, { expiresIn })
 
+const generateAdminToken = (admin, expiresIn = '7d') =>
+  jwt.sign({ adminId: admin.id, username: admin.username, role: 'superadmin' }, process.env.JWT_SECRET, { expiresIn })
+
 // ─── POST /auth/signup ────────────────────────────────────────────────────────
-
-router.post('/signup', async (req, res) => {
-  try {
-    const parsed = signupSchema.safeParse(req.body)
-    if (!parsed.success) return res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten().fieldErrors })
-
-    const { name, email, password, college, phone } = parsed.data
-
-    const { data: existing } = await supabase.from('clubs').select('id').eq('email', email.toLowerCase()).single()
-    if (existing) return res.status(409).json({ error: 'A club with this email already exists' })
-
-    const password_hash = await bcrypt.hash(password, 12)
-
-    const { data: club, error } = await supabase
-      .from('clubs')
-      .insert({ name, email: email.toLowerCase(), password_hash, college: college || null, phone: phone || null, plan: 'free' })
-      .select('id, name, email, college, phone, plan, logo_url, created_at')
-      .single()
-
-    if (error) { console.error('Signup error:', error); return res.status(500).json({ error: 'Failed to create account' }) }
-
-    return res.status(201).json({ message: 'Account created successfully', token: generateToken(club), club })
-  } catch (err) { console.error(err); return res.status(500).json({ error: 'Internal server error' }) }
-})
+// Public signup is disabled. Clubs must be created by super admin.
 
 // ─── POST /auth/login ─────────────────────────────────────────────────────────
 
@@ -58,6 +30,21 @@ router.post('/login', async (req, res) => {
 
     const { email, password } = parsed.data
 
+    // 1. Check if it's a super admin
+    const { data: admin } = await supabase.from('super_admins').select('*').eq('username', email).single()
+    if (admin) {
+      const match = await bcrypt.compare(password, admin.password_hash)
+      if (match) {
+        return res.json({
+          message: 'Admin logged in successfully',
+          role: 'admin',
+          token: generateAdminToken(admin),
+          admin: { id: admin.id, username: admin.username },
+        })
+      }
+    }
+
+    // 2. Check if it's a club
     const { data: club, error } = await supabase.from('clubs').select('*').eq('email', email.toLowerCase()).single()
     if (error || !club) return res.status(401).json({ error: 'Invalid email or password' })
 
@@ -66,6 +53,7 @@ router.post('/login', async (req, res) => {
 
     return res.json({
       message: 'Logged in successfully',
+      role: 'club',
       token:   generateToken(club),
       club: { id: club.id, name: club.name, email: club.email, college: club.college, phone: club.phone, plan: club.plan, logo_url: club.logo_url },
     })

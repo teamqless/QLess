@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import { NavLink } from 'react-router-dom'
+import { Outlet, NavLink } from 'react-router-dom'
+import { useState } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
@@ -8,26 +8,37 @@ const MOBILE_NAV = [
   { to: '/events',    icon: '◈', label: 'Events' },
   { to: '/volunteers',icon: '◉', label: 'Volunteers' },
   { to: '/import',    icon: '⬆', label: 'Import' },
-  { to: '/settings',  icon: '◎', label: 'Settings' },
+  { to: '/profile',   icon: '👤', label: 'Profile' },
 ]
 
 export default function DashboardLayout() {
-  return (
-    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: 'var(--surface-2)' }}>
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-      {/* Desktop sidebar */}
-      <div className="sidebar-desktop" style={{ flexShrink: 0 }}>
-        <Sidebar />
+  return (
+    <div className="flex h-[100dvh] overflow-hidden bg-transparent">
+      {/* Sidebar Overlay (Mobile only) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Docked on desktop, drawer on mobile */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <Sidebar onNavClick={() => setIsSidebarOpen(false)} />
       </div>
 
       {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        <Header />
-        <main
-          className="dashboard-main fade-in"
-          style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}
-        >
-          <Outlet />
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
+        <Header onMenuClick={() => setIsSidebarOpen(true)} />
+        <main className="dashboard-main fade-in flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+          <div className="max-w-[1600px] mx-auto w-full">
+            <Outlet />
+          </div>
         </main>
       </div>
 

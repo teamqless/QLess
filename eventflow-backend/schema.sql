@@ -8,6 +8,16 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================================
+-- TABLE: super_admins
+-- ============================================================
+CREATE TABLE IF NOT EXISTS super_admins (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username        TEXT NOT NULL UNIQUE,
+  password_hash   TEXT NOT NULL,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
 -- TABLE: clubs
 -- ============================================================
 CREATE TABLE IF NOT EXISTS clubs (
@@ -45,6 +55,9 @@ CREATE TABLE IF NOT EXISTS events (
   theme_color     TEXT DEFAULT '#6366f1',
   capacity        INTEGER,
   entry_fee       INTEGER DEFAULT 0,
+  registration_type TEXT DEFAULT 'native',
+  sheet_url       TEXT,
+  sheet_column_map JSONB,
   form_fields     JSONB NOT NULL DEFAULT '[]',
   -- form_fields shape: [{ id, label, type, required, options? }]
   status          TEXT NOT NULL DEFAULT 'draft',  -- 'draft' | 'published' | 'closed' | 'completed'
@@ -136,6 +149,7 @@ CREATE INDEX IF NOT EXISTS idx_volunteers_code       ON volunteers(access_code);
 -- We use service_role key in the backend so RLS is bypassed
 -- at the API layer. These policies protect direct DB access.
 -- ============================================================
+ALTER TABLE super_admins  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clubs         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE registrations ENABLE ROW LEVEL SECURITY;
@@ -146,6 +160,7 @@ ALTER TABLE scan_logs     ENABLE ROW LEVEL SECURITY;
 -- Service role bypasses RLS automatically (our backend uses this)
 -- These policies are for safety if anon key is ever used directly
 
+CREATE POLICY "No anon access to super_admins"  ON super_admins  FOR ALL USING (FALSE);
 CREATE POLICY "No anon access to clubs"         ON clubs         FOR ALL USING (FALSE);
 CREATE POLICY "No anon access to registrations" ON registrations FOR ALL USING (FALSE);
 CREATE POLICY "No anon access to qr_codes"      ON qr_codes      FOR ALL USING (FALSE);

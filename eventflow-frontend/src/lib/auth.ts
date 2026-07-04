@@ -5,6 +5,7 @@ import type { Club } from '@/types'
 
 const TOKEN_KEY = 'eventflow_token'
 const CLUB_KEY  = 'eventflow_club'
+const ADMIN_TOKEN_KEY = 'eventflow_admin_token'
 
 export const getToken = (): string | null =>
   localStorage.getItem(TOKEN_KEY)
@@ -30,5 +31,24 @@ export const setStoredClub = (club: Club): void =>
 
 export const logout = (): void => {
   removeToken()
+  window.location.href = '/login'
+}
+
+// ─── ADMIN AUTH ─────────────────────────────────────────────────────────────
+
+export const getAdminToken = (): string | null =>
+  localStorage.getItem(ADMIN_TOKEN_KEY)
+
+export const setAdminToken = (token: string): void =>
+  localStorage.setItem(ADMIN_TOKEN_KEY, token)
+
+export const removeAdminToken = (): void =>
+  localStorage.removeItem(ADMIN_TOKEN_KEY)
+
+export const isAdminAuthenticated = (): boolean =>
+  !!localStorage.getItem(ADMIN_TOKEN_KEY)
+
+export const adminLogout = (): void => {
+  removeAdminToken()
   window.location.href = '/login'
 }

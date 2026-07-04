@@ -1,13 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { isAuthenticated } from '@/lib/auth'
+import { isAuthenticated, isAdminAuthenticated } from '@/lib/auth'
 
 import DashboardLayout  from '@/components/layout/DashboardLayout'
 import AuthLayout       from '@/components/layout/AuthLayout'
+import AdminLayout      from '@/components/layout/AdminLayout'
 
 import Landing          from '@/pages/Landing'
 import Login            from '@/pages/Login'
-import Signup           from '@/pages/Signup'
-import Pricing          from '@/pages/Pricing'
 import Dashboard        from '@/pages/Dashboard'
 import EventList        from '@/pages/EventList'
 import EventCreate      from '@/pages/EventCreate'
@@ -17,12 +16,19 @@ import RegisterSuccess  from '@/pages/RegisterSuccess'
 import ScannerLogin     from '@/pages/ScannerLogin'
 import Scanner          from '@/pages/Scanner'
 import Volunteers       from '@/pages/Volunteers'
-import Settings         from '@/pages/Settings'
+import Profile          from '@/pages/Profile'
 import SheetImport      from '@/pages/SheetImport'
 import NotFound         from '@/pages/NotFound'
 
+import AdminDashboard   from '@/pages/admin/AdminDashboard'
+import CreateClub       from '@/pages/admin/CreateClub'
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
+  return isAdminAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 export default function App() {
@@ -30,7 +36,6 @@ export default function App() {
     <Routes>
       {/* ── Public ────────────────────────────────────── */}
       <Route path="/"                       element={<Landing />} />
-      <Route path="/pricing"                element={<Pricing />} />
       <Route path="/register/:slug"         element={<Register />} />
       <Route path="/register/:slug/success" element={<RegisterSuccess />} />
       <Route path="/scanner/login"          element={<ScannerLogin />} />
@@ -42,7 +47,12 @@ export default function App() {
       {/* ── Auth ──────────────────────────────────────── */}
       <Route element={<AuthLayout />}>
         <Route path="/login"  element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+      </Route>
+
+      {/* ── Admin Auth & Dashboard ────────────────────── */}
+      <Route element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/create-club" element={<CreateClub />} />
       </Route>
 
       {/* ── Protected dashboard ───────────────────────── */}
@@ -52,7 +62,7 @@ export default function App() {
         <Route path="/events/new" element={<EventCreate />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/volunteers" element={<Volunteers />} />
-        <Route path="/settings"   element={<Settings />} />
+        <Route path="/profile"    element={<Profile />} />
         <Route path="/import"     element={<SheetImport />} />
       </Route>
 

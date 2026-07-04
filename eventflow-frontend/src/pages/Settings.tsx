@@ -6,7 +6,6 @@ import { setStoredClub } from '@/lib/auth'
 type Tab = 'profile' | 'password' | 'email' | 'danger'
 
 const TAB_LABELS: { id: Tab; label: string; proOnly?: boolean }[] = [
-  { id: 'profile',  label: 'Profile' },
   { id: 'password', label: 'Password' },
   { id: 'email',    label: 'Email Settings' },
   { id: 'danger',   label: 'Danger Zone' },
@@ -14,41 +13,18 @@ const TAB_LABELS: { id: Tab; label: string; proOnly?: boolean }[] = [
 
 export default function Settings() {
   const { data: club, refetch } = useAuth()
-  const [tab, setTab] = useState<Tab>('profile')
-
-  const [profile, setProfile]   = useState({ name: '', college: '', phone: '' })
+  const [tab, setTab] = useState<Tab>('password')
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' })
   const [smtp, setSmtp] = useState({ smtp_host: '', smtp_port: '587', smtp_user: '', smtp_pass: '', smtp_from_name: '', smtp_from_email: '' })
 
-  const [profileMsg, setProfileMsg] = useState('')
   const [pwMsg,      setPwMsg]      = useState('')
   const [smtpMsg,    setSmtpMsg]    = useState('')
-  const [profileErr, setProfileErr] = useState('')
   const [pwErr,      setPwErr]      = useState('')
   const [smtpErr,    setSmtpErr]    = useState('')
 
-  const [saving,   setSaving]   = useState(false)
   const [savingPw, setSavingPw] = useState(false)
   const [savingSmtp, setSavingSmtp] = useState(false)
   const [testingSmtp, setTestingSmtp] = useState(false)
-
-  const saveProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true); setProfileMsg(''); setProfileErr('')
-    try {
-      const updates: any = {}
-      if (profile.name)    updates.name    = profile.name
-      if (profile.college) updates.college = profile.college
-      if (profile.phone)   updates.phone   = profile.phone
-      const { data } = await api.patch('/auth/profile', updates)
-      setStoredClub(data.club)
-      await refetch()
-      setProfileMsg('Profile updated successfully')
-      setProfile({ name: '', college: '', phone: '' })
-    } catch (err: any) {
-      setProfileErr(err.response?.data?.error || 'Update failed')
-    } finally { setSaving(false) }
-  }
 
   const changePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,55 +86,6 @@ export default function Settings() {
           </button>
         ))}
       </div>
-
-      {/* ── Profile tab ── */}
-      {tab === 'profile' && (
-        <div className="space-y-6">
-          {/* Current info */}
-          <div className="card p-5 sm:p-6">
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Current Account</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {[
-                { label: 'Club Name', value: club?.name },
-                { label: 'Email',     value: club?.email },
-                { label: 'College',   value: club?.college || '—' },
-                { label: 'Plan',      value: club?.plan === 'free' ? 'Free' : club?.plan === 'pro' ? 'Club Pro' : 'Institution' },
-              ].map(f => (
-                <div key={f.label}>
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{f.label}</div>
-                  <div className="text-sm text-gray-200 font-medium">{f.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="card p-5 sm:p-6">
-            <div className="text-base font-semibold text-white mb-4">Update Profile</div>
-            {profileMsg && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-4">{profileMsg}</div>}
-            {profileErr && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 mb-4">{profileErr}</div>}
-            
-            <form onSubmit={saveProfile} className="flex flex-col gap-4">
-              <div>
-                <label className="label">New Club Name</label>
-                <input className="input" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} placeholder={club?.name} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="label">College</label>
-                  <input className="input" value={profile.college} onChange={e => setProfile(p => ({ ...p, college: e.target.value }))} placeholder={club?.college || 'Your college'} />
-                </div>
-                <div>
-                  <label className="label">Phone</label>
-                  <input className="input" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="Contact number" />
-                </div>
-              </div>
-              <button type="submit" disabled={saving} className="btn btn-primary mt-2 self-start w-full sm:w-auto">
-                {saving ? 'Saving…' : 'Save Profile'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ── Password tab ── */}
       {tab === 'password' && (

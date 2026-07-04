@@ -43,6 +43,9 @@ export interface Event {
   theme_color: string
   capacity?: number
   entry_fee: number
+  registration_type: 'native' | 'sheet'
+  sheet_url?: string
+  sheet_column_map?: Record<string, string>
   form_fields: FormField[]
   status: EventStatus
   slug: string

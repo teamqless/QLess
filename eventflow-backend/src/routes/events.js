@@ -28,7 +28,10 @@ const createEventSchema = z.object({
   theme_color:           z.string().default('#6366f1'),
   capacity:              z.number().int().positive().optional(),
   entry_fee:             z.number().int().min(0).default(0),
-  form_fields:           z.array(formFieldSchema).min(1),
+  registration_type:     z.enum(['native', 'sheet']).default('native'),
+  sheet_url:             z.string().optional(),
+  sheet_column_map:      z.record(z.string()).optional(),
+  form_fields:           z.array(formFieldSchema).default([]),
 })
 
 // ─── GET /events ──────────────────────────────────────────────────────────────
@@ -72,13 +75,14 @@ router.post('/', requireAuth, async (req, res) => {
 
     const data = parsed.data
 
-    // Auto-inject email field if missing
-    if (!data.form_fields.some(f => f.type === 'email')) {
-      data.form_fields.unshift({ id: 'attendee_email', label: 'Email Address', type: 'email', required: true, placeholder: 'your@email.com' })
-    }
-    // Auto-inject name field if missing
-    if (!data.form_fields.some(f => f.label.toLowerCase().includes('name') && f.type === 'text')) {
-      data.form_fields.unshift({ id: 'attendee_name', label: 'Full Name', type: 'text', required: true, placeholder: 'Your full name' })
+    // Auto-inject fields for native forms
+    if (data.registration_type === 'native') {
+      if (!data.form_fields.some(f => f.type === 'email')) {
+        data.form_fields.unshift({ id: 'attendee_email', label: 'Email Address', type: 'email', required: true, placeholder: 'your@email.com' })
+      }
+      if (!data.form_fields.some(f => f.label.toLowerCase().includes('name') && f.type === 'text')) {
+        data.form_fields.unshift({ id: 'attendee_name', label: 'Full Name', type: 'text', required: true, placeholder: 'Your full name' })
+      }
     }
 
     const { data: event, error } = await supabase
@@ -94,6 +98,9 @@ router.post('/', requireAuth, async (req, res) => {
         theme_color:           data.theme_color,
         capacity:              data.capacity || null,
         entry_fee:             data.entry_fee,
+        registration_type:     data.registration_type,
+        sheet_url:             data.sheet_url || null,
+        sheet_column_map:      data.sheet_column_map || null,
         form_fields:           data.form_fields,
         slug:                  generateSlug(data.title),
         status:                'draft',
@@ -112,7 +119,7 @@ router.get('/public/:slug', async (req, res) => {
   try {
     const { data: event, error } = await supabase
       .from('events')
-      .select('id, title, description, venue, event_date, registration_deadline, banner_url, theme_color, capacity, entry_fee, form_fields, slug, status, clubs(name, logo_url, college)')
+      .select('id, title, description, venue, event_date, registration_deadline, banner_url, theme_color, capacity, entry_fee, registration_type, sheet_url, sheet_column_map, form_fields, slug, status, clubs(name, logo_url, college)')
       .eq('slug', req.params.slug)
       .eq('status', 'published')
       .single()
@@ -163,10 +170,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
 
     if (req.body.form_fields) {
       const { count } = await supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('event_id', req.params.id)
-      if (count > 0) return res.status(400).json({ error: 'Form fields cannot be changed after registrations have been received' })
+      if (count > 0 && req.body.registration_type !== 'sheet') return res.status(400).json({ error: 'Form fields cannot be changed after registrations have been received' })
     }
 
-    const allowed = ['title','description','venue','event_date','registration_deadline','banner_url','theme_color','capacity','entry_fee','form_fields','status']
+    const allowed = ['title','description','venue','event_date','registration_deadline','banner_url','theme_color','capacity','entry_fee','registration_type','sheet_url','sheet_column_map','form_fields','status']
     const updates = {}
     for (const f of allowed) { if (req.body[f] !== undefined) updates[f] = req.body[f] }
 
@@ -182,7 +189,8 @@ router.patch('/:id/publish', requireAuth, async (req, res) => {
   try {
     const { data: event } = await supabase.from('events').select('*').eq('id', req.params.id).eq('club_id', req.club.clubId).single()
     if (!event) return res.status(404).json({ error: 'Event not found' })
-    if (!event.form_fields.length) return res.status(400).json({ error: 'Add at least one form field before publishing' })
+    if (event.registration_type === 'native' && !event.form_fields.length) return res.status(400).json({ error: 'Add at least one form field before publishing' })
+    if (event.registration_type === 'sheet' && !event.sheet_url) return res.status(400).json({ error: 'Google Sheet URL is required for sheet-based events' })
 
     const newStatus = event.status === 'published' ? 'draft' : 'published'
     const { data: updated } = await supabase.from('events').update({ status: newStatus }).eq('id', req.params.id).select('id, status, slug').single()
@@ -205,6 +213,48 @@ router.delete('/:id', requireAuth, async (req, res) => {
     await supabase.from('events').delete().eq('id', req.params.id)
     return res.json({ message: 'Event deleted' })
   } catch (err) { return res.status(500).json({ error: 'Internal server error' }) }
+})
+
+// ─── POST /events/:id/bulk-qr ──────────────────────────────────────────────────
+router.post('/:id/bulk-qr', requireAuth, async (req, res) => {
+  try {
+    const { data: event } = await supabase.from('events').select('*, clubs(*)').eq('id', req.params.id).eq('club_id', req.club.clubId).single()
+    if (!event) return res.status(404).json({ error: 'Event not found' })
+
+    const { data: registrations } = await supabase.from('registrations')
+      .select('*, qr_codes(*)')
+      .eq('event_id', req.params.id)
+      .eq('status', 'approved')
+
+    if (!registrations || !registrations.length) return res.status(400).json({ error: 'No approved registrations found' })
+
+    const toProcess = registrations.filter(r => !r.qr_codes || !r.qr_codes[0] || !r.qr_codes[0].email_sent)
+    if (!toProcess.length) return res.json({ message: 'All approved attendees have already received their QR codes.' })
+
+    const { generateQRCode } = require('../services/qr')
+    const { sendQREmail } = require('../services/email')
+
+    let sent = 0
+    let errors = 0
+    for (const reg of toProcess) {
+      try {
+        let qrCode = reg.qr_codes && reg.qr_codes[0]
+        if (!qrCode) {
+          qrCode = await generateQRCode(reg.id, event.id)
+        }
+        await sendQREmail({ registration: reg, event, qrCode })
+        sent++
+      } catch (err) {
+        console.error(`Failed to send QR for ${reg.attendee_email}:`, err)
+        errors++
+      }
+    }
+
+    return res.json({ message: `Successfully sent ${sent} QR codes. ${errors ? `Failed to send ${errors}.` : ''}` })
+  } catch (err) {
+    console.error('Bulk QR error:', err)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
 module.exports = router
