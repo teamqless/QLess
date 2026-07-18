@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+// Force Vite HMR reload
 export default {
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -10,30 +11,26 @@ export default {
       },
       colors: {
         brand: {
-          DEFAULT: '#6366f1',
-          light: '#818cf8',
-          dark: '#4f46e5',
-          glow: 'rgba(99, 102, 241, 0.4)',
+          DEFAULT: '#C05800',
+          dark: '#713600',
+          light: '#d97424',
+          glow: 'rgba(192, 88, 0, 0.4)',
         },
         surface: {
           DEFAULT: '#ffffff',
-          1: '#f8fafc',
-          2: '#f1f5f9',
-          3: '#e2e8f0',
-          dark: '#0f172a',
-          darker: '#020617',
+          base: '#FDFBD4',
+          glass: 'rgba(253, 251, 212, 0.7)',
         },
         text: {
-          1: '#0f172a',
-          2: '#334155',
-          3: '#64748b',
-          light: '#f8fafc',
-          muted: '#94a3b8',
+          1: '#38240D',
+          2: '#5c3a14',
+          3: '#8c6032',
+          light: '#FDFBD4',
+          muted: '#ab8258',
         },
         border: {
-          DEFAULT: '#e2e8f0',
-          light: '#f1f5f9',
-          dark: '#334155',
+          DEFAULT: '#713600',
+          light: 'rgba(113, 54, 0, 0.1)',
         },
         success: {
           DEFAULT: '#10b981',

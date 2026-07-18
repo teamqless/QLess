@@ -23,7 +23,13 @@ export const isAuthenticated = (): boolean =>
 
 export const getStoredClub = (): Club | null => {
   const raw = localStorage.getItem(CLUB_KEY)
-  return raw ? JSON.parse(raw) : null
+  if (!raw || raw === 'undefined') return null
+  try {
+    return JSON.parse(raw)
+  } catch (e) {
+    console.error('Failed to parse stored club:', e)
+    return null
+  }
 }
 
 export const setStoredClub = (club: Club): void =>

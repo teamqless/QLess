@@ -36,7 +36,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </span>
         )}
         <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-red-500/10 border border-indigo-100 dark:border-red-500/20 flex items-center justify-center text-sm font-bold text-indigo-600 dark:text-red-500 shadow-sm">
-          {club?.name.charAt(0).toUpperCase() ?? 'C'}
+          {club?.name?.charAt(0)?.toUpperCase() ?? 'C'}
         </div>
       </div>
     </header>

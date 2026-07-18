@@ -49,7 +49,7 @@ export default function Dashboard() {
     <div className="w-full">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Good to see you, {club?.name?.split(' ')[0]} 👋</h1>
+          <h1 className="page-title">Good to see you, {club?.name?.split(' ')?.[0]} 👋</h1>
           <p className="page-subtitle">Here's what's happening with your events</p>
         </div>
         <Link to="/events/new" className="btn btn-primary">+ New Event</Link>
@@ -57,7 +57,7 @@ export default function Dashboard() {
 
       {/* Plan banner */}
       {!isLoading && data && (
-        <PlanBanner plan={club?.plan || 'free'} eventCount={data.stats.total_events} />
+        <PlanBanner plan={club?.plan || 'free'} eventCount={data?.stats?.total_events ?? 0} />
       )}
 
       {/* Stat cards */}
@@ -166,7 +166,7 @@ export default function Dashboard() {
                       reg.status === 'pending' ? 'bg-amber-100 text-amber-700' :
                         'bg-red-100 text-red-700'
                     }`}>
-                    {reg.attendee_name?.charAt(0).toUpperCase()}
+                    {reg.attendee_name?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-text-1 truncate">

@@ -37,47 +37,47 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0A0A0B]">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-brand-dark">
       {/* Dynamic Background */}
-      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-brand/20 blur-[150px] rounded-full animate-pulse-glow" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-purple-600/20 blur-[150px] rounded-full animate-float" />
+      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-brand/30 blur-[150px] rounded-full animate-pulse-glow" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-brand-light/20 blur-[150px] rounded-full animate-float" />
       
-      <div className="w-full max-w-md p-8 glass-panel z-10 animate-fade-in-up">
+      <div className="w-full max-w-md p-8 bg-surface-base border border-border-light rounded-2xl shadow-md z-10 animate-fade-in-up">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-brand/20 flex items-center justify-center mx-auto mb-4 border border-brand/30 shadow-neon">
+          <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4 border border-brand/20">
             <span className="text-brand font-bold text-3xl">S</span>
           </div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">Super Admin</h1>
-          <p className="text-gray-400 mt-2">Manage all clubs & subscriptions</p>
+          <h1 className="text-3xl font-bold text-text-1">Super Admin</h1>
+          <p className="text-text-3 mt-2">Manage all clubs & subscriptions</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+          <div className="mb-6 p-4 bg-warning-bg border border-warning/20 rounded-xl text-warning text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Username</label>
+            <label className="block text-sm font-medium text-text-2 mb-1.5">Username</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-surface/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors"
+              className="w-full px-4 py-3 bg-white border border-border-light rounded-xl text-text-1 placeholder-text-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors"
               placeholder="admin"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+            <label className="block text-sm font-medium text-text-2 mb-1.5">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-surface/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors"
+              className="w-full px-4 py-3 bg-white border border-border-light rounded-xl text-text-1 placeholder-text-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors"
               placeholder="••••••••"
             />
           </div>

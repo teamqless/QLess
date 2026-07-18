@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getStoredClub, logout } from '@/lib/auth'
-import { ThemeToggle } from '../ThemeToggle'
 
 const NAV = [
   { to: '/dashboard', label: 'Dashboard',  icon: '▦' },
@@ -14,31 +13,31 @@ export default function Sidebar({ onNavClick }: { onNavClick?: () => void }) {
   const navigate = useNavigate()
 
   return (
-    <aside className="w-[260px] h-full flex flex-col shrink-0 bg-white dark:bg-[#0a0a0a] border-r border-slate-200 dark:border-red-500/20 transition-colors duration-300">
+    <aside className="w-[260px] h-full flex flex-col shrink-0 bg-surface-base transition-colors duration-300">
       {/* Logo */}
-      <div className="p-6 border-b border-slate-200 dark:border-red-500/20 relative">
-        <div className="flex items-center gap-3 relative z-10 text-[#1F7BF5] dark:text-red-500">
-          <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+      <div className="h-20 flex items-center px-5 border-b border-border-light relative overflow-hidden">
+        <div className="flex items-center gap-3 relative z-10 text-brand w-[220px]">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-brand">
             <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="60 16"></circle>
             <path d="M22 22L30 30" stroke="currentColor" strokeWidth="3" strokeLinecap="round"></path>
             <path d="M14 16L18 20L26 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"></path>
           </svg>
-          <span className="font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white transition-colors duration-300">
-            Q<span className="text-[#1F7BF5] dark:text-red-500">Less</span>
+          <span className="font-black text-2xl tracking-tight text-text-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 delay-100">
+            Event<span className="text-brand">Flow</span>
           </span>
         </div>
       </div>
 
       {/* Club info */}
       {club && (
-        <div className="p-5 border-b border-slate-200 dark:border-red-500/20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#f0fbff] dark:bg-red-500/10 flex items-center justify-center text-[#1F7BF5] dark:text-red-500 font-black text-lg shrink-0 border border-[#1F7BF5]/20 dark:border-red-500/20 shadow-sm transition-colors duration-300">
-              {club.name.charAt(0).toUpperCase()}
+        <div className="p-4 border-b border-border-light overflow-hidden">
+          <div className="flex items-center gap-3 w-[220px]">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-brand font-black text-lg shrink-0 border border-border-light shadow-sm">
+              {club?.name?.charAt(0)?.toUpperCase() ?? 'C'}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-bold text-sm text-slate-900 dark:text-white truncate transition-colors duration-300">
-                {club.name}
+            <div className="min-w-0 flex-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 delay-75">
+              <div className="font-bold text-sm text-text-1 truncate">
+                {club?.name || 'Club Member'}
               </div>
               <div className="mt-1">
                 <span className={`badge badge-${club.plan} text-[10px]`}>
@@ -51,8 +50,8 @@ export default function Sidebar({ onNavClick }: { onNavClick?: () => void }) {
       )}
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-3 mb-4 mt-2">
+      <nav className="flex-1 p-3 space-y-2 overflow-y-auto overflow-x-hidden">
+        <div className="text-[10px] font-black text-text-3 uppercase tracking-widest px-3 mb-4 mt-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
           Menu
         </div>
         {NAV.map(item => (
@@ -60,23 +59,23 @@ export default function Sidebar({ onNavClick }: { onNavClick?: () => void }) {
             key={item.to}
             to={item.to}
             onClick={onNavClick}
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            className={({ isActive }) => `nav-link w-[230px] flex items-center ${isActive ? 'active' : ''}`}
           >
-            <span className="text-xl leading-none opacity-80">{item.icon}</span>
-            <span>{item.label}</span>
+            <span className="text-xl leading-none w-10 flex items-center justify-center shrink-0">{item.icon}</span>
+            <span className="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 delay-75 whitespace-nowrap">{item.label}</span>
           </NavLink>
         ))}
       </nav>
 
-      {/* Bottom Area (Theme + Logout) */}
-      <div className="p-4 border-t border-slate-200 dark:border-red-500/20 flex items-center justify-between">
-        <ThemeToggle />
+      {/* Bottom Area (Logout) */}
+      <div className="p-4 border-t border-border-light flex items-center overflow-hidden">
         <button
           onClick={logout}
-          className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors group"
+          className="w-[230px] flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-text-2 hover:text-danger hover:bg-danger-bg transition-colors group/btn"
           title="Logout"
         >
-          Logout <span className="text-lg group-hover:translate-x-1 transition-transform">↪</span>
+          <span className="text-xl w-8 flex items-center justify-center shrink-0 group-hover/btn:translate-x-1 transition-transform">↪</span>
+          <span className="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Logout</span>
         </button>
       </div>
     </aside>
