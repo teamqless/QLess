@@ -63,25 +63,25 @@ export default function Settings() {
   const isProOrAbove = club?.plan === 'pro' || club?.plan === 'institution'
 
   return (
-    <div className="w-full max-w-3xl pb-12">
-      <div className="page-header mb-8">
+    <div className="w-full max-w-3xl pb-12 animate-fade-in-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="page-title text-2xl font-bold text-white tracking-tight mb-1">Settings</h1>
-          <p className="page-subtitle text-sm text-gray-400">Manage your club account and preferences</p>
+          <h1 className="font-display font-bold text-2xl text-ink">Settings</h1>
+          <p className="text-sm text-ink-soft mt-1">Manage your club account and preferences</p>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div className="flex overflow-x-auto gap-1 mb-8 bg-white/5 backdrop-blur-sm rounded-xl p-1.5 w-max max-w-full scrollbar-hide border border-white/5">
+      <div className="flex overflow-x-auto gap-1 mb-8 bg-paper-dim border border-line-soft rounded-xl p-1.5 w-max max-w-full scrollbar-hide">
         {TAB_LABELS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`
               whitespace-nowrap px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 flex items-center gap-2
-              ${tab === t.id ? 'bg-white/10 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.03]'}
+              ${tab === t.id ? 'bg-paper text-ink shadow-sm border border-line-soft' : 'text-ink-soft hover:text-ink hover:bg-paper/50'}
             `}>
             {t.label}
             {t.proOnly && !isProOrAbove && (
-              <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded flex-shrink-0 font-bold border border-purple-500/30">PRO</span>
+              <span className="text-[10px] bg-amber-soft text-amber-deep px-1.5 py-0.5 rounded flex-shrink-0 font-bold border border-amber/20">PRO</span>
             )}
           </button>
         ))}
@@ -89,10 +89,10 @@ export default function Settings() {
 
       {/* ── Password tab ── */}
       {tab === 'password' && (
-        <div className="card p-5 sm:p-6">
-          <div className="text-base font-semibold text-white mb-4">Change Password</div>
-          {pwMsg && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-4">{pwMsg}</div>}
-          {pwErr && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 mb-4">{pwErr}</div>}
+        <div className="vc-card p-5 sm:p-6">
+          <div className="text-base font-semibold text-ink mb-4">Change Password</div>
+          {pwMsg && <div className="bg-teal-soft border border-teal/20 rounded-lg p-3 text-sm text-teal mb-4">{pwMsg}</div>}
+          {pwErr && <div className="bg-rust-soft border border-rust/20 rounded-lg p-3 text-sm text-rust mb-4">{pwErr}</div>}
           
           <form onSubmit={changePassword} className="flex flex-col gap-4">
             <div>
@@ -103,7 +103,7 @@ export default function Settings() {
               <label className="label">New Password</label>
               <input className="input" type="password" value={passwords.newPassword} onChange={e => setPasswords(p => ({ ...p, newPassword: e.target.value }))} required minLength={8} placeholder="Min 8 characters" />
             </div>
-            <button type="submit" disabled={savingPw} className="btn btn-primary mt-2 self-start w-full sm:w-auto">
+            <button type="submit" disabled={savingPw} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5 mt-2 self-start w-full sm:w-auto">
               {savingPw ? 'Changing…' : 'Change Password'}
             </button>
           </form>
@@ -112,30 +112,30 @@ export default function Settings() {
 
       {/* ── Custom Email (SMTP) tab ── */}
       {tab === 'email' && (
-        <div className="card p-5 sm:p-6">
-          <div className="text-base font-semibold text-white mb-3">Email Settings</div>
+        <div className="vc-card p-5 sm:p-6">
+          <div className="text-base font-semibold text-ink mb-3">Email Settings</div>
 
           {/* Current sender info */}
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-5 text-sm text-gray-300 leading-relaxed">
-            <strong className="text-gray-200">Current sending mode:</strong>{' '}
+          <div className="bg-paper-dim border border-line-soft rounded-xl p-4 mb-5 text-sm text-ink-soft leading-relaxed">
+            <strong className="text-ink">Current sending mode:</strong>{' '}
             {club?.smtp_host
-              ? <span className="text-green-400 font-medium">✓ Custom SMTP — emails sent from your club address</span>
-              : <span>Using EventFlow default sender (<code className="font-mono bg-black/40 px-1.5 py-0.5 rounded text-gray-300 border border-white/5">onboarding@resend.dev</code>). Configure SMTP below to send from your own email.</span>
+              ? <span className="text-teal font-medium">✓ Custom SMTP — emails sent from your club address</span>
+              : <span>Using EventFlow default sender (<code className="font-mono bg-paper-card px-1.5 py-0.5 rounded text-ink border border-line-soft">onboarding@resend.dev</code>). Configure SMTP below to send from your own email.</span>
             }
           </div>
 
-          <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+          <p className="text-sm text-ink-soft mb-6 leading-relaxed">
             Configure your club's SMTP settings to send QR passes from your own email address.
             Works with Gmail (use App Password), Outlook, or any SMTP provider.
           </p>
 
-          {smtpMsg && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-4">{smtpMsg}</div>}
-          {smtpErr && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 mb-4">{smtpErr}</div>}
+          {smtpMsg && <div className="bg-teal-soft border border-teal/20 rounded-lg p-3 text-sm text-teal mb-4">{smtpMsg}</div>}
+          {smtpErr && <div className="bg-rust-soft border border-rust/20 rounded-lg p-3 text-sm text-rust mb-4">{smtpErr}</div>}
 
           {/* Current SMTP status */}
           {club?.smtp_host && (
-            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 mb-5 font-medium">
-              ✓ SMTP configured — sending from <strong className="text-green-300">{club.smtp_from_email || club.smtp_host}</strong>
+            <div className="bg-teal-soft border border-teal/20 rounded-lg p-3 text-sm text-teal mb-5 font-medium">
+              ✓ SMTP configured — sending from <strong className="text-teal">{club.smtp_from_email || club.smtp_host}</strong>
             </div>
           )}
 
@@ -171,16 +171,16 @@ export default function Settings() {
               </div>
             </div>
 
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs text-amber-200/80 leading-relaxed mt-2">
-              💡 For Gmail, use an <strong className="text-amber-200">App Password</strong> (not your regular password). Go to Google Account → Security → 2-Step Verification → App passwords.
+            <div className="bg-amber-soft border border-amber/20 rounded-lg p-3 text-xs text-amber-deep leading-relaxed mt-2">
+              💡 For Gmail, use an <strong className="text-amber">App Password</strong> (not your regular password). Go to Google Account → Security → 2-Step Verification → App passwords.
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mt-4">
-              <button type="submit" disabled={savingSmtp} className="btn btn-primary w-full sm:w-auto">
+              <button type="submit" disabled={savingSmtp} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5 w-full sm:w-auto">
                 {savingSmtp ? 'Saving…' : 'Save SMTP Settings'}
               </button>
               {club?.smtp_host && (
-                <button type="button" onClick={testSmtp} disabled={testingSmtp} className="btn btn-ghost w-full sm:w-auto border border-white/10 hover:bg-white/5">
+                <button type="button" onClick={testSmtp} disabled={testingSmtp} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5 w-full sm:w-auto">
                   {testingSmtp ? 'Sending…' : 'Send test email'}
                 </button>
               )}
@@ -191,25 +191,25 @@ export default function Settings() {
 
       {/* ── Danger zone tab ── */}
       {tab === 'danger' && (
-        <div className="card p-5 sm:p-6 border border-red-500/30 bg-red-500/5">
-          <div className="text-base font-semibold text-red-400 mb-2">Danger Zone</div>
-          <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+        <div className="vc-card p-5 sm:p-6 border border-rust/30 bg-rust-soft">
+          <div className="text-base font-semibold text-rust mb-2">Danger Zone</div>
+          <p className="text-sm text-ink-soft mb-6 leading-relaxed">
             These actions are permanent and cannot be undone. Proceed with caution.
           </p>
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-paper rounded-xl border border-line-soft gap-4">
               <div>
-                <div className="text-sm font-medium text-gray-200">Delete all events</div>
-                <div className="text-xs text-gray-400 mt-1">Removes all draft events. Published events cannot be deleted.</div>
+                <div className="text-sm font-medium text-ink">Delete all events</div>
+                <div className="text-xs text-ink-soft mt-1">Removes all draft events. Published events cannot be deleted.</div>
               </div>
-              <button className="btn btn-danger btn-sm whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support to perform bulk deletions.')}>Delete drafts</button>
+              <button className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-rust text-paper hover:bg-rust/90 shadow-sm text-sm px-4.5 py-2.5 whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support to perform bulk deletions.')}>Delete drafts</button>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-paper rounded-xl border border-line-soft gap-4">
               <div>
-                <div className="text-sm font-medium text-gray-200">Delete account</div>
-                <div className="text-xs text-gray-400 mt-1">Permanently deletes your club and all associated data.</div>
+                <div className="text-sm font-medium text-ink">Delete account</div>
+                <div className="text-xs text-ink-soft mt-1">Permanently deletes your club and all associated data.</div>
               </div>
-              <button className="btn btn-danger btn-sm whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support at hello@eventflow.app to delete your account.')}>Delete account</button>
+              <button className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-rust text-paper hover:bg-rust/90 shadow-sm text-sm px-4.5 py-2.5 whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support at hello@eventflow.app to delete your account.')}>Delete account</button>
             </div>
           </div>
         </div>

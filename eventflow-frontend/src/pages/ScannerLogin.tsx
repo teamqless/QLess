@@ -41,28 +41,28 @@ export default function ScannerLogin() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#080714] flex items-center justify-center font-sans p-5 box-border relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-paper flex items-center justify-center font-sans p-5 box-border relative overflow-hidden">
       
       {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-purple-500/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-amber/5 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-amber-soft rounded-full blur-[80px] pointer-events-none" />
 
-      <div className="bg-[#10102a]/80 backdrop-blur-xl border border-white/10 rounded-[20px] p-8 w-full max-w-[400px] box-border relative z-10 shadow-2xl">
+      <div className="vc-card p-8 w-full max-w-[400px] box-border relative z-10 shadow-2xl">
         
         {/* Icon + Title */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-indigo-500/20">📷</div>
-          <h1 className="text-[22px] font-bold text-[#f0eeff] mb-2 tracking-tight">
+          <div className="w-16 h-16 bg-amber/10 text-amber-deep rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm border border-amber/20">📷</div>
+          <h1 className="text-[22px] font-bold text-ink mb-2 tracking-tight">
             Gate Scanner
           </h1>
-          <p className="text-[13px] text-[#5e5a80] leading-relaxed">
+          <p className="text-[13px] text-ink-soft leading-relaxed">
             Enter your access code to start scanning
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-[13px] text-red-400 mb-5 leading-relaxed">
+          <div className="bg-rust-soft border border-rust/20 rounded-xl px-4 py-3 text-[13px] text-rust mb-5 leading-relaxed">
             {error}
           </div>
         )}
@@ -71,7 +71,7 @@ export default function ScannerLogin() {
           
           {/* Access Code */}
           <div>
-            <label className="block text-[11px] font-bold text-[#6b6890] mb-2 uppercase tracking-widest">Access Code *</label>
+            <label className="block text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-widest">Access Code *</label>
             <input
               type="text"
               value={code}
@@ -81,16 +81,16 @@ export default function ScannerLogin() {
               autoComplete="off"
               autoCapitalize="characters"
               placeholder="e.g. TECH-V1"
-              className="w-full bg-[#1a1a3a] border border-white/10 rounded-xl px-4 py-3.5 text-[#f0eeff] text-[22px] font-mono tracking-[0.2em] font-bold text-center outline-none focus:border-indigo-500/60 focus:bg-[#1a1a3a]/80 transition-all placeholder:text-white/20"
+              className="w-full bg-paper-dim border border-line-soft rounded-xl px-4 py-3.5 text-ink text-[22px] font-mono tracking-[0.2em] font-bold text-center outline-none focus:border-ink/60 focus:bg-paper transition-all placeholder:text-ink-faint"
             />
           </div>
 
           {/* Event ID */}
           {!presetEventId && (
             <div>
-              <label className="block text-[11px] font-bold text-[#6b6890] mb-2 uppercase tracking-widest">
+              <label className="block text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-widest">
                 Event ID
-                <span className="text-[#3d3a5c] font-normal normal-case tracking-normal ml-1.5">
+                <span className="text-ink-faint font-normal normal-case tracking-normal ml-1.5">
                   (optional)
                 </span>
               </label>
@@ -99,9 +99,9 @@ export default function ScannerLogin() {
                 value={eid}
                 onChange={e => setEid(e.target.value.trim())}
                 placeholder="Paste event ID here if given"
-                className="w-full bg-[#1a1a3a] border border-white/10 rounded-xl px-4 py-3 text-[#f0eeff] text-[15px] outline-none focus:border-indigo-500/60 focus:bg-[#1a1a3a]/80 transition-all placeholder:text-white/20"
+                className="w-full bg-paper-dim border border-line-soft rounded-xl px-4 py-3 text-ink text-[15px] outline-none focus:border-ink/60 focus:bg-paper transition-all placeholder:text-ink-faint"
               />
-              <p className="text-[11px] text-[#3d3a5c] mt-2 leading-relaxed">
+              <p className="text-[11px] text-ink-soft mt-2 leading-relaxed">
                 The event admin will share this with you. Leave blank for club-wide access.
               </p>
             </div>
@@ -111,15 +111,15 @@ export default function ScannerLogin() {
             type="submit"
             disabled={login.isPending || !code.trim()}
             className={`
-              mt-2 p-4 text-base font-bold text-white rounded-xl transition-all duration-300
-              ${(login.isPending || !code.trim()) ? 'bg-indigo-500/40 cursor-not-allowed opacity-70' : 'bg-gradient-to-br from-indigo-500 to-purple-500 hover:shadow-[0_4px_20px_rgba(99,102,241,0.35)] hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'}
+              inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 text-paper text-sm px-4.5 py-3 w-full
+              ${(login.isPending || !code.trim()) ? 'bg-ink-soft cursor-not-allowed opacity-70' : 'bg-ink hover:bg-ink-soft cursor-pointer shadow-sm'}
             `}
           >
             {login.isPending ? 'Verifying…' : 'Start Scanning'}
           </button>
         </form>
 
-        <p className="text-center text-[11px] text-[#2a2848] mt-6">
+        <p className="text-center text-[11px] text-ink-soft mt-6">
           Contact your event organizer if you don't have an access code
         </p>
       </div>

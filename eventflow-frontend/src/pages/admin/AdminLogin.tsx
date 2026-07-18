@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { setAdminToken } from '@/lib/auth'
+import Button from '@/components/ui/Button'
+import { Spinner } from '@/components/ui/Spinner'
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('')
@@ -37,58 +39,65 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-brand-dark">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-ink">
       {/* Dynamic Background */}
-      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-brand/30 blur-[150px] rounded-full animate-pulse-glow" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-brand-light/20 blur-[150px] rounded-full animate-float" />
+      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-amber/30 blur-[150px] rounded-full animate-pulse-glow" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-amber-soft/20 blur-[150px] rounded-full animate-float" />
       
-      <div className="w-full max-w-md p-8 bg-surface-base border border-border-light rounded-2xl shadow-md z-10 animate-fade-in-up">
+      <div className="vc-card w-full max-w-md p-8 z-10 animate-fade-in-up">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4 border border-brand/20">
-            <span className="text-brand font-bold text-3xl">S</span>
+          <div className="w-16 h-16 rounded-2xl bg-amber-soft flex items-center justify-center mx-auto mb-4 border border-amber/20">
+            <span className="text-amber-deep font-bold text-3xl">S</span>
           </div>
-          <h1 className="text-3xl font-bold text-text-1">Super Admin</h1>
-          <p className="text-text-3 mt-2">Manage all clubs & subscriptions</p>
+          <h1 className="font-display text-3xl font-bold text-ink">Super Admin</h1>
+          <p className="text-ink-soft mt-2">Manage all clubs & subscriptions</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-warning-bg border border-warning/20 rounded-xl text-warning text-sm">
+          <div className="mb-6 p-4 bg-rust-soft border border-rust/20 rounded-xl text-rust text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-text-2 mb-1.5">Username</label>
+            <label className="section-label block mb-2">Username</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-border-light rounded-xl text-text-1 placeholder-text-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors"
+              className="input"
               placeholder="admin"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-text-2 mb-1.5">Password</label>
+            <label className="section-label block mb-2">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-border-light rounded-xl text-text-1 placeholder-text-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors"
+              className="input"
               placeholder="••••••••"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full btn btn-primary mt-4 py-3 text-lg"
+            className="w-full mt-4"
+            size="lg"
+            variant="accent"
           >
-            {loading ? 'Logging in...' : 'Login to Admin Panel'}
-          </button>
+            {loading ? (
+              <>
+                <Spinner size={16} color="text-ink" />
+                <span className="ml-2">Logging in...</span>
+              </>
+            ) : 'Login to Admin Panel'}
+          </Button>
         </form>
       </div>
     </div>

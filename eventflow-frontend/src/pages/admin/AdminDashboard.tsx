@@ -52,45 +52,43 @@ export default function AdminDashboard() {
 
   return (
     <div className="animate-fade-in-up">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Clubs Overview</h1>
-          <p className="page-subtitle">Manage all registered clubs and their subscriptions.</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="font-display font-bold text-3xl tracking-tight text-ink">Clubs Overview</h1>
+        <p className="text-ink-soft mt-1">Manage all registered clubs and their subscriptions.</p>
       </div>
 
-      {error && <div className="text-danger bg-danger-bg p-4 rounded-xl mb-4">{error}</div>}
+      {error && <div className="text-rust bg-rust-soft p-4 rounded-xl mb-4 border border-rust/20 font-medium">{error}</div>}
 
       {loading ? (
-        <div className="shimmer h-64 w-full"></div>
+        <div className="skeleton h-64 w-full rounded-2xl"></div>
       ) : (
-        <div className="table-container">
+        <div className="vc-card overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="p-4 text-slate-600 font-semibold">Name</th>
-                <th className="p-4 text-slate-600 font-semibold">Email</th>
-                <th className="p-4 text-slate-600 font-semibold">Joined</th>
-                <th className="p-4 text-slate-600 font-semibold">Plan</th>
-                <th className="p-4 text-slate-600 font-semibold">Actions</th>
+              <tr className="bg-paper-dim border-b border-line text-xs font-semibold text-ink-soft uppercase tracking-wider">
+                <th className="px-5 py-4 font-medium">Name</th>
+                <th className="px-5 py-4 font-medium">Email</th>
+                <th className="px-5 py-4 font-medium">Joined</th>
+                <th className="px-5 py-4 font-medium">Plan</th>
+                <th className="px-5 py-4 font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-line">
               {clubs.map((club) => (
-                <tr key={club.id}>
-                  <td className="font-bold text-text-1">{club.name}</td>
-                  <td className="text-text-3 font-medium">{club.email}</td>
-                  <td className="text-text-3">{new Date(club.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <span className={`badge badge-${club.plan}`}>
+                <tr key={club.id} className="hover:bg-paper-dim transition-colors duration-200">
+                  <td className="px-5 py-4 font-medium text-ink">{club.name}</td>
+                  <td className="px-5 py-4 text-ink-soft">{club.email}</td>
+                  <td className="px-5 py-4 text-ink-soft text-sm">{new Date(club.created_at).toLocaleDateString()}</td>
+                  <td className="px-5 py-4">
+                    <span className={`badge ${club.plan === 'pro' ? 'badge-amber' : club.plan === 'institution' ? 'badge-blue' : 'badge-default'}`}>
                       {club.plan}
                     </span>
                   </td>
-                  <td>
+                  <td className="px-5 py-4">
                     <select
                       value={club.plan}
                       onChange={(e) => updatePlan(club.id, e.target.value)}
-                      className="input py-1.5 px-3 max-w-[150px]"
+                      className="input py-1.5 px-3 w-[150px] text-sm"
                     >
                       <option value="free">Free</option>
                       <option value="pro">Pro</option>
@@ -101,7 +99,7 @@ export default function AdminDashboard() {
               ))}
               {clubs.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-5 py-8 text-center text-ink-soft">
                     No clubs found.
                   </td>
                 </tr>

@@ -28,9 +28,9 @@ function AnimatedStat({ value, label, color }: { value: number; label: string; c
   }, [value])
 
   return (
-    <div className="stat-card p-4">
-      <div className="stat-label">{label}</div>
-      <div className="stat-value text-2xl" style={{ color }}>{display}</div>
+    <div className="vc-card p-4">
+      <div className="text-sm font-semibold text-ink-soft mb-1">{label}</div>
+      <div className="text-2xl font-bold" style={{ color: color || 'var(--color-ink)' }}>{display}</div>
     </div>
   )
 }
@@ -146,30 +146,30 @@ export default function EventDetail() {
       <div className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <div className="mb-2">
-            <Link to="/events" className="text-sm text-text-3 hover:text-text-2 transition-colors">← Events</Link>
+            <Link to="/events" className="text-sm text-ink-soft hover:text-ink transition-colors">← Events</Link>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="page-title">{event.title}</h1>
+            <h1 className="font-display font-bold text-2xl text-ink">{event.title}</h1>
             <EventStatusBadge status={event.status as EventStatus} />
             {event.status === 'published' && (
-              <span className="flex items-center gap-1.5 text-xs text-green-700 font-semibold bg-green-50 border border-green-200 px-3 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse" />
+              <span className="flex items-center gap-1.5 text-xs text-teal-deep font-semibold bg-teal-soft border border-teal/20 px-3 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 bg-teal rounded-full animate-pulse" />
                 Live
               </span>
             )}
           </div>
-          <p className="page-subtitle mt-2">
+          <p className="text-sm text-ink-soft mt-2">
             {event.venue && `${event.venue} · `}
             {event.entry_fee === 0 ? 'Free entry' : `₹${event.entry_fee}`}
             {event.capacity && ` · ${event.capacity} capacity`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2.5 shrink-0">
-          <Link to={`/scanner/login?event=${event.id}`} className="btn btn-ghost btn-sm">📷 Scanner</Link>
+          <Link to={`/scanner/login?event=${event.id}`} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">📷 Scanner</Link>
           {event.registration_type === 'sheet' && (
-            <Link to={`/import?event=${event.id}`} className="btn btn-ghost btn-sm">🔄 Sync Sheet</Link>
+            <Link to={`/import?event=${event.id}`} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">🔄 Sync Sheet</Link>
           )}
-          <button onClick={() => exportCSV(event.id, event.title)} className="btn btn-ghost btn-sm">↓ Export CSV</button>
+          <button onClick={() => exportCSV(event.id, event.title)} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">↓ Export CSV</button>
           
           <button 
             onClick={async () => {
@@ -182,7 +182,7 @@ export default function EventDetail() {
               }
             }}
             disabled={bulkSendQR.isPending}
-            className="btn btn-ghost btn-sm text-brand"
+            className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5"
           >
             {bulkSendQR.isPending ? 'Sending...' : '📨 Send Pending QRs'}
           </button>
@@ -190,7 +190,7 @@ export default function EventDetail() {
           <button
             onClick={() => publishEvent.mutate()}
             disabled={publishEvent.isPending}
-            className={`btn btn-sm ${event.status === 'published' ? 'btn-ghost' : 'btn-primary'}`}>
+            className={`inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 shadow-sm text-sm px-4.5 py-2.5 ${event.status === 'published' ? 'bg-paper text-ink border border-line hover:bg-paper-dim' : 'bg-ink text-paper hover:bg-ink-soft'}`}>
             {event.status === 'published' ? 'Unpublish' : 'Publish Event'}
           </button>
         </div>
@@ -208,71 +208,71 @@ export default function EventDetail() {
       {/* Capacity progress + registration link */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Entry progress */}
-        <div className="glass p-5">
+        <div className="vc-card p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-text-2">Entry progress</span>
-            <span className="text-2xl font-extrabold text-brand">{pct}%</span>
+            <span className="text-sm font-semibold text-ink-deep">Entry progress</span>
+            <span className="text-2xl font-extrabold text-amber-deep">{pct}%</span>
           </div>
-          <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-brand to-purple-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+          <div className="h-2 bg-paper-dim rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-amber to-amber-deep rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
           </div>
-          <div className="flex justify-between mt-2 text-xs text-text-3">
+          <div className="flex justify-between mt-2 text-xs text-ink-soft">
             <span>{liveScannedIn} in</span>
             <span>{liveTotalApproved - liveScannedIn} remaining</span>
           </div>
         </div>
 
         {/* Registration link */}
-        <div className="glass p-5">
-          <div className="text-xs font-semibold text-text-3 uppercase tracking-wider mb-2">
+        <div className="vc-card p-5">
+          <div className="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-2">
             Registration Link
           </div>
           {event.status === 'published' ? (
             event.registration_type === 'sheet' ? (
-              <div className="text-sm text-text-3">
+              <div className="text-sm text-ink-soft">
                 <p className="mb-2">This event uses Google Forms for registration.</p>
-                <Link to={`/import?event=${event.id}`} className="btn btn-ghost btn-sm text-brand border border-brand/20">
+                <Link to={`/import?event=${event.id}`} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">
                   Configure Google Sheet Sync ↗
                 </Link>
               </div>
             ) : (
               <>
-                <div className="text-sm text-brand font-mono overflow-hidden text-ellipsis whitespace-nowrap mb-3">
+                <div className="text-sm text-ink-deep font-mono overflow-hidden text-ellipsis whitespace-nowrap mb-3">
                   {regUrl}
                 </div>
                 <div className="flex gap-2.5">
                   <button onClick={() => { navigator.clipboard.writeText(regUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-                    className="btn btn-primary btn-sm">
+                    className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5">
                     {copiedLink ? '✓ Copied' : 'Copy link'}
                   </button>
-                  <a href={regUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
+                  <a href={regUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">
                     Open ↗
                   </a>
                 </div>
               </>
             )
           ) : (
-            <div className="text-sm text-text-3">Publish the event to get the registration link</div>
+            <div className="text-sm text-ink-soft">Publish the event to get the registration link</div>
           )}
         </div>
       </div>
 
       {/* Recent live scans (real-time) */}
       {recentScans.length > 0 && (
-        <div className="glass p-5 mb-6">
-          <div className="text-sm font-semibold text-text-1 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-success rounded-full inline-block animate-pulse" />
+        <div className="vc-card p-5 mb-6">
+          <div className="text-sm font-semibold text-ink mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-teal rounded-full inline-block animate-pulse" />
             Live scans
           </div>
           <div className="flex gap-2 flex-wrap">
             {recentScans.map((s, i) => (
-              <div key={i} className="flex items-center gap-2 bg-white/50 border border-border/50 rounded-lg py-1.5 px-3 text-sm">
-                <span className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-xs font-bold text-success shrink-0">
+              <div key={i} className="flex items-center gap-2 bg-paper-dim border border-line-soft rounded-lg py-1.5 px-3 text-sm">
+                <span className="w-6 h-6 bg-teal-soft rounded-full flex items-center justify-center text-xs font-bold text-teal shrink-0">
                   {s.attendee?.name?.charAt(0)?.toUpperCase()}
                 </span>
                 <div>
-                  <div className="font-medium text-text-1 leading-tight">{s.attendee?.name}</div>
-                  <div className="text-[10px] text-text-3 leading-tight">{new Date(s.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}</div>
+                  <div className="font-medium text-ink leading-tight">{s.attendee?.name}</div>
+                  <div className="text-[10px] text-ink-soft leading-tight">{new Date(s.scanned_at).toLocaleTimeString('en-IN', { timeStyle: 'short' })}</div>
                 </div>
               </div>
             ))}
@@ -282,128 +282,123 @@ export default function EventDetail() {
 
       {/* Analytics chart */}
       {chartData.length > 1 && (
-        <div className="glass p-5 mb-6">
-          <div className="text-sm font-semibold text-text-1 mb-4">Registrations over time</div>
+        <div className="vc-card p-5 mb-6">
+          <div className="text-sm font-semibold text-ink mb-4">Registrations over time</div>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="regGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#C05800" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#C05800" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} width={25} />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--color-ink-soft)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'var(--color-ink-soft)' }} axisLine={false} tickLine={false} width={25} />
               <Tooltip
-                contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }}
-                labelStyle={{ color: 'var(--text-1)', fontWeight: 600 }}
+                contentStyle={{ background: 'var(--color-paper)', border: '1px solid var(--color-line-soft)', borderRadius: 8, fontSize: 13 }}
+                labelStyle={{ color: 'var(--color-ink)', fontWeight: 600 }}
               />
-              <Area type="monotone" dataKey="registrations" stroke="#6366f1" strokeWidth={2} fill="url(#regGrad)" />
+              <Area type="monotone" dataKey="registrations" stroke="#C05800" strokeWidth={2} fill="url(#regGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
 
       {/* Registrations table */}
-      <div className="glass overflow-hidden">
-        <div className="p-4 border-b border-border/50 flex items-center gap-3 flex-wrap bg-white/40">
-          <span className="text-base font-semibold text-text-1 mr-1">Registrations</span>
-          <div className="flex gap-1 bg-surface-2 rounded-lg p-1">
+      <div className="vc-card overflow-hidden">
+        <div className="p-4 border-b border-line flex items-center gap-3 flex-wrap">
+          <span className="text-base font-semibold text-ink mr-1">Registrations</span>
+          <div className="flex gap-1 bg-paper-dim border border-line-soft rounded-lg p-1">
             {STATUS_TABS.map(t => (
               <button key={t.value} onClick={() => setFilter(t.value)}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
                   statusFilter === t.value 
-                    ? 'bg-white text-text-1 shadow-sm' 
-                    : 'text-text-3 hover:text-text-2'
+                    ? 'bg-paper text-ink shadow-sm border border-line-soft' 
+                    : 'text-ink-soft hover:text-ink'
                 }`}>
                 {t.label}
               </button>
             ))}
           </div>
-          <input className="input w-full md:w-48 ml-auto text-sm bg-white/50" placeholder="Search name or email…"
+          <input className="input w-full md:w-48 ml-auto text-sm" placeholder="Search name or email…"
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
 
-        <div className="table-container border-none shadow-none bg-transparent">
+        <div className="overflow-x-auto">
           {regsLoading ? (
             <div className="p-5">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="shimmer h-11 rounded-md mb-2" />
+                <div key={i} className="skeleton h-11 rounded-md mb-2" />
               ))}
             </div>
           ) : !registrations?.length ? (
-            <div className="py-10 text-center text-text-3 text-sm">
+            <div className="py-10 text-center text-ink-soft text-sm">
               No registrations found
             </div>
           ) : (
-            <table>
-              <thead className="bg-white/30">
-                <tr>
-                  <th>Attendee</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>QR Code</th>
-                  <th>Registered</th>
-                  <th>Actions</th>
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-paper-dim border-b border-line">
+                <tr className="text-xs font-semibold text-ink-soft uppercase tracking-wider">
+                  <th className="px-5 py-3 font-medium">Attendee</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium">Payment</th>
+                  <th className="px-5 py-3 font-medium">QR Code</th>
+                  <th className="px-5 py-3 font-medium">Registered</th>
+                  <th className="px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-line">
                 {registrations.map(reg => (
-                  <tr key={reg.id} className={`transition-colors duration-200 border-b border-border/10 ${
-                    reg.status === 'approved' ? 'bg-green-50/60 hover:bg-green-100/50' : 
-                    reg.status === 'pending' ? 'bg-amber-50/60 hover:bg-amber-100/50' : 
-                    reg.status === 'rejected' ? 'bg-red-50/60 hover:bg-red-100/50' : 
-                    'hover:bg-white/40'
-                  }`}>
-                    <td className="py-3">
-                      <div className="font-medium text-text-1">{reg.attendee_name}</div>
-                      <div className="text-xs text-text-3">{reg.attendee_email}</div>
+                  <tr key={reg.id} className="hover:bg-paper-dim transition-colors duration-200">
+                    <td className="px-5 py-3">
+                      <div className="font-medium text-ink">{reg.attendee_name}</div>
+                      <div className="text-xs text-ink-soft">{reg.attendee_email}</div>
                     </td>
-                    <td className="py-3"><span className={`badge badge-${reg.status}`}>{reg.status}</span></td>
-                    <td className="py-3">
+                    <td className="px-5 py-3"><EventStatusBadge status={reg.status as any} /></td>
+                    <td className="px-5 py-3">
                       {reg.payment_screenshot_url ? (
                         <button 
                           onClick={() => setViewImage(reg.payment_screenshot_url!)}
-                          className="flex items-center gap-1.5 text-sm text-brand font-medium hover:text-indigo-700 bg-white/50 px-2.5 py-1.5 rounded-md border border-brand/20 transition-all hover:shadow-sm"
+                          className="flex items-center gap-1.5 text-sm text-ink font-medium hover:text-ink-deep bg-paper-dim px-2.5 py-1.5 rounded-md border border-line transition-all hover:shadow-sm"
                         >
                           <span>👁️</span> View
                         </button>
                       ) : (
-                        <span className="text-sm text-text-3">
+                        <span className="text-sm text-ink-soft">
                           {event.entry_fee === 0 ? 'Free' : '—'}
                         </span>
                       )}
                     </td>
-                    <td>
+                    <td className="px-5 py-3">
                       {reg.qr_codes?.[0]?.scanned_at
-                        ? <span className="text-xs text-success font-semibold">✓ Scanned in</span>
+                        ? <span className="text-xs text-teal font-semibold">✓ Scanned in</span>
                         : reg.qr_codes?.[0]?.email_sent
-                          ? <span className="text-xs text-blue-600">Email sent</span>
+                          ? <span className="text-xs text-ink-deep">Email sent</span>
                           : reg.status === 'approved'
-                            ? <span className="text-xs text-text-3">Generating…</span>
-                            : <span className="text-xs text-text-3">—</span>
+                            ? <span className="text-xs text-ink-soft">Generating…</span>
+                            : <span className="text-xs text-ink-soft">—</span>
                       }
                     </td>
-                    <td className="text-xs text-text-3">
+                    <td className="px-5 py-3 text-xs text-ink-soft">
                       {new Date(reg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </td>
-                    <td>
+                    <td className="px-5 py-3">
                       <div className="flex gap-2 flex-wrap">
                         {reg.status === 'pending' && (
                           <>
                             <button onClick={() => { approve.mutate(reg.id); showToast(`Approving ${reg.attendee_name}…`, 'info') }}
-                              disabled={approve.isPending} className="btn btn-success btn-sm">
+                              disabled={approve.isPending} className="inline-flex items-center justify-center font-display font-semibold rounded-lg transition-all duration-200 ease-out active:scale-95 bg-teal-soft text-teal border border-teal/20 hover:bg-teal/20 text-xs px-3 py-1.5">
                               Approve
                             </button>
                             <button onClick={() => { setRejectId(reg.id); setReason('') }}
-                              className="btn btn-danger btn-sm">
+                              className="inline-flex items-center justify-center font-display font-semibold rounded-lg transition-all duration-200 ease-out active:scale-95 bg-rust-soft text-rust border border-rust/20 hover:bg-rust/20 text-xs px-3 py-1.5">
                               Reject
                             </button>
                           </>
                         )}
                         {reg.status === 'approved' && reg.qr_codes?.[0] && (
                           <button onClick={() => { resendQR.mutate(reg.id); showToast('QR resent', 'success') }}
-                            disabled={resendQR.isPending} className="btn btn-ghost btn-sm">
+                            disabled={resendQR.isPending} className="inline-flex items-center justify-center font-display font-semibold rounded-lg transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim text-xs px-3 py-1.5">
                             Resend QR
                           </button>
                         )}
@@ -421,17 +416,17 @@ export default function EventDetail() {
       {rejectId && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] animate-fade-in p-4" 
              onClick={() => setRejectId(null)}>
-          <div className="glass-panel p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-4 text-text-1">Reject Registration</h3>
+          <div className="vc-card p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4 text-ink">Reject Registration</h3>
             <div>
-              <label className="label">Reason <span className="text-text-3 font-normal">(optional)</span></label>
+              <label className="section-label block mb-1">Reason <span className="text-ink-soft font-normal">(optional)</span></label>
               <input className="input" value={rejectReason} onChange={e => setReason(e.target.value)}
                 placeholder="e.g. Payment screenshot unclear" autoFocus />
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setRejectId(null)} className="btn btn-ghost flex-1">Cancel</button>
+              <button onClick={() => setRejectId(null)} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5 flex-1">Cancel</button>
               <button onClick={handleReject} disabled={reject.isPending}
-                className="btn btn-danger flex-1">
+                className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-rust text-paper hover:bg-rust/90 shadow-sm text-sm px-4.5 py-2.5 flex-1">
                 {reject.isPending ? 'Rejecting…' : 'Reject'}
               </button>
             </div>

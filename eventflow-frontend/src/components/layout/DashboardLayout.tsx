@@ -15,18 +15,18 @@ export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-surface-base">
+    <div className="flex h-[100dvh] overflow-hidden bg-paper">
       {/* Sidebar Overlay (Mobile only) */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar - Collapsed by default, expands on hover */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 group w-[260px] md:w-[76px] md:hover:w-[260px] transition-[width,transform] duration-300 ease-in-out bg-surface-base border-r border-border-light overflow-hidden shadow-[4px_0_24px_rgba(113,54,0,0.05)]
+        fixed inset-y-0 left-0 z-50 group w-[260px] md:w-[76px] md:hover:w-[260px] transition-[width,transform] duration-300 ease-in-out bg-paper border-r border-line-soft overflow-hidden shadow-card
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <Sidebar onNavClick={() => setIsSidebarOpen(false)} />

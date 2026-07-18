@@ -84,18 +84,16 @@ export default function SheetImport() {
   const stepIdx = ['url','map','import','done'].indexOf(step)
 
   return (
-    <div style={{ maxWidth: 720 }}>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Import from Google Sheets</h1>
-          <p className="page-subtitle">Import attendees from a Google Form response sheet and send QR codes automatically</p>
-        </div>
+    <div className="max-w-[720px] mx-auto">
+      <div className="mb-8">
+        <h1 className="font-display font-bold text-3xl tracking-tight text-ink">Import from Google Sheets</h1>
+        <p className="text-ink-soft mt-1">Import attendees from a Google Form response sheet and send QR codes automatically</p>
       </div>
 
       {/* How it works */}
-      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 12, padding: '14px 18px', marginBottom: 24, fontSize: 13, color: '#1e40af', lineHeight: 1.7 }}>
+      <div className="bg-teal-soft border border-teal/20 rounded-xl px-5 py-4 mb-6 text-sm text-teal-deep leading-relaxed">
         <strong>How this works:</strong>
-        <ol style={{ margin: '6px 0 0 16px', padding: 0 }}>
+        <ol className="list-decimal ml-4 mt-2 p-0 space-y-1">
           <li>Your club collects registrations via Google Forms (responses go to a Google Sheet)</li>
           <li>Make the sheet public: <strong>Share → Anyone with the link → Viewer</strong></li>
           <li>Paste the sheet URL here, map columns, and we import all attendees</li>
@@ -105,57 +103,52 @@ export default function SheetImport() {
       </div>
 
       {/* Step progress */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 28 }}>
+      <div className="flex items-center mb-7">
         {STEP_LABELS.map((label, i) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', flex: i < STEP_LABELS.length - 1 ? 1 : 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
-                width: 26, height: 26, borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 700, flexShrink: 0,
-                background: stepIdx > i ? 'var(--success)' : stepIdx === i ? 'var(--brand)' : 'var(--surface-3)',
-                color: stepIdx >= i ? 'white' : 'var(--text-3)',
-              }}>
+          <div key={label} className={`flex items-center ${i < STEP_LABELS.length - 1 ? 'flex-1' : 'flex-none'}`}>
+            <div className="flex items-center gap-2.5">
+              <div className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0
+                ${stepIdx > i ? 'bg-teal text-paper' : stepIdx === i ? 'bg-amber-deep text-paper' : 'bg-paper-dim border border-line-soft text-ink-soft'}`}>
                 {stepIdx > i ? '✓' : i + 1}
               </div>
-              <span style={{ fontSize: 13, fontWeight: stepIdx === i ? 600 : 400, color: stepIdx === i ? 'var(--text-1)' : 'var(--text-3)' }}>
+              <span className={`text-[13px] ${stepIdx === i ? 'font-semibold text-ink' : 'font-normal text-ink-soft'}`}>
                 {label}
               </span>
             </div>
             {i < STEP_LABELS.length - 1 && (
-              <div style={{ flex: 1, height: 1, background: stepIdx > i ? 'var(--success)' : 'var(--border)', margin: '0 12px' }} />
+              <div className={`flex-1 h-[1px] mx-3 ${stepIdx > i ? 'bg-teal' : 'bg-line-soft'}`} />
             )}
           </div>
         ))}
       </div>
 
       {error && (
-        <div style={{ background: 'var(--danger-bg)', border: '1px solid #fca5a5', borderRadius: 10, padding: '11px 16px', fontSize: 13, color: 'var(--danger)', marginBottom: 20 }}>
-          ⚠ {error}
+        <div className="bg-rust-soft border border-rust/20 rounded-xl px-4 py-3 text-[13px] text-rust mb-5 font-medium flex items-center gap-2">
+          <span className="text-lg">⚠</span> {error}
         </div>
       )}
 
       {/* ── Step 1: URL + Event ── */}
       {step === 'url' && (
-        <div className="card" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: 'var(--text-1)' }}>
+        <div className="vc-card p-7">
+          <h2 className="text-base font-semibold mb-5 text-ink">
             Enter your Google Sheet URL
           </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div className="flex flex-col gap-5">
             <div>
-              <label className="label">Google Sheet URL *</label>
+              <label className="section-label block mb-2">Google Sheet URL *</label>
               <input className="input" type="url" value={sheetUrl}
                 onChange={e => setSheetUrl(e.target.value)}
                 placeholder="https://docs.google.com/spreadsheets/d/..."
                 autoFocus />
-              <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6, lineHeight: 1.5 }}>
+              <p className="text-xs text-ink-soft mt-1.5 leading-relaxed">
                 Make sure the sheet is set to "Anyone with the link can view" in Google Sheets sharing settings.
               </p>
             </div>
 
             <div>
-              <label className="label">Select Event *</label>
+              <label className="section-label block mb-2">Select Event *</label>
               <select className="input" value={eventId} onChange={e => setEventId(e.target.value)}>
                 <option value="">Choose which event these attendees belong to</option>
                 {events?.map((event: any) => (
@@ -163,16 +156,16 @@ export default function SheetImport() {
                 ))}
               </select>
               {events?.length === 0 && (
-                <p style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>
+                <p className="text-xs text-rust mt-1.5 font-medium">
                   No published events found. Publish an event first.
                 </p>
               )}
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+          <div className="flex justify-end mt-6">
             <button onClick={fetchPreview} disabled={loading || !sheetUrl || !eventId}
-              className="btn btn-primary">
+              className={`inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 text-sm px-4.5 py-2.5 ${loading || !sheetUrl || !eventId ? 'bg-ink-soft text-paper cursor-not-allowed opacity-70' : 'bg-ink text-paper hover:bg-ink-soft cursor-pointer shadow-sm'}`}>
               {loading ? 'Fetching sheet…' : 'Fetch sheet & preview →'}
             </button>
           </div>
@@ -183,21 +176,21 @@ export default function SheetImport() {
       {step === 'map' && preview && (
         <div>
           {/* Sheet preview */}
-          <div className="card" style={{ padding: 24, marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-1)', margin: 0 }}>
+          <div className="vc-card p-6 mb-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-ink m-0">
                 Sheet preview
               </h2>
-              <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{preview.total_rows} rows found</span>
+              <span className="text-xs font-medium text-ink-soft bg-paper-dim border border-line-soft px-2.5 py-1 rounded-md">{preview.total_rows} rows found</span>
             </div>
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>{preview.headers.map(h => <th key={h}>{h}</th>)}</tr>
+            <div className="overflow-x-auto border border-line rounded-lg">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-paper-dim border-b border-line">
+                  <tr className="text-xs font-semibold text-ink-soft uppercase tracking-wider">{preview.headers.map(h => <th className="px-4 py-2 font-medium" key={h}>{h}</th>)}</tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-line">
                   {preview.preview_rows.map((row, i) => (
-                    <tr key={i}>{row.map((cell, j) => <td key={j} style={{ fontSize: 12, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cell}</td>)}</tr>
+                    <tr key={i} className="hover:bg-paper-dim transition-colors duration-150">{row.map((cell, j) => <td className="px-4 py-2 text-xs text-ink max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap" key={j}>{cell}</td>)}</tr>
                   ))}
                 </tbody>
               </table>
@@ -205,58 +198,58 @@ export default function SheetImport() {
           </div>
 
           {/* Column mapping */}
-          <div className="card" style={{ padding: 24, marginBottom: 20 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 6, color: 'var(--text-1)' }}>Map your columns</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 20, lineHeight: 1.5 }}>
+          <div className="vc-card p-6 mb-5">
+            <h2 className="text-base font-semibold mb-1.5 text-ink">Map your columns</h2>
+            <p className="text-[13px] text-ink-soft mb-5 leading-relaxed">
               Tell us which columns contain the attendee name and email. These are used to send QR passes.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label">
-                  Email column * <span style={{ color: 'var(--danger)' }}>required</span>
+                <label className="section-label block mb-2">
+                  Email column * <span className="text-rust ml-1 font-normal normal-case">required</span>
                 </label>
                 <select className="input" value={colMap.email}
                   onChange={e => setColMap(p => ({ ...p, email: e.target.value }))}>
                   <option value="">Select email column</option>
                   {preview.headers.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
-                <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>
+                <p className="text-[11px] text-ink-faint mt-1.5 font-medium">
                   QR passes are sent to this email address
                 </p>
               </div>
               <div>
-                <label className="label">Name column</label>
+                <label className="section-label block mb-2">Name column</label>
                 <select className="input" value={colMap.name}
                   onChange={e => setColMap(p => ({ ...p, name: e.target.value }))}>
                   <option value="">Select name column (optional)</option>
                   {preview.headers.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
-                <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>
+                <p className="text-[11px] text-ink-faint mt-1.5 font-medium">
                   Used to personalise the QR email
                 </p>
               </div>
             </div>
 
             {/* Additional columns */}
-            <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', marginBottom: 10 }}>
+            <div className="mt-5 pt-5 border-t border-line-soft">
+              <div className="text-[13px] font-semibold text-ink mb-2.5">
                 Other columns to store (optional)
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                 {preview.headers
                   .filter(h => h !== colMap.email && h !== colMap.name)
                   .map(h => {
                     const key = h.toLowerCase().replace(/[^a-z0-9]/g, '_')
                     return (
-                      <label key={h} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-2)', cursor: 'pointer', padding: '6px 10px', background: 'var(--surface-2)', borderRadius: 7 }}>
+                      <label key={h} className="flex items-center gap-2 text-[13px] text-ink-soft cursor-pointer px-3 py-2 bg-paper-dim hover:bg-paper border border-transparent hover:border-line-soft rounded-lg transition-all duration-150">
                         <input type="checkbox"
                           checked={!!colMap[key]}
                           onChange={e => setColMap(p => e.target.checked
                             ? { ...p, [key]: h }
                             : Object.fromEntries(Object.entries(p).filter(([k]) => k !== key))
                           )}
-                          style={{ accentColor: 'var(--brand)' }}
+                          className="w-4 h-4 rounded border-line-soft text-amber focus:ring-amber/50 bg-paper transition-all"
                         />
                         {h}
                       </label>
@@ -268,15 +261,15 @@ export default function SheetImport() {
           </div>
 
           {/* QR send option */}
-          <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
+          <div className="vc-card p-5 mb-5">
+            <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" checked={sendQr} onChange={e => setSendQr(e.target.checked)}
-                style={{ accentColor: 'var(--brand)', width: 16, height: 16, marginTop: 2, flexShrink: 0 }} />
+                className="w-4 h-4 rounded border-line-soft text-amber focus:ring-amber/50 bg-paper transition-all mt-0.5 shrink-0" />
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', marginBottom: 3 }}>
+                <div className="text-sm font-semibold text-ink mb-1">
                   Send QR codes immediately after import
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.5 }}>
+                <div className="text-[13px] text-ink-soft leading-relaxed">
                   Each imported attendee will receive their QR entry pass via email right away.
                   If unchecked, registrations are created as approved but QR emails are not sent —
                   you can send them later from the event's registrations page.
@@ -285,12 +278,12 @@ export default function SheetImport() {
             </label>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <button onClick={() => setStep('url')} className="btn btn-ghost">← Back</button>
+          <div className="flex justify-between">
+            <button onClick={() => setStep('url')} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">← Back</button>
             <button
               onClick={runImport}
               disabled={loading || !colMap.email}
-              className="btn btn-primary">
+              className={`inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 text-sm px-4.5 py-2.5 ${loading || !colMap.email ? 'bg-ink-soft text-paper cursor-not-allowed opacity-70' : 'bg-ink text-paper hover:bg-ink-soft shadow-sm'}`}>
               {loading
                 ? `Importing ${preview.total_rows} rows…`
                 : `Import ${preview.total_rows} attendees →`}
@@ -301,41 +294,41 @@ export default function SheetImport() {
 
       {/* ── Done ── */}
       {step === 'done' && result && (
-        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', marginBottom: 8 }}>Import complete</h2>
-          <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 28 }}>{result.message}</p>
+        <div className="vc-card p-9 text-center">
+          <div className="text-5xl mb-4">✅</div>
+          <h2 className="text-[22px] font-bold text-ink mb-2">Import complete</h2>
+          <p className="text-sm text-ink-soft mb-7">{result.message}</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, marginBottom: 28 }}>
-            <div style={{ background: 'var(--success-bg)', border: '1px solid #86efac', borderRadius: 10, padding: '16px' }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--success)' }}>{result.results.imported}</div>
-              <div style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>Imported</div>
+          <div className="grid grid-cols-3 gap-3.5 mb-7">
+            <div className="bg-teal-soft border border-teal/20 rounded-xl p-4">
+              <div className="text-[28px] font-black text-teal-deep leading-tight">{result.results.imported}</div>
+              <div className="text-xs font-semibold text-teal-deep mt-1">Imported</div>
             </div>
-            <div style={{ background: 'var(--warning-bg)', border: '1px solid #fde68a', borderRadius: 10, padding: '16px' }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--warning)' }}>{result.results.skipped}</div>
-              <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 4 }}>Skipped (duplicates)</div>
+            <div className="bg-amber-soft/50 border border-amber/20 rounded-xl p-4">
+              <div className="text-[28px] font-black text-amber-deep leading-tight">{result.results.skipped}</div>
+              <div className="text-xs font-semibold text-amber-deep mt-1">Skipped (duplicates)</div>
             </div>
-            <div style={{ background: result.results.failed > 0 ? 'var(--danger-bg)' : 'var(--surface-2)', border: `1px solid ${result.results.failed > 0 ? '#fca5a5' : 'var(--border)'}`, borderRadius: 10, padding: '16px' }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: result.results.failed > 0 ? 'var(--danger)' : 'var(--text-3)' }}>{result.results.failed}</div>
-              <div style={{ fontSize: 12, color: result.results.failed > 0 ? 'var(--danger)' : 'var(--text-3)', marginTop: 4 }}>Failed</div>
+            <div className={`border rounded-xl p-4 ${result.results.failed > 0 ? 'bg-rust-soft border-rust/20 text-rust' : 'bg-paper-dim border-line-soft text-ink-soft'}`}>
+              <div className={`text-[28px] font-black leading-tight ${result.results.failed > 0 ? 'text-rust' : 'text-ink-soft'}`}>{result.results.failed}</div>
+              <div className={`text-xs font-semibold mt-1 ${result.results.failed > 0 ? 'text-rust' : 'text-ink-soft'}`}>Failed</div>
             </div>
           </div>
 
           {result.results.errors.length > 0 && (
-            <div style={{ background: 'var(--danger-bg)', border: '1px solid #fca5a5', borderRadius: 10, padding: '14px 16px', marginBottom: 24, textAlign: 'left' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--danger)', marginBottom: 8 }}>Errors:</div>
+            <div className="bg-rust-soft border border-rust/20 rounded-xl px-4 py-3.5 mb-6 text-left">
+              <div className="text-[13px] font-semibold text-rust mb-2">Errors:</div>
               {result.results.errors.slice(0, 5).map((e, i) => (
-                <div key={i} style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 4 }}>• {e}</div>
+                <div key={i} className="text-xs text-rust mb-1">• {e}</div>
               ))}
               {result.results.errors.length > 5 && (
-                <div style={{ fontSize: 12, color: 'var(--danger)' }}>...and {result.results.errors.length - 5} more</div>
+                <div className="text-xs text-rust font-medium mt-1">...and {result.results.errors.length - 5} more</div>
               )}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={reset} className="btn btn-ghost">Import another sheet</button>
-            <a href={`/events/${eventId}`} className="btn btn-primary">View event registrations →</a>
+          <div className="flex gap-3 justify-center">
+            <button onClick={reset} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5">Import another sheet</button>
+            <a href={`/events/${eventId}`} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5">View event registrations →</a>
           </div>
         </div>
       )}
