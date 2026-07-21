@@ -150,7 +150,7 @@ export default function EventCreate() {
               onClick={() => setBasic(p => ({ ...p, registration_type: 'native' }))}
             >
               <div className="text-xl mb-2">📝</div>
-              <h3 className="font-bold text-white mb-1">EventFlow Form</h3>
+              <h3 className="font-bold text-white mb-1">QLess Form</h3>
               <p className="text-xs text-gray-400">Build a custom form. We'll automatically generate QR codes and send tickets.</p>
             </div>
 

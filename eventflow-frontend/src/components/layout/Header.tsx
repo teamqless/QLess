@@ -15,7 +15,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const club = getStoredClub()
 
   const title = PAGE_TITLES[location.pathname]
-    ?? (location.pathname.startsWith('/events/') ? 'Event Details' : 'EventFlow')
+    ?? (location.pathname.startsWith('/events/') ? 'Event Details' : 'QLess')
 
   return (
     <header className="h-16 glass flex items-center justify-between px-4 md:px-8 shrink-0 sticky top-0 z-30 shadow-sm w-full transition-colors duration-300">

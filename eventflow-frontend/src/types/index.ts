@@ -1,5 +1,5 @@
 // ============================================================
-// types/index.ts — All shared TypeScript types for EventFlow
+// types/index.ts — All shared TypeScript types for QLess
 // ============================================================
 
 export type Plan = 'free' | 'pro' | 'institution'

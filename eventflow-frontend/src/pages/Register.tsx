@@ -368,7 +368,7 @@ export default function Register() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-8 font-medium">
-          Powered by <span className="text-indigo-500 font-bold tracking-tight">EventFlow</span>
+          Powered by <span className="text-indigo-500 font-bold tracking-tight">QLess</span>
         </p>
       </div>
     </div>

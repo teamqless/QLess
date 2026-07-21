@@ -199,7 +199,7 @@ export default function Landing() {
               <div className="relative z-10">
                 <div className="text-sm font-black text-amber-deep mb-8 uppercase tracking-widest flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-amber flex items-center justify-center text-ink">✓</span>
-                  EventFlow
+                  QLess
                 </div>
                 <ul className="space-y-4">
                   {[
@@ -230,7 +230,7 @@ export default function Landing() {
               </svg>
               <span className="font-display font-extrabold text-lg text-ink">Event<span className="text-amber">Flow</span></span>
             </div>
-            <div className="text-sm font-medium text-ink-faint">© 2026 EventFlow · Built for modern clubs</div>
+            <div className="text-sm font-medium text-ink-faint">© 2026 QLess · Built for modern clubs</div>
             <div className="flex gap-8">
               {['Privacy', 'Terms', 'Contact'].map(l => (
                 <a key={l} href="#" className="text-sm font-bold text-ink-soft hover:text-amber transition-colors">{l}</a>

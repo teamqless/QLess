@@ -67,13 +67,13 @@ export default function Login() {
         
         <div className="pb-16 relative z-10">
           <div className="text-[10px] font-mono font-black text-amber uppercase tracking-[0.2em] mb-4">
-            The EventFlow Ecosystem
+            The QLess Ecosystem
           </div>
           <div className="font-display text-4xl font-black text-paper tracking-tight leading-tight mb-6">
             Intelligence at Scale.
           </div>
           <div className="text-[15px] text-paper/70 leading-relaxed font-medium">
-            We don't just track your registrations; we harmonize your entire logistical operation. EventFlow is the single, powerful ecosystem that turns chaotic event data into precise, automated intelligence.
+            We don't just track your registrations; we harmonize your entire logistical operation. QLess is the single, powerful ecosystem that turns chaotic event data into precise, automated intelligence.
           </div>
         </div>
       </div>

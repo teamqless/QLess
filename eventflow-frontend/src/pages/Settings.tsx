@@ -120,7 +120,7 @@ export default function Settings() {
             <strong className="text-ink">Current sending mode:</strong>{' '}
             {club?.smtp_host
               ? <span className="text-teal font-medium">✓ Custom SMTP — emails sent from your club address</span>
-              : <span>Using EventFlow default sender (<code className="font-mono bg-paper-card px-1.5 py-0.5 rounded text-ink border border-line-soft">onboarding@resend.dev</code>). Configure SMTP below to send from your own email.</span>
+              : <span>Using QLess default sender (<code className="font-mono bg-paper-card px-1.5 py-0.5 rounded text-ink border border-line-soft">onboarding@resend.dev</code>). Configure SMTP below to send from your own email.</span>
             }
           </div>
 
@@ -209,7 +209,7 @@ export default function Settings() {
                 <div className="text-sm font-medium text-ink">Delete account</div>
                 <div className="text-xs text-ink-soft mt-1">Permanently deletes your club and all associated data.</div>
               </div>
-              <button className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-rust text-paper hover:bg-rust/90 shadow-sm text-sm px-4.5 py-2.5 whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support at hello@eventflow.app to delete your account.')}>Delete account</button>
+              <button className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-rust text-paper hover:bg-rust/90 shadow-sm text-sm px-4.5 py-2.5 whitespace-nowrap self-start sm:self-auto" onClick={() => alert('Contact support at hello@qless.app to delete your account.')}>Delete account</button>
             </div>
           </div>
         </div>

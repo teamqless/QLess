@@ -54,7 +54,7 @@ export default function Pricing() {
 
   const handleUpgrade = async (planId: string) => {
     if (!authed) { navigate('/signup'); return }
-    if (planId === 'institution') { window.location.href = 'mailto:hello@eventflow.app?subject=Institution Plan Inquiry'; return }
+    if (planId === 'institution') { window.location.href = 'mailto:hello@qless.app?subject=Institution Plan Inquiry'; return }
 
     setLoading(planId); setError('')
     try {
@@ -75,7 +75,7 @@ export default function Pricing() {
           key:          orderData.key_id,
           amount:       orderData.amount,
           currency:     orderData.currency,
-          name:         'EventFlow',
+          name:         'QLess',
           description:  `Club Pro Plan`,
           order_id:     orderData.order_id,
           prefill: {
@@ -115,7 +115,7 @@ export default function Pricing() {
       <nav className="sticky top-0 z-[100] flex items-center justify-between px-6 md:px-16 h-16 bg-[#080714]/85 backdrop-blur-md border-b border-white/5">
         <Link to="/" className="flex items-center gap-2 no-underline">
           <div className="w-7 h-7 bg-indigo-500 rounded-md flex items-center justify-center font-extrabold text-sm text-white">E</div>
-          <span className="font-bold text-base text-[#f0eeff]">EventFlow</span>
+          <span className="font-bold text-base text-[#f0eeff]">QLess</span>
         </Link>
         <div className="flex gap-2 items-center">
           {authed
@@ -223,7 +223,7 @@ export default function Pricing() {
 
       {/* Footer */}
       <div className="border-t border-white/5 py-6 px-6 text-center text-xs text-[#3a3758]">
-        © 2026 EventFlow · <a href="mailto:hello@eventflow.app" className="text-[#3a3758] hover:text-[#56527a] transition-colors">hello@eventflow.app</a>
+        © 2026 QLess · <a href="mailto:hello@qless.app" className="text-[#3a3758] hover:text-[#56527a] transition-colors">hello@qless.app</a>
       </div>
     </div>
   )

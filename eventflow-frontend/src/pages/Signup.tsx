@@ -83,7 +83,7 @@ export default function Signup() {
 
           <Link to="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none', zIndex:1 }}>
             <div style={{ width:34, height:34, background:'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius:9, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:17, color:'white' }}>E</div>
-            <span style={{ fontWeight:700, fontSize:17, color:'#f0eeff', letterSpacing:'-0.3px' }}>EventFlow</span>
+            <span style={{ fontWeight:700, fontSize:17, color:'#f0eeff', letterSpacing:'-0.3px' }}>QLess</span>
           </Link>
 
           <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', zIndex:1 }}>
@@ -122,7 +122,7 @@ export default function Signup() {
             </div>
           </div>
 
-          <div style={{ fontSize:12, color:'#2a2848', zIndex:1 }}>© 2026 EventFlow</div>
+          <div style={{ fontSize:12, color:'#2a2848', zIndex:1 }}>© 2026 QLess</div>
         </div>
 
         {/* ── Form panel ── */}
