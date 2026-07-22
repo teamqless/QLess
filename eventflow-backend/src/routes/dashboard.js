@@ -15,18 +15,38 @@ router.get('/', requireAuth, async (req, res) => {
       { count: liveEvents },
       { count: totalRegistrations },
       { count: pendingApprovals },
+      { count: approved },
+      { count: rejected },
+      { data: timelineData },
     ] = await Promise.all([
       supabase.from('events').select('id', { count: 'exact', head: true }).eq('club_id', clubId),
       supabase.from('events').select('id', { count: 'exact', head: true }).eq('club_id', clubId).eq('status', 'published'),
       supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('club_id', clubId),
       supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('club_id', clubId).eq('status', 'pending'),
+      supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('club_id', clubId).eq('status', 'approved'),
+      supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('club_id', clubId).eq('status', 'rejected'),
+      supabase.from('registrations').select('created_at').eq('club_id', clubId).gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).order('created_at', { ascending: true })
     ])
+
+    const byDate = {}
+    ;(timelineData || []).forEach(r => {
+      const date = r.created_at.slice(0,10)
+      byDate[date] = (byDate[date] || 0) + 1
+    })
 
     const { data: recentEvents } = await supabase.from('events').select('id, title, status, event_date, slug, entry_fee').eq('club_id', clubId).order('created_at', { ascending: false }).limit(5)
     const { data: recentRegistrations } = await supabase.from('registrations').select('id, attendee_name, attendee_email, status, created_at, events(title)').eq('club_id', clubId).order('created_at', { ascending: false }).limit(10)
 
     return res.json({
-      stats: { total_events: totalEvents, live_events: liveEvents, total_registrations: totalRegistrations, pending_approvals: pendingApprovals },
+      stats: { 
+        total_events: totalEvents, 
+        live_events: liveEvents, 
+        total_registrations: totalRegistrations, 
+        pending_approvals: pendingApprovals,
+        approved: approved,
+        rejected: rejected
+      },
+      timeline: byDate,
       recent_events: recentEvents,
       recent_registrations: recentRegistrations,
     })

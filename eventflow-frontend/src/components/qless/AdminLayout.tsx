@@ -15,7 +15,7 @@ import {
 import { QLessLogo } from './Logo'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
-import { clearAuth } from '@/lib/auth'
+import { clearAuth, getStoredClub } from '@/lib/auth'
 
 const NAV = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -36,6 +36,11 @@ export function AdminLayout({ children, title }: { children: ReactNode; title?: 
     clearAuth()
     navigate('/login')
   }
+
+  const club = getStoredClub()
+  const clubName = club?.name || 'Club'
+  const email = club?.email || ''
+  const initials = clubName.substring(0, 2).toUpperCase()
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
@@ -101,13 +106,13 @@ export function AdminLayout({ children, title }: { children: ReactNode; title?: 
             )}
           >
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-violet grid place-items-center text-sm font-bold text-primary-foreground shrink-0">
-              CB
+              {initials}
             </div>
             {!collapsed && (
               <>
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate">Coding Club</div>
-                  <div className="text-xs text-muted-foreground truncate">admin@campus.edu</div>
+                  <div className="text-sm font-medium truncate">{clubName}</div>
+                  <div className="text-xs text-muted-foreground truncate">{email}</div>
                 </div>
                 <button
                   onClick={handleLogout}

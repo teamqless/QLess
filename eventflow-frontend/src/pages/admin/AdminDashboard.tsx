@@ -20,7 +20,7 @@ export default function AdminDashboard() {
 
   const fetchClubs = async () => {
     try {
-      const res = await fetch('http://localhost:5000/admin/clubs', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/clubs`, {
         headers: { Authorization: `Bearer ${getAdminToken()}` }
       })
       if (!res.ok) throw new Error('Failed to fetch clubs')
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
 
   const updatePlan = async (id: string, newPlan: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/admin/clubs/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/clubs/${id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',

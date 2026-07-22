@@ -21,17 +21,7 @@ import { StatusPill } from '@/components/qless/StatusPill'
 import { useDashboard } from '@/hooks/useDashboard'
 import { getStoredClub } from '@/lib/auth'
 
-// Chart data (will be enriched with real data when available)
-const registrationsOverTime = Array.from({ length: 14 }).map((_, i) => ({
-  day: `D-${14 - i}`,
-  count: Math.round(20 + Math.sin(i / 2) * 15 + i * 3 + Math.random() * 10),
-}))
-
-const paymentBreakdown = [
-  { name: 'Approved', value: 214, fill: 'var(--color-success)' },
-  { name: 'Pending', value: 88, fill: 'var(--color-warning)' },
-  { name: 'Rejected', value: 12, fill: 'var(--color-destructive)' },
-]
+// Hardcoded fallbacks removed; charts now use dynamic data computed in the component.
 
 export default function Dashboard() {
   const { data, isLoading } = useDashboard()
@@ -41,8 +31,27 @@ export default function Dashboard() {
   const METRICS = [
     { label: 'Events Hosted', value: stats?.total_events ?? 0, icon: Calendar, delta: 12, dir: 'up' as const },
     { label: 'Total Registrations', value: stats?.total_registrations ?? 0, icon: Users, delta: 24, dir: 'up' as const },
-    { label: 'Verified Payments', value: stats?.total_registrations ? Math.round(stats.total_registrations * 0.88) : 0, icon: CheckCircle2, delta: 8, dir: 'up' as const },
+    { label: 'Verified Payments', value: stats?.approved ?? 0, icon: CheckCircle2, delta: 8, dir: 'up' as const },
     { label: 'Pending Approvals', value: stats?.pending_approvals ?? 0, icon: ScanLine, delta: stats?.pending_approvals ? 5 : 0, dir: 'down' as const },
+  ]
+
+  // Dynamic Chart Data
+  const timelineData = data?.timeline || {}
+  const dynamicRegistrationsOverTime = Array.from({ length: 14 }).map((_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (13 - i))
+    const dateStr = d.toISOString().slice(0, 10)
+    const month = d.toLocaleString('default', { month: 'short' })
+    return {
+      day: `${month} ${d.getDate()}`,
+      count: timelineData[dateStr] || 0
+    }
+  })
+
+  const dynamicPaymentBreakdown = [
+    { name: 'Approved', value: stats?.approved || 0, fill: 'var(--color-success)' },
+    { name: 'Pending', value: stats?.pending_approvals || 0, fill: 'var(--color-warning)' },
+    { name: 'Rejected', value: stats?.rejected || 0, fill: 'var(--color-destructive)' },
   ]
 
   return (
@@ -109,7 +118,7 @@ export default function Dashboard() {
             </div>
             <div className="h-64">
               <ResponsiveContainer>
-                <AreaChart data={registrationsOverTime}>
+                <AreaChart data={dynamicRegistrationsOverTime}>
                   <defs>
                     <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="oklch(0.85 0.17 205)" stopOpacity={0.6} />
@@ -138,14 +147,14 @@ export default function Dashboard() {
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
-                    data={paymentBreakdown}
+                    data={dynamicPaymentBreakdown}
                     dataKey="value"
                     nameKey="name"
                     innerRadius={55}
                     outerRadius={85}
                     paddingAngle={4}
                   >
-                    {paymentBreakdown.map((e, i) => (
+                    {dynamicPaymentBreakdown.map((e, i) => (
                       <Cell key={i} fill={e.fill} stroke="transparent" />
                     ))}
                   </Pie>

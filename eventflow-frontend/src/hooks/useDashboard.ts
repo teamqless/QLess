@@ -7,7 +7,8 @@ import api from '@/lib/api'
 import type { DashboardStats, Event, Registration } from '@/types'
 
 interface DashboardData {
-  stats: DashboardStats
+  stats: DashboardStats & { approved: number; rejected: number }
+  timeline: Record<string, number>
   recent_events: Event[]
   recent_registrations: (Registration & { events: { title: string } })[]
 }
