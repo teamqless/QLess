@@ -1,244 +1,497 @@
-import { Link } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import {
+  Sparkles,
+  Zap,
+  ShieldCheck,
+  QrCode,
+  Mail,
+  FormInput,
+  ScanLine,
+  Wallet,
+  Play,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  ChevronDown,
+} from 'lucide-react'
+
+import { PublicHeader } from '@/components/qless/PublicHeader'
+import { ScrollBackground } from '@/components/qless/ScrollBackground'
+import { MagneticButton } from '@/components/qless/MagneticButton'
+import { GlassCard } from '@/components/qless/GlassCard'
+import { AnimatedCounter } from '@/components/qless/AnimatedCounter'
+import { QLessLogo } from '@/components/qless/Logo'
+import { StatusPill } from '@/components/qless/StatusPill'
+
+function SplitHeadline() {
+  const words = ['Eliminate', 'Chaos.', 'Go', 'QLess.']
+  return (
+    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95]">
+      {words.map((w, i) => (
+        <span key={i} className="inline-block overflow-hidden pb-2 mr-3">
+          <motion.span
+            initial={{ y: '110%' }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.9, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+            className={`inline-block ${i === 3 ? 'text-gradient-cyan' : ''}`}
+          >
+            {w}
+          </motion.span>
+        </span>
+      ))}
+    </h1>
+  )
+}
+
+function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-md p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="glass-strong rounded-3xl p-6 max-w-3xl w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="aspect-video rounded-2xl bg-black/60 grid place-items-center relative overflow-hidden">
+          <div className="absolute inset-0 animate-gradient-shift bg-[linear-gradient(120deg,oklch(0.3_0.2_200/0.4),oklch(0.3_0.24_295/0.4),oklch(0.3_0.2_155/0.4))]" />
+          <div className="relative text-center">
+            <Play className="h-16 w-16 mx-auto text-primary" />
+            <p className="mt-3 text-sm text-muted-foreground">Live product walkthrough (demo placeholder)</p>
+          </div>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <MagneticButton variant="outline" onClick={onClose}>
+            Close
+          </MagneticButton>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function HeroMockup() {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const sx = useSpring(x, { stiffness: 80, damping: 20 })
+  const sy = useSpring(y, { stiffness: 80, damping: 20 })
+  const rx = useTransform(sy, [-0.5, 0.5], [10, -10])
+  const ry = useTransform(sx, [-0.5, 0.5], [-10, 10])
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const el = ref.current
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      x.set((e.clientX - r.left) / r.width - 0.5)
+      y.set((e.clientY - r.top) / r.height - 0.5)
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [x, y])
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1200 }}
+      className="relative w-full max-w-md mx-auto"
+    >
+      <div className="glass-strong rounded-3xl p-6 glow-cyan relative overflow-hidden">
+        <div className="flex items-center justify-between mb-4">
+          <StatusPill tone="success" dot>
+            Live Scan
+          </StatusPill>
+          <span className="text-xs text-muted-foreground font-mono">TicketID #A392F1</span>
+        </div>
+        <div className="aspect-square rounded-2xl bg-black/40 grid place-items-center relative overflow-hidden border border-white/10">
+          <QrCode className="h-40 w-40 text-primary" strokeWidth={1.2} />
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-scan-line" />
+          </div>
+          <div className="absolute top-3 left-3 h-6 w-6 border-t-2 border-l-2 border-primary rounded-tl-lg" />
+          <div className="absolute top-3 right-3 h-6 w-6 border-t-2 border-r-2 border-primary rounded-tr-lg" />
+          <div className="absolute bottom-3 left-3 h-6 w-6 border-b-2 border-l-2 border-primary rounded-bl-lg" />
+          <div className="absolute bottom-3 right-3 h-6 w-6 border-b-2 border-r-2 border-primary rounded-br-lg" />
+        </div>
+        <div className="mt-4 space-y-1">
+          <p className="text-sm text-muted-foreground">Attendee</p>
+          <p className="text-lg font-semibold">Ananya Rao</p>
+          <p className="text-xs font-mono text-muted-foreground">1MS22CS103 · CSE</p>
+        </div>
+        <div className="mt-4 flex items-center justify-between rounded-xl bg-success/10 border border-success/30 px-4 py-3">
+          <div className="flex items-center gap-2 text-success">
+            <CheckCircle2 className="h-5 w-5" />
+            <span className="font-medium">Entry Granted</span>
+          </div>
+          <span className="text-xs font-mono text-success/70">0.48s</span>
+        </div>
+      </div>
+      <motion.div
+        animate={{ y: [-10, 10, -10] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-6 -right-6 glass rounded-2xl px-3 py-2 text-xs font-mono"
+      >
+        99.9% verified
+      </motion.div>
+      <motion.div
+        animate={{ y: [10, -10, 10] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -bottom-6 -left-6 glass rounded-2xl px-3 py-2 text-xs font-mono"
+      >
+        <Zap className="inline h-3 w-3 text-primary mr-1" />
+        342 scans today
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function ComparisonSlider() {
+  const [pos, setPos] = useState(50)
+  return (
+    <div className="relative rounded-3xl overflow-hidden border border-white/10 glass-strong h-[520px] select-none">
+      {/* Old Way — clipped to show only the right portion (pos% → 100%) */}
+      <div
+        className="absolute inset-0 p-8 md:p-12 bg-gradient-to-br from-destructive/10 to-transparent"
+        style={{ clipPath: `polygon(${pos}% 0, 100% 0, 100% 100%, ${pos}% 100%)` }}
+      >
+        <StatusPill tone="danger" dot>
+          The Old Way
+        </StatusPill>
+        <h3 className="mt-4 text-2xl md:text-3xl font-bold">Spreadsheets & Chaos</h3>
+        <ul className="mt-6 space-y-3">
+          {[
+            { icon: XCircle, text: 'Cluttered Google Sheets with 40 columns' },
+            { icon: XCircle, text: 'Manually verifying fake payment screenshots' },
+            { icon: XCircle, text: 'Volunteers checking names one-by-one at the gate' },
+            { icon: XCircle, text: '60+ minute entry queues, angry attendees' },
+            { icon: XCircle, text: 'Zero audit trail, no analytics' },
+          ].map((r, i) => (
+            <li key={i} className="flex items-start gap-3 text-sm md:text-base">
+              <r.icon className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <span className="text-foreground/80">{r.text}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 grid grid-cols-2 gap-3 max-w-sm">
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs font-mono text-destructive">
+            ERROR: Duplicate ID
+          </div>
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs font-mono text-destructive">
+            ERROR: Fake proof
+          </div>
+        </div>
+      </div>
+
+      {/* QLess Way — clipped to show only the left portion (0 → pos%)) */}
+      <div
+        className="absolute inset-0 p-8 md:p-12 bg-gradient-to-br from-primary/10 to-emerald/10"
+        style={{ clipPath: `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)` }}
+      >
+        <StatusPill tone="success" dot>
+          The QLess Way
+        </StatusPill>
+        <h3 className="mt-4 text-2xl md:text-3xl font-bold">Automated & Instant</h3>
+        <ul className="mt-6 space-y-3">
+          {[
+            'AI-assisted screenshot verification in seconds',
+            'QR tickets generated & emailed via your SMTP',
+            'Sub-second scans at the gate on any phone',
+            'Real-time analytics & registration velocity',
+            'Full audit trail with fraud detection',
+          ].map((t, i) => (
+            <li key={i} className="flex items-start gap-3 text-sm md:text-base">
+              <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
+              <span className="text-foreground/90">{t}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 grid grid-cols-2 gap-3 max-w-sm">
+          <div className="rounded-lg border border-success/40 bg-success/10 p-3 text-xs font-mono text-success">
+            ✓ Ticket delivered
+          </div>
+          <div className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-xs font-mono text-primary">
+            ✓ 0.48s scan
+          </div>
+        </div>
+      </div>
+
+      {/* Slider handle */}
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={pos}
+        onChange={(e) => setPos(Number(e.target.value))}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-10"
+        aria-label="Comparison slider"
+      />
+      <div
+        className="absolute top-0 bottom-0 w-[2px] bg-primary pointer-events-none z-[5]"
+        style={{ left: `${pos}%`, boxShadow: '0 0 30px oklch(0.85 0.17 205 / 0.8)' }}
+      >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-12 rounded-full glass-strong grid place-items-center glow-cyan">
+          <div className="flex gap-0.5">
+            <div className="w-0.5 h-4 bg-primary" />
+            <div className="w-0.5 h-4 bg-primary" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const FEATURES = [
-  {
-    icon: '⬡',
-    title: 'Flexible Registration Forms',
-    desc: 'Build forms with any fields — text, dropdowns, phone, file uploads. Every club has different needs, so we let you define your own structure completely.',
-  },
-  {
-    icon: '⬢',
-    title: 'Payment Verification Built-in',
-    desc: 'Attendees upload payment screenshots during registration. You review and approve with one click. No third-party payment gateway needed.',
-  },
-  {
-    icon: '◈',
-    title: 'Branded QR Entry Passes',
-    desc: 'Approved attendees get a beautifully designed QR code emailed automatically — with your event name, date, venue, and theme color.',
-  },
-  {
-    icon: '◉',
-    title: 'One-Scan Enforcement',
-    desc: 'Each QR is cryptographically signed and single-use. The moment it\'s scanned, it\'s locked. No duplicate entries, no sharing workarounds.',
-  },
-  {
-    icon: '▦',
-    title: 'Mobile Gate Scanner',
-    desc: 'Volunteers open a URL on any phone. No app install. The camera scanner shows instant green/red feedback and logs every entry in real-time.',
-  },
-  {
-    icon: '✦',
-    title: 'Live Entry Dashboard',
-    desc: 'Watch attendees check in live. See who\'s arrived, who hasn\'t, and export the full list to CSV anytime — even during the event.',
-  },
-]
-
-const HOW_IT_WORKS = [
-  { n: '01', title: 'Create your event', desc: 'Set a title, venue, date, fee, and design a registration form with your own fields. Publish a shareable link in minutes.' },
-  { n: '02', title: 'Attendees register', desc: 'Students fill your form, upload payment proof. You see every submission, review screenshots, and approve or reject with one click.' },
-  { n: '03', title: 'QR codes delivered', desc: 'The moment you approve, a branded QR entry pass gets emailed automatically. Attendees keep it in their inbox.' },
-  { n: '04', title: 'Scan at the gate', desc: 'Volunteers use any phone to scan QR codes at entry. One scan per ticket, enforced server-side. Done.' },
-]
-
-const STATS = [
-  { value: '2,400+', label: 'QR passes sent' },
-  { value: '48',     label: 'Events managed' },
-  { value: '0',      label: 'Duplicate entries' },
-  { value: '< 1s',   label: 'Scan response time' },
+  { icon: FormInput, title: 'Dynamic Form Builder', desc: 'Design multi-step registration forms with any field type. No code required.' },
+  { icon: Wallet, title: 'Custom Payment Gateways', desc: 'Accept UPI, QR, or card payments with your own account and instructions.' },
+  { icon: ShieldCheck, title: 'QR Security Hash', desc: 'Signed cryptographic tickets prevent duplication and screenshot fraud.' },
+  { icon: ScanLine, title: 'Gate Scanner PWA', desc: 'Install on any phone, scan tickets offline, sync when back online.' },
+  { icon: Mail, title: 'Custom SMTP Delivery', desc: 'Send tickets from your domain — full branding, unbeatable inbox rates.' },
+  { icon: Sparkles, title: 'Live Analytics', desc: 'Real-time dashboards, cohort insights, exportable reports.' },
 ]
 
 export default function Landing() {
-  
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in-up');
-          (entry.target as HTMLElement).style.opacity = '1';
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.scroll-animate').forEach((el) => {
-      observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
+  const [demoOpen, setDemoOpen] = useState(false)
   return (
-    <div className="min-h-screen bg-paper text-ink font-sans overflow-x-hidden relative transition-colors duration-300">
-      
-      {/* Absolute Background Effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-amber opacity-10 blur-[100px] rounded-full animate-pulse-glow" />
-        <div className="absolute top-1/2 -left-20 w-72 h-72 bg-amber-soft opacity-10 blur-[80px] rounded-full" />
-      </div>
+    <div className="relative min-h-screen">
+      <ScrollBackground />
+      <PublicHeader />
 
-      {/* ── Navbar ── */}
-      <nav className="glass fixed top-0 w-full z-50 flex items-center justify-between px-6 md:px-16 h-20 transition-all duration-300">
-        <div className="flex items-center gap-3 group cursor-pointer">
-          <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform group-hover:scale-105 text-amber">
-            <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="60 16"></circle>
-            <path d="M22 22L30 30" stroke="currentColor" strokeWidth="3" strokeLinecap="round"></path>
-            <path d="M14 16L18 20L26 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"></path>
-          </svg>
-          <span className="font-display font-extrabold text-2xl tracking-tight text-ink">
-            Event<span className="text-amber">Flow</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link to="/login" className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5">
-            Sign in
-          </Link>
-        </div>
-      </nav>
-
-      <div className="relative z-10 pt-20">
-        {/* ── Hero ── */}
-        <div className="text-center pt-32 pb-24 px-6 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-soft border border-amber/20 text-xs font-mono text-amber-deep mb-10 fade-in-up">
-            <span className="bg-amber text-ink rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">New</span>
-            Built for modern college clubs
+      {/* HERO */}
+      <section className="relative pt-32 md:pt-40 pb-24 px-6">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 glass rounded-full px-3 py-1.5 text-xs mb-6"
+            >
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse-dot" />
+              Next-Gen Event Operations for Campus Organizations
+            </motion.div>
+            <SplitHeadline />
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-6 text-lg text-muted-foreground max-w-xl"
+            >
+              QLess is the automated event platform built for university clubs — dynamic registration
+              forms, verified payments, cryptographic QR tickets, and instant gate scans.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="mt-8 flex flex-wrap gap-3"
+            >
+              <Link to="/login">
+                <MagneticButton size="lg">
+                  Host an Event <ArrowRight className="h-4 w-4" />
+                </MagneticButton>
+              </Link>
+              <MagneticButton size="lg" variant="outline" onClick={() => setDemoOpen(true)}>
+                <Play className="h-4 w-4" /> Watch Live Demo
+              </MagneticButton>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.1 }}
+              className="mt-10 flex items-center gap-6 text-xs text-muted-foreground"
+            >
+              <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> SOC-ready</div>
+              <div className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> {'<1s scans'}</div>
+              <div className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> 350+ events</div>
+            </motion.div>
           </div>
-
-          <h1 className="font-display text-5xl md:text-8xl font-black leading-[1.05] tracking-tighter mb-8 max-w-5xl mx-auto fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Stop managing events<br />
-            <span className="text-amber-deep">
-              with WhatsApp & Excel
-            </span>
-          </h1>
-
-          <p className="text-lg md:text-2xl text-ink-soft leading-relaxed max-w-3xl mx-auto mb-14 font-medium fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Registration forms, payment verification, QR entry passes, and gate
-            scanning — all in one place. No chaotic scripts. No stress.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-24 px-4 fade-in-up" style={{ animationDelay: '0.3s' }}>
-            <Link to="/login" className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-amber text-ink hover:bg-amber-deep shadow-sm text-base px-6 py-3">
-              Sign in to dashboard
-            </Link>
+          <div className="relative">
+            <HeroMockup />
           </div>
+        </div>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-6 text-muted-foreground"
+        >
+          <ChevronDown className="h-6 w-6" />
+        </motion.div>
+      </section>
 
-          {/* Stats strip */}
-          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px bg-line-soft border border-line rounded-2xl overflow-hidden fade-in-up shadow-card" style={{ animationDelay: '0.4s' }}>
-            {STATS.map((s, i) => (
-              <div key={s.label} className="p-8 hover:bg-paper-dim transition-colors bg-paper-card">
-                <div className="font-display text-3xl md:text-4xl font-black text-ink tracking-tight mb-2">{s.value}</div>
-                <div className="section-label">{s.label}</div>
-              </div>
+      {/* HOW IT WORKS */}
+      <section id="how" className="relative py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
+            <StatusPill tone="info">How it works</StatusPill>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+              Three steps. Zero chaos.
+            </h2>
+          </motion.div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { n: '01', icon: FormInput, title: 'Build & Configure', desc: 'Design a custom registration form, set fees and add payment instructions.' },
+              { n: '02', icon: ShieldCheck, title: 'Verify & Deliver', desc: 'Approve payments in seconds. QR tickets auto-send via your SMTP.' },
+              { n: '03', icon: ScanLine, title: 'Scan & Enter', desc: 'Volunteers scan tickets at the gate — 0.5s validation, full audit trail.' },
+            ].map((s, i) => (
+              <motion.div
+                key={s.n}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12 }}
+              >
+                <GlassCard tilt className="h-full">
+                  <div className="text-6xl font-bold text-gradient-cyan opacity-40">{s.n}</div>
+                  <s.icon className="h-8 w-8 mt-4 text-primary" />
+                  <h3 className="mt-4 text-xl font-semibold">{s.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
+                </GlassCard>
+              </motion.div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* ── How it works ── */}
-        <div className="py-32 px-6 md:px-16 max-w-7xl mx-auto scroll-animate" style={{ opacity: 0 }}>
-          <div className="text-center mb-20">
-            <h2 className="font-display text-4xl md:text-5xl font-black tracking-tight mb-6 text-ink">Four steps. <span className="text-amber">Fully automated.</span></h2>
-            <p className="text-xl text-ink-soft max-w-2xl mx-auto">From creating the form to scanning the last QR code, everything just works.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {HOW_IT_WORKS.map((s, i) => (
-              <div key={s.n} className="vc-card p-8 group">
-                <div className="text-[12px] font-black text-amber-deep bg-amber-soft inline-block px-3 py-1 rounded-full mb-6">{s.n}</div>
-                <div className="font-display text-xl font-bold mb-4 text-ink group-hover:text-amber-deep transition-colors">{s.title}</div>
-                <div className="text-sm text-ink-soft leading-relaxed font-medium">{s.desc}</div>
-              </div>
-            ))}
-          </div>
+      {/* COMPARISON */}
+      <section id="compare" className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center max-w-2xl mx-auto mb-12"
+          >
+            <StatusPill tone="danger">Before / After</StatusPill>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+              The Old Way vs. The <span className="text-gradient-cyan">QLess</span> Way
+            </h2>
+            <p className="mt-3 text-muted-foreground">Drag the slider to compare.</p>
+          </motion.div>
+          <ComparisonSlider />
         </div>
+      </section>
 
-        {/* ── Features ── */}
-        <div className="py-32 px-6 md:px-16 relative scroll-animate" style={{ opacity: 0 }}>
-          <div className="max-w-7xl mx-auto relative">
-            <div className="text-center mb-20">
-              <h2 className="font-display text-4xl md:text-5xl font-black tracking-tight mb-6 text-ink">Everything your club needs</h2>
-              <p className="text-xl text-ink-soft max-w-2xl mx-auto">No more stringing together 5 different tools just to run a workshop.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {FEATURES.map(f => (
-                <div key={f.title} className="vc-card p-8 group">
-                  <div className="w-14 h-14 rounded-2xl bg-paper-dim flex items-center justify-center text-3xl text-amber mb-6 group-hover:scale-110 group-hover:bg-amber group-hover:text-ink transition-all duration-300">
-                    {f.icon}
+      {/* FEATURES */}
+      <section id="features" className="relative py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
+            <StatusPill tone="success">Feature matrix</StatusPill>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+              Built for the modern campus club
+            </h2>
+          </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FEATURES.map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+              >
+                <GlassCard tilt className="h-full group">
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/30 grid place-items-center group-hover:glow-cyan transition-shadow">
+                    <f.icon className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="font-display text-lg font-bold mb-3 text-ink">{f.title}</div>
-                  <div className="text-sm text-ink-soft leading-relaxed font-medium">{f.desc}</div>
-                </div>
-              ))}
-            </div>
+                  <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+                </GlassCard>
+              </motion.div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* ── Problem → Solution ── */}
-        <div className="py-32 px-6 max-w-6xl mx-auto scroll-animate" style={{ opacity: 0 }}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="vc-card p-10 bg-rust-soft border-rust/20">
-              <div className="text-sm font-black text-rust mb-8 uppercase tracking-widest flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-rust-soft border border-rust/20 flex items-center justify-center text-rust">✗</span>
-                The Old Way
-              </div>
-              <ul className="space-y-4">
-                {[
-                  'Google Form → Excel sheet → manual QR generation',
-                  'Python script running on someone\'s laptop at the gate',
-                  'WhatsApp for payment confirmations',
-                  'Duplicate entries because QR was screenshotted',
-                  'No real-time entry count',
-                ].map(t => (
-                  <li key={t} className="flex gap-4 text-[15px] text-ink-soft font-medium">
-                    <span className="text-rust mt-0.5">✗</span> {t}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="vc-card p-10 bg-paper-card relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-amber/5 rounded-full blur-3xl" />
-              <div className="relative z-10">
-                <div className="text-sm font-black text-amber-deep mb-8 uppercase tracking-widest flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber flex items-center justify-center text-ink">✓</span>
-                  QLess
+      {/* STATS */}
+      <section id="stats" className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <StatusPill tone="info" dot>Live platform stats</StatusPill>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">Trusted at scale</h2>
+          </motion.div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { v: 350, s: '+', label: 'Entries Processed', d: 0 },
+              { v: 0.48, s: 's', label: 'Avg. Scan Speed', d: 2 },
+              { v: 99.9, s: '%', label: 'Fraud Detection', d: 1 },
+            ].map((s) => (
+              <GlassCard key={s.label} tilt glow className="text-center">
+                <div className="text-5xl md:text-6xl font-bold text-gradient-cyan">
+                  <AnimatedCounter value={s.v} suffix={s.s} decimals={s.d} />
                 </div>
-                <ul className="space-y-4">
-                  {[
-                    'Custom registration form live in 5 minutes',
-                    'QR emailed automatically on approval',
-                    'Payment screenshots in the dashboard, approve in one click',
-                    'Each QR is single-use, server-enforced',
-                    'Live entry counter on any phone',
-                  ].map(t => (
-                    <li key={t} className="flex gap-4 text-[15px] text-ink font-medium">
-                      <span className="text-teal mt-0.5">✓</span> {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+                <div className="mt-3 text-sm text-muted-foreground uppercase tracking-wider">{s.label}</div>
+              </GlassCard>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* ── Footer ── */}
-        <div className="border-t border-line bg-paper-card py-12 px-6 md:px-16 mt-20">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3 text-amber">
-              <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="60 16"></circle>
-                <path d="M22 22L30 30" stroke="currentColor" strokeWidth="3" strokeLinecap="round"></path>
-                <path d="M14 16L18 20L26 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"></path>
-              </svg>
-              <span className="font-display font-extrabold text-lg text-ink">Event<span className="text-amber">Flow</span></span>
-            </div>
-            <div className="text-sm font-medium text-ink-faint">© 2026 QLess · Built for modern clubs</div>
-            <div className="flex gap-8">
-              {['Privacy', 'Terms', 'Contact'].map(l => (
-                <a key={l} href="#" className="text-sm font-bold text-ink-soft hover:text-amber transition-colors">{l}</a>
-              ))}
-            </div>
+      {/* CTA */}
+      <section className="relative py-32 px-6">
+        <div className="max-w-4xl mx-auto text-center relative">
+          <div className="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-r from-primary/20 via-violet/20 to-emerald/20 blur-3xl" />
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-6xl font-bold tracking-tight"
+          >
+            Ready to make your next event <span className="text-gradient-aurora">QLess</span>?
+          </motion.h2>
+          <p className="mt-4 text-lg text-muted-foreground">Free to try. No card required.</p>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link to="/login">
+              <MagneticButton size="lg">
+                Get Started Free <ArrowRight className="h-4 w-4" />
+              </MagneticButton>
+            </Link>
+            <MagneticButton size="lg" variant="outline" onClick={() => setDemoOpen(true)}>
+              Watch Demo
+            </MagneticButton>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="relative border-t border-white/5 py-10 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 justify-between">
+          <div className="flex items-center gap-4">
+            <QLessLogo size={28} />
+            <StatusPill tone="success" dot>All Systems Operational</StatusPill>
+          </div>
+          <div className="text-sm text-muted-foreground flex items-center gap-4">
+            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
+            <a href="#" className="hover:text-foreground transition-colors">GitHub</a>
+            <a href="#" className="hover:text-foreground transition-colors">Docs</a>
+            <span>© 2026 QLess</span>
+          </div>
+        </div>
+      </footer>
+
+      {demoOpen && <DemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />}
     </div>
   )
 }

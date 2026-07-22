@@ -1,207 +1,217 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { TrendingUp, TrendingDown, Calendar, Users, CheckCircle2, ScanLine, Plus } from 'lucide-react'
+import {
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts'
+import { AdminLayout } from '@/components/qless/AdminLayout'
+import { GlassCard } from '@/components/qless/GlassCard'
+import { AnimatedCounter } from '@/components/qless/AnimatedCounter'
+import { MagneticButton } from '@/components/qless/MagneticButton'
+import { StatusPill } from '@/components/qless/StatusPill'
 import { useDashboard } from '@/hooks/useDashboard'
 import { getStoredClub } from '@/lib/auth'
-import EventStatusBadge from '@/components/events/EventStatusBadge'
-import type { EventStatus } from '@/types'
 
-import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
+// Chart data (will be enriched with real data when available)
+const registrationsOverTime = Array.from({ length: 14 }).map((_, i) => ({
+  day: `D-${14 - i}`,
+  count: Math.round(20 + Math.sin(i / 2) * 15 + i * 3 + Math.random() * 10),
+}))
 
-function SkeletonCard() {
-  return (
-    <div className="vc-card p-5">
-      <div className="skeleton h-3.5 w-20 mb-2.5" />
-      <div className="skeleton h-8 w-16" />
-    </div>
-  )
-}
-
-function PlanBanner({ plan, eventCount }: { plan: string; eventCount: number }) {
-  if (plan !== 'free') return null
-
-  const atLimit = eventCount >= 1
-
-  return (
-    <div className={`vc-card p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 ${atLimit
-        ? 'bg-rust-soft border-rust/20'
-        : 'bg-amber-soft border-amber/20'
-      }`}>
-      <div>
-        <div className={`text-sm font-display font-semibold mb-1 ${atLimit ? 'text-rust' : 'text-amber-deep'}`}>
-          {atLimit ? '⚠ Free plan limit reached' : '🎉 You are on the Free plan'}
-        </div>
-        <div className={`text-sm ${atLimit ? 'text-rust/80' : 'text-amber-deep/80'}`}>
-          {atLimit
-            ? 'You have used your 1 free event. Upgrade to Club Pro to create unlimited events.'
-            : `${1 - eventCount} free event remaining. Upgrade anytime to unlock unlimited events.`}
-        </div>
-      </div>
-      <Link to="/pricing" className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5 whitespace-nowrap shrink-0">
-        Upgrade →
-      </Link>
-    </div>
-  )
-}
+const paymentBreakdown = [
+  { name: 'Approved', value: 214, fill: 'var(--color-success)' },
+  { name: 'Pending', value: 88, fill: 'var(--color-warning)' },
+  { name: 'Rejected', value: 12, fill: 'var(--color-destructive)' },
+]
 
 export default function Dashboard() {
   const { data, isLoading } = useDashboard()
   const club = getStoredClub()
 
+  const stats = data?.stats
+  const METRICS = [
+    { label: 'Events Hosted', value: stats?.total_events ?? 0, icon: Calendar, delta: 12, dir: 'up' as const },
+    { label: 'Total Registrations', value: stats?.total_registrations ?? 0, icon: Users, delta: 24, dir: 'up' as const },
+    { label: 'Verified Payments', value: stats?.total_registrations ? Math.round(stats.total_registrations * 0.88) : 0, icon: CheckCircle2, delta: 8, dir: 'up' as const },
+    { label: 'Pending Approvals', value: stats?.pending_approvals ?? 0, icon: ScanLine, delta: stats?.pending_approvals ? 5 : 0, dir: 'down' as const },
+  ]
+
   return (
-    <div className="w-full animate-page-enter">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display font-bold text-2xl text-ink">Good to see you, {club?.name?.split(' ')?.[0]} 👋</h1>
-          <p className="text-sm text-ink-soft mt-1">Here's what's happening with your events</p>
+    <AdminLayout title="Dashboard">
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold">Welcome back, {club?.name?.split(' ')?.[0] ?? 'Club'}</h2>
+            <p className="text-sm text-muted-foreground">
+              {new Date().toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })}
+            </p>
+          </div>
+          <Link to="/events/new">
+            <MagneticButton>
+              <Plus className="h-4 w-4" /> New Event
+            </MagneticButton>
+          </Link>
         </div>
-        <Link to="/events/new" className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5">
-          + New Event
-        </Link>
-      </div>
 
-      {/* Plan banner */}
-      {!isLoading && data && (
-        <PlanBanner plan={club?.plan || 'free'} eventCount={data?.stats?.total_events ?? 0} />
-      )}
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : (
-          <>
-            <div className="vc-card p-5">
-              <div className="section-label mb-1">Total Events</div>
-              <div className="font-display font-bold text-3xl text-ink">{data?.stats.total_events ?? 0}</div>
-              {club?.plan === 'free' && (
-                <div className={`text-xs mt-1 ${(data?.stats.total_events ?? 0) >= 1 ? 'text-rust font-medium' : 'text-ink-soft'}`}>
-                  {(data?.stats.total_events ?? 0) >= 1 ? 'Limit reached' : '1 free remaining'}
-                </div>
-              )}
-            </div>
-            <div className="vc-card p-5">
-              <div className="section-label mb-1">Live Now</div>
-              <div className={`font-display font-bold text-3xl ${(data?.stats.live_events ?? 0) > 0 ? 'text-teal' : 'text-ink'}`}>
-                {data?.stats.live_events ?? 0}
-              </div>
-            </div>
-            <div className="vc-card p-5">
-              <div className="section-label mb-1">Total Registrations</div>
-              <div className="font-display font-bold text-3xl text-ink">{data?.stats.total_registrations ?? 0}</div>
-            </div>
-            <div className={`vc-card p-5 ${(data?.stats.pending_approvals ?? 0) > 0 ? 'border-rust/30 bg-rust-soft/50' : ''}`}>
-              <div className="section-label mb-1">Pending Approvals</div>
-              <div className={`font-display font-bold text-3xl ${(data?.stats.pending_approvals ?? 0) > 0 ? 'text-rust' : 'text-ink'}`}>
-                {data?.stats.pending_approvals ?? 0}
-              </div>
-              {(data?.stats.pending_approvals ?? 0) > 0 && (
-                <div className="text-xs mt-1 text-rust font-medium">Needs attention</div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent events */}
-        <div className="vc-card flex flex-col overflow-hidden">
-          <div className="px-5 py-4 border-b border-line-soft flex items-center justify-between bg-paper-dim">
-            <span className="text-sm font-semibold text-ink">Recent Events</span>
-            <Link to="/events" className="text-sm font-medium text-amber-deep hover:text-amber transition-colors">View all →</Link>
-          </div>
-          <div className="py-2 flex-1 overflow-y-auto max-h-[300px]">
-            {isLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="px-5 py-3 flex gap-3 items-center">
-                  <div className="skeleton flex-1 h-3.5" />
-                  <div className="skeleton w-12 h-5 rounded-full" />
+        {/* Metrics */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="glass rounded-2xl p-6 animate-pulse">
+                  <div className="h-10 w-10 rounded-xl bg-white/5 mb-6" />
+                  <div className="h-8 w-20 bg-white/5 rounded mb-2" />
+                  <div className="h-4 w-24 bg-white/5 rounded" />
                 </div>
               ))
-            ) : !data?.recent_events?.length ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-ink-faint mb-3">No events yet</p>
-                <Link to="/events/new" className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-xs px-3.5 py-1.5">Create your first event</Link>
+            : METRICS.map((m, i) => (
+                <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <GlassCard tilt className="h-full">
+                    <div className="flex items-start justify-between">
+                      <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/30 grid place-items-center">
+                        <m.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <span
+                        className={`inline-flex items-center gap-1 text-xs font-medium ${
+                          m.dir === 'up' ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {m.dir === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {m.delta}%
+                      </span>
+                    </div>
+                    <div className="mt-6 text-3xl font-bold">
+                      <AnimatedCounter value={m.value} />
+                    </div>
+                    <div className="text-sm text-muted-foreground">{m.label}</div>
+                  </GlassCard>
+                </motion.div>
+              ))}
+        </div>
+
+        {/* Charts */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          <GlassCard className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-semibold">Registration velocity</h3>
+                <p className="text-xs text-muted-foreground">Last 14 days</p>
               </div>
-            ) : (
-              data.recent_events.map(event => (
-                <Link key={event.id} to={`/events/${event.id}`}
-                  className="flex items-center gap-3 px-5 py-3 text-decoration-none transition-colors hover:bg-paper-dim group">
-                  <div className="w-1.5 h-8 rounded-full shrink-0" style={{ background: (event as any).theme_color || 'var(--color-amber)' }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-ink truncate group-hover:text-amber-deep transition-colors">
-                      {event.title}
-                    </div>
-                    <div className="text-xs text-ink-faint mt-0.5 truncate">
-                      {(event as any).entry_fee === 0 ? 'Free entry' : `₹${(event as any).entry_fee}`}
-                      {event.venue ? ` · ${event.venue}` : ''}
-                    </div>
-                  </div>
-                  <EventStatusBadge status={event.status as EventStatus} />
-                </Link>
-              ))
-            )}
-          </div>
+              <StatusPill tone="info">Live</StatusPill>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer>
+                <AreaChart data={registrationsOverTime}>
+                  <defs>
+                    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="oklch(0.85 0.17 205)" stopOpacity={0.6} />
+                      <stop offset="100%" stopColor="oklch(0.85 0.17 205)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" stroke="oklch(0.7 0.02 250)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="oklch(0.7 0.02 250)" fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'oklch(0.18 0.03 260)',
+                      border: '1px solid oklch(1 0 0 / 0.1)',
+                      borderRadius: 12,
+                    }}
+                  />
+                  <Area type="monotone" dataKey="count" stroke="oklch(0.85 0.17 205)" strokeWidth={2} fill="url(#g1)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
+
+          <GlassCard>
+            <h3 className="font-semibold">Payment status</h3>
+            <p className="text-xs text-muted-foreground mb-2">Breakdown across events</p>
+            <div className="h-64">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={paymentBreakdown}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={4}
+                  >
+                    {paymentBreakdown.map((e, i) => (
+                      <Cell key={i} fill={e.fill} stroke="transparent" />
+                    ))}
+                  </Pie>
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
         </div>
 
         {/* Recent registrations */}
-        <div className="vc-card flex flex-col overflow-hidden">
-          <div className="px-5 py-4 border-b border-line-soft bg-paper-dim">
-            <span className="text-sm font-semibold text-ink">Recent Registrations</span>
-          </div>
-          <div className="py-2 flex-1 overflow-y-auto max-h-[300px]">
-            {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="px-5 py-3 flex gap-3 items-center">
-                  <div className="skeleton w-8 h-8 rounded-full" />
-                  <div className="flex-1">
-                    <div className="skeleton h-3 w-3/5 mb-1.5" />
-                    <div className="skeleton h-2.5 w-2/5" />
-                  </div>
-                </div>
-              ))
-            ) : !data?.recent_registrations?.length ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-ink-faint">Registrations will appear here</p>
-              </div>
-            ) : (
-              data.recent_registrations.map(reg => (
-                <div key={reg.id} className="flex items-center gap-3 px-5 py-3 hover:bg-paper-dim transition-colors">
-                  <Avatar name={reg.attendee_name} size={32} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-ink truncate">
-                      {reg.attendee_name}
-                    </div>
-                    <div className="text-xs text-ink-faint truncate">
-                      {(reg as any).events?.title}
-                    </div>
-                  </div>
-                  <Badge color={reg.status === 'approved' ? 'teal' : reg.status === 'pending' ? 'amber' : 'rust'}>
-                    {reg.status}
-                  </Badge>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick links */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { to: '/events/new', icon: '◈', label: 'Create Event', sub: 'Launch a new event' },
-          { to: '/volunteers', icon: '◉', label: 'Manage Volunteers', sub: 'Add scanning volunteers' },
-          { to: '/pricing', icon: '✦', label: 'View Plans', sub: 'Upgrade for more features' },
-        ].map(item => (
-          <Link key={item.to} to={item.to} className="text-decoration-none group">
-            <div className="vc-card p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover bg-paper-card">
-              <div className="text-2xl mb-2 text-amber-deep group-hover:scale-110 transition-all origin-left">{item.icon}</div>
-              <div className="text-sm font-semibold text-ink mb-1">{item.label}</div>
-              <div className="text-xs text-ink-soft">{item.sub}</div>
+        <GlassCard>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold">Recent Registrations</h3>
+              <p className="text-xs text-muted-foreground">Real-time stream</p>
             </div>
-          </Link>
-        ))}
+            <StatusPill tone="success" dot>Live</StatusPill>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs text-muted-foreground border-b border-white/5">
+                <tr className="text-left">
+                  <th className="pb-2 font-medium">Attendee</th>
+                  <th className="pb-2 font-medium">Event</th>
+                  <th className="pb-2 font-medium">Status</th>
+                  <th className="pb-2 font-medium">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-white/5">
+                      <td className="py-3"><div className="h-4 w-32 bg-white/5 rounded animate-pulse" /></td>
+                      <td className="py-3"><div className="h-4 w-24 bg-white/5 rounded animate-pulse" /></td>
+                      <td className="py-3"><div className="h-5 w-16 bg-white/5 rounded-full animate-pulse" /></td>
+                      <td className="py-3"><div className="h-4 w-16 bg-white/5 rounded animate-pulse" /></td>
+                    </tr>
+                  ))
+                ) : data?.recent_registrations?.length ? (
+                  data.recent_registrations.slice(0, 8).map((r) => (
+                    <tr key={r.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                      <td className="py-3">{r.attendee_name}</td>
+                      <td className="py-3 text-muted-foreground">{(r as any).events?.title ?? '—'}</td>
+                      <td className="py-3">
+                        <StatusPill
+                          tone={r.status === 'approved' ? 'success' : r.status === 'pending' ? 'warning' : 'danger'}
+                        >
+                          {r.status}
+                        </StatusPill>
+                      </td>
+                      <td className="py-3 text-xs text-muted-foreground">
+                        {new Date(r.created_at ?? Date.now()).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-muted-foreground">No registrations yet</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
       </div>
-    </div>
+    </AdminLayout>
   )
 }

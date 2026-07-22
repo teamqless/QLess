@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import api from '@/lib/api'
 import { setStoredClub } from '@/lib/auth'
+import { AdminLayout } from '@/components/qless/AdminLayout'
+import { MagneticButton } from '@/components/qless/MagneticButton'
+import { User, Building2, Phone, Mail, CheckCircle2, AlertCircle, Shield, Calendar, Edit3, ArrowRight, UserCircle2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export default function Profile() {
   const { data: club, refetch } = useAuth()
@@ -33,61 +37,106 @@ export default function Profile() {
   }
 
   return (
-    <div className="w-full max-w-3xl pb-12 animate-fade-in-up">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display font-bold text-2xl text-ink">Club Profile</h1>
-          <p className="text-sm text-ink-soft mt-1">View and manage your complete club information</p>
-        </div>
+    <AdminLayout title="Club Profile">
+      <div className="w-full max-w-4xl pb-12 pt-4 animate-fade-in-up">
+        <div className="mb-10">
+        <h1 className="font-display font-bold text-4xl text-foreground tracking-tight flex items-center gap-3">
+          <UserCircle2 className="w-8 h-8 text-primary" /> Club Profile
+        </h1>
+        <p className="text-muted-foreground mt-2">View and manage your complete club information.</p>
       </div>
 
-      <div className="space-y-6">
-        {/* Current info */}
-        <div className="vc-card p-5 sm:p-6">
-          <div className="text-xs font-bold text-ink-soft uppercase tracking-widest mb-4">Complete Information</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {[
-              { label: 'Club Name', value: club?.name },
-              { label: 'Email', value: club?.email },
-              { label: 'College', value: club?.college || '—' },
-              { label: 'Phone', value: club?.phone || '—' },
-              { label: 'Plan', value: club?.plan === 'free' ? 'Free' : club?.plan === 'pro' ? 'Club Pro' : 'Institution' },
-              { label: 'Joined', value: club?.created_at ? new Date(club.created_at).toLocaleDateString() : '—' },
-            ].map(f => (
-              <div key={f.label}>
-                <div className="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-1">{f.label}</div>
-                <div className="text-sm text-ink font-medium">{f.value}</div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        
+        {/* Left Column: Current Info */}
+        <div className="lg:col-span-2 space-y-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-strong rounded-3xl p-6 md:p-8 ring-glow">
+            <div className="text-xs font-bold text-primary uppercase tracking-widest mb-6 flex items-center gap-2">
+              <Shield className="w-4 h-4" /> Account Details
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Club Name</div>
+                <div className="text-sm font-medium text-foreground flex items-center gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5"><User className="w-4 h-4 text-muted-foreground" /> {club?.name}</div>
               </div>
-            ))}
-          </div>
+              
+              <div>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Email</div>
+                <div className="text-sm font-medium text-foreground flex items-center gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5"><Mail className="w-4 h-4 text-muted-foreground" /> {club?.email}</div>
+              </div>
+
+              <div>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">College</div>
+                <div className="text-sm font-medium text-foreground flex items-center gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5"><Building2 className="w-4 h-4 text-muted-foreground" /> {club?.college || '—'}</div>
+              </div>
+
+              <div>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Phone</div>
+                <div className="text-sm font-medium text-foreground flex items-center gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5"><Phone className="w-4 h-4 text-muted-foreground" /> {club?.phone || '—'}</div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Plan</div>
+                  <div className="text-sm font-bold text-primary">{club?.plan === 'free' ? 'Free' : club?.plan === 'pro' ? 'Club Pro' : 'Institution'}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Joined</div>
+                  <div className="text-sm font-medium text-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {club?.created_at ? new Date(club.created_at).toLocaleDateString() : '—'}</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
 
-        <div className="vc-card p-5 sm:p-6">
-          <div className="text-base font-semibold text-ink mb-4">Update Profile</div>
-          {profileMsg && <div className="bg-teal-soft border border-teal/20 rounded-lg p-3 text-sm text-teal mb-4">{profileMsg}</div>}
-          {profileErr && <div className="bg-rust-soft border border-rust/20 rounded-lg p-3 text-sm text-rust mb-4">{profileErr}</div>}
+        {/* Right Column: Update Form */}
+        <div className="lg:col-span-3">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-strong rounded-3xl p-6 md:p-8 ring-glow">
+            <div className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+              <Edit3 className="w-5 h-5 text-primary" /> Update Profile
+            </div>
+            
+            {profileMsg && <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-sm text-foreground mb-6 flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> {profileMsg}</div>}
+            {profileErr && <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 text-sm text-destructive mb-6 flex items-center gap-3"><AlertCircle className="w-5 h-5 shrink-0" /> {profileErr}</div>}
 
-          <form onSubmit={saveProfile} className="flex flex-col gap-4">
-            <div>
-              <label className="label">New Club Name</label>
-              <input className="input" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} placeholder={club?.name} />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={saveProfile} className="space-y-6">
               <div>
-                <label className="label">College</label>
-                <input className="input" value={profile.college} onChange={e => setProfile(p => ({ ...p, college: e.target.value }))} placeholder={club?.college || 'Your college'} />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">New Club Name</label>
+                <div className="flex items-center gap-3 glass rounded-xl px-4 h-12 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/50 focus-within:bg-white/10">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <input className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} placeholder={club?.name} />
+                </div>
               </div>
-              <div>
-                <label className="label">Phone</label>
-                <input className="input" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="Contact number" />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">College</label>
+                  <div className="flex items-center gap-3 glass rounded-xl px-4 h-12 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/50 focus-within:bg-white/10">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <input className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground" value={profile.college} onChange={e => setProfile(p => ({ ...p, college: e.target.value }))} placeholder={club?.college || 'Your college'} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Phone</label>
+                  <div className="flex items-center gap-3 glass rounded-xl px-4 h-12 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/50 focus-within:bg-white/10">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <input className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="Contact number" />
+                  </div>
+                </div>
               </div>
-            </div>
-            <button type="submit" disabled={saving} className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-ink text-paper hover:bg-ink-soft shadow-sm text-sm px-4.5 py-2.5 mt-2 self-start w-full sm:w-auto">
-              {saving ? 'Saving…' : 'Save Profile'}
-            </button>
-          </form>
+
+              <div className="pt-4 flex justify-end">
+                <MagneticButton type="submit" disabled={saving}>
+                  {saving ? 'Saving…' : 'Save Profile Changes'} <ArrowRight className="w-4 h-4 ml-2" />
+                </MagneticButton>
+              </div>
+            </form>
+          </motion.div>
         </div>
+
       </div>
     </div>
+    </AdminLayout>
   )
 }

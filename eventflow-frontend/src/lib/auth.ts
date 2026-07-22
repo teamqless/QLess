@@ -58,3 +58,10 @@ export const adminLogout = (): void => {
   removeAdminToken()
   window.location.href = '/login'
 }
+
+// Clears all auth state (used by sidebar logout button)
+export const clearAuth = (): void => {
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(CLUB_KEY)
+  localStorage.removeItem(ADMIN_TOKEN_KEY)
+}

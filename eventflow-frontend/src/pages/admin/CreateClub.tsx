@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { getAdminToken } from '@/lib/auth'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Key, Mail, Building2, Sparkles, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react'
+import { MagneticButton } from '@/components/qless/MagneticButton'
 
 export default function CreateClub() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [plan, setPlan] = useState('free')
+  const [isPlanOpen, setIsPlanOpen] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -38,7 +42,7 @@ export default function CreateClub() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to create club')
 
-      setSuccess(`Club "${data.club.name}" created successfully! Credentials: Email: ${data.club.email}, Password: ${password}`)
+      setSuccess(`Club "${data.club.name}" created successfully!\nEmail: ${data.club.email}\nPassword: ${password}`)
       setName('')
       setEmail('')
       setPassword('')
@@ -51,55 +55,81 @@ export default function CreateClub() {
   }
 
   return (
-    <div className="max-w-2xl animate-fade-in-up mx-auto">
+    <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="mb-8">
-        <h1 className="font-display font-bold text-3xl tracking-tight text-ink">Create New Club</h1>
-        <p className="text-ink-soft mt-1">Generate an account for a new club.</p>
+        <h1 className="font-display font-bold text-3xl tracking-tight text-foreground flex items-center gap-3">
+          <Sparkles className="w-8 h-8 text-primary" />
+          Create New Club
+        </h1>
+        <p className="text-muted-foreground mt-2">Generate an account and credentials for a new club.</p>
       </div>
 
-      {error && <div className="p-4 mb-6 bg-rust-soft border border-rust/20 text-rust font-medium rounded-xl flex items-center gap-2"><span className="text-lg">⚠</span> {error}</div>}
-      {success && <div className="p-4 mb-6 bg-teal-soft border border-teal/20 text-teal-deep font-medium rounded-xl whitespace-pre-wrap flex items-center gap-2"><span className="text-lg">✓</span> {success}</div>}
+      {error && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 mb-6 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0" /> 
+          {error}
+        </motion.div>
+      )}
+      
+      {success && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 mb-6 bg-primary/10 border border-primary/20 text-primary font-medium text-sm rounded-xl whitespace-pre-wrap flex items-start gap-3">
+          <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+          <span>{success}</span>
+        </motion.div>
+      )}
 
-      <form onSubmit={handleSubmit} className="vc-card p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="glass-strong rounded-3xl p-6 md:p-8 space-y-6 ring-glow">
         <div>
-          <label className="section-label block mb-2">Club Name</label>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="input"
-            placeholder="e.g. Google Developer Student Club"
-          />
-        </div>
-
-        <div>
-          <label className="section-label block mb-2">Club Email (Login ID)</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input"
-            placeholder="club@university.edu"
-          />
-        </div>
-
-        <div>
-          <label className="section-label block mb-2">Temporary Password</label>
-          <div className="flex gap-3">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
+            <Building2 className="w-4 h-4" /> Club Name
+          </label>
+          <div className="flex items-center gap-2 glass rounded-xl px-3 h-12 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/50 focus-within:bg-white/10">
             <input
               type="text"
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input flex-1"
-              placeholder="••••••••"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              placeholder="e.g. Google Developer Student Club"
             />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
+            <Mail className="w-4 h-4" /> Club Email (Login ID)
+          </label>
+          <div className="flex items-center gap-2 glass rounded-xl px-3 h-12 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/50 focus-within:bg-white/10">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              placeholder="club@university.edu"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
+            <Key className="w-4 h-4" /> Temporary Password
+          </label>
+          <div className="flex gap-3">
+            <div className="flex items-center gap-2 glass rounded-xl px-3 h-12 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/50 focus-within:bg-white/10 flex-1">
+              <input
+                type="text"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                placeholder="••••••••"
+              />
+            </div>
             <button
               type="button"
               onClick={generatePassword}
-              className="inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 bg-paper text-ink border border-line hover:bg-paper-dim shadow-sm text-sm px-4.5 py-2.5"
+              className="px-5 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-colors flex items-center justify-center whitespace-nowrap text-foreground"
             >
               Generate
             </button>
@@ -107,28 +137,53 @@ export default function CreateClub() {
         </div>
 
         <div>
-          <label className="section-label block mb-2">Initial Plan</label>
-          <select
-            value={plan}
-            onChange={(e) => setPlan(e.target.value)}
-            className="input appearance-none"
-          >
-            <option value="free">Free</option>
-            <option value="pro">Pro</option>
-            <option value="institution">Institution</option>
-          </select>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Initial Plan</label>
+          <div className="relative">
+            <div 
+              className="flex items-center gap-2 glass rounded-xl px-4 h-12 cursor-pointer transition-all duration-300 hover:bg-white/10"
+              onClick={() => setIsPlanOpen(!isPlanOpen)}
+            >
+              <div className="flex-1 text-sm text-foreground capitalize">{plan}</div>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isPlanOpen ? 'rotate-180' : ''}`} />
+            </div>
+            
+            <AnimatePresence>
+              {isPlanOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full left-0 w-full mt-2 bg-background/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-50 overflow-hidden"
+                >
+                  <div 
+                    className={`px-4 py-3 text-sm cursor-pointer hover:bg-white/10 transition-colors ${plan === 'free' ? 'text-primary bg-primary/5' : 'text-foreground'}`}
+                    onClick={() => { setPlan('free'); setIsPlanOpen(false) }}
+                  >
+                    Free
+                  </div>
+                  <div 
+                    className={`px-4 py-3 text-sm cursor-pointer hover:bg-white/10 transition-colors ${plan === 'pro' ? 'text-primary bg-primary/5' : 'text-foreground'}`}
+                    onClick={() => { setPlan('pro'); setIsPlanOpen(false) }}
+                  >
+                    Pro
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading || !password}
-          className={`
-            inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 text-paper text-sm px-4.5 py-3 w-full mt-4
-            ${(loading || !password) ? 'bg-ink-soft cursor-not-allowed opacity-70' : 'bg-ink hover:bg-ink-soft cursor-pointer shadow-sm'}
-          `}
-        >
-          {loading ? 'Creating...' : 'Create Club & Generate Credentials'}
-        </button>
+        <div className="pt-2">
+          <MagneticButton
+            type="submit"
+            loading={loading}
+            disabled={!password || !name || !email}
+            className="w-full"
+          >
+            {loading ? 'Creating Club...' : 'Create Club & Generate Credentials'} <Plus className="w-4 h-4 ml-2" />
+          </MagneticButton>
+        </div>
       </form>
     </div>
   )

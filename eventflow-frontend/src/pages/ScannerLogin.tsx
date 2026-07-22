@@ -1,127 +1,119 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useVolunteerLogin } from '@/hooks/useScanner'
+import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+import { Camera, Delete } from 'lucide-react'
+import { QLessLogo } from '@/components/qless/Logo'
+import { MagneticButton } from '@/components/qless/MagneticButton'
+import api from '@/lib/api'
+import { useEvents } from '@/hooks/useEvents'
 
 export default function ScannerLogin() {
-  const navigate        = useNavigate()
-  const [params]        = useSearchParams()
-  const presetEventId   = params.get('event') || ''
-  const login           = useVolunteerLogin()
+  const [pin, setPin] = useState('')
+  const [eventId, setEventId] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const { data: events } = useEvents()
 
-  const [code, setCode]   = useState('')
-  const [eid, setEid]     = useState(presetEventId)
-  const [error, setError] = useState('')
+  const press = (d: string) => setPin((p) => (p.length < 4 ? p + d : p))
+  const back = () => setPin((p) => p.slice(0, -1))
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    if (!code.trim()) {
-      setError('Please enter your access code')
+  const launch = async () => {
+    if (pin.length !== 4) {
+      toast.error('Enter your 4-digit code')
       return
     }
-
+    if (!eventId) {
+      toast.error('Select an event')
+      return
+    }
+    setLoading(true)
     try {
-      const result = await login.mutateAsync({
-        access_code: code.trim(),
-        event_id:    eid.trim() || '',  // empty string = club-wide
+      const { data } = await api.post('/volunteers/auth', {
+        access_code: pin,
+        event_id: eventId,
       })
-
-      // If no event_id was provided and the server returned an event, use it
-      // Otherwise navigate to a generic scanner
-      const targetEventId = eid.trim() || result?.event?.id || ''
-      if (targetEventId) {
-        navigate(`/scanner/${targetEventId}`)
-      } else {
-        navigate('/scanner/ready')
-      }
+      localStorage.setItem('scanner_token', data.token)
+      localStorage.setItem('scanner_event_id', data.event_id ?? eventId)
+      navigate(`/scanner/${data.event_id ?? eventId}`)
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid access code. Please try again.')
+      toast.error(err.response?.data?.error || 'Invalid access code')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-[100dvh] bg-paper flex items-center justify-center font-sans p-5 box-border relative overflow-hidden">
-      
-      {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-amber/5 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] bg-amber-soft rounded-full blur-[80px] pointer-events-none" />
-
-      <div className="vc-card p-8 w-full max-w-[400px] box-border relative z-10 shadow-2xl">
-        
-        {/* Icon + Title */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-amber/10 text-amber-deep rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm border border-amber/20">📷</div>
-          <h1 className="text-[22px] font-bold text-ink mb-2 tracking-tight">
-            Gate Scanner
-          </h1>
-          <p className="text-[13px] text-ink-soft leading-relaxed">
-            Enter your access code to start scanning
-          </p>
+    <div className="min-h-screen grid place-items-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-6">
+          <QLessLogo size={40} className="justify-center" />
+          <p className="mt-2 text-sm text-muted-foreground">Gate Scanner PWA</p>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="bg-rust-soft border border-rust/20 rounded-xl px-4 py-3 text-[13px] text-rust mb-5 leading-relaxed">
-            {error}
-          </div>
-        )}
+        <div className="glass-strong rounded-3xl p-6 ring-glow">
+          <h1 className="text-2xl font-bold text-center">Volunteer Access</h1>
+          <p className="mt-1 text-sm text-muted-foreground text-center">Enter your 4-digit passcode</p>
 
-        <form onSubmit={submit} className="flex flex-col gap-5">
-          
-          {/* Access Code */}
-          <div>
-            <label className="block text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-widest">Access Code *</label>
-            <input
-              type="text"
-              value={code}
-              onChange={e => setCode(e.target.value.toUpperCase())}
-              required
-              autoFocus
-              autoComplete="off"
-              autoCapitalize="characters"
-              placeholder="e.g. TECH-V1"
-              className="w-full bg-paper-dim border border-line-soft rounded-xl px-4 py-3.5 text-ink text-[22px] font-mono tracking-[0.2em] font-bold text-center outline-none focus:border-ink/60 focus:bg-paper transition-all placeholder:text-ink-faint"
-            />
+          <div className="mt-6 flex justify-center gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                animate={pin[i] ? { scale: [1, 1.15, 1] } : {}}
+                className={`h-14 w-14 rounded-2xl grid place-items-center text-3xl font-mono font-bold border ${
+                  pin[i] ? 'bg-primary/15 border-primary text-primary glow-cyan' : 'border-white/10 text-muted-foreground'
+                }`}
+              >
+                {pin[i] ? '•' : ''}
+              </motion.div>
+            ))}
           </div>
 
-          {/* Event ID */}
-          {!presetEventId && (
-            <div>
-              <label className="block text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-widest">
-                Event ID
-                <span className="text-ink-faint font-normal normal-case tracking-normal ml-1.5">
-                  (optional)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={eid}
-                onChange={e => setEid(e.target.value.trim())}
-                placeholder="Paste event ID here if given"
-                className="w-full bg-paper-dim border border-line-soft rounded-xl px-4 py-3 text-ink text-[15px] outline-none focus:border-ink/60 focus:bg-paper transition-all placeholder:text-ink-faint"
-              />
-              <p className="text-[11px] text-ink-soft mt-2 leading-relaxed">
-                The event admin will share this with you. Leave blank for club-wide access.
-              </p>
-            </div>
-          )}
+          <div className="mt-6 grid grid-cols-3 gap-2">
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
+              <button
+                key={d}
+                onClick={() => press(d)}
+                className="h-16 rounded-2xl glass text-2xl font-semibold hover:bg-white/10 active:scale-95 transition-transform"
+              >
+                {d}
+              </button>
+            ))}
+            <div />
+            <button
+              onClick={() => press('0')}
+              className="h-16 rounded-2xl glass text-2xl font-semibold hover:bg-white/10 active:scale-95 transition-transform"
+            >
+              0
+            </button>
+            <button
+              onClick={back}
+              className="h-16 rounded-2xl glass grid place-items-center hover:bg-white/10 active:scale-95 transition-transform"
+            >
+              <Delete className="h-5 w-5" />
+            </button>
+          </div>
 
-          <button
-            type="submit"
-            disabled={login.isPending || !code.trim()}
-            className={`
-              inline-flex items-center justify-center font-display font-semibold rounded-xl transition-all duration-200 ease-out active:scale-95 text-paper text-sm px-4.5 py-3 w-full
-              ${(login.isPending || !code.trim()) ? 'bg-ink-soft cursor-not-allowed opacity-70' : 'bg-ink hover:bg-ink-soft cursor-pointer shadow-sm'}
-            `}
-          >
-            {login.isPending ? 'Verifying…' : 'Start Scanning'}
-          </button>
-        </form>
+          <div className="mt-6">
+            <label className="text-xs text-muted-foreground">Assigned event</label>
+            <select
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+              className="mt-1.5 w-full glass rounded-xl h-11 px-3 text-sm bg-transparent outline-none"
+            >
+              <option value="" className="bg-background">Select event</option>
+              {(events ?? []).map((e) => (
+                <option key={e.id} value={e.id} className="bg-background">
+                  {e.title}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <p className="text-center text-[11px] text-ink-soft mt-6">
-          Contact your event organizer if you don't have an access code
-        </p>
+          <MagneticButton className="mt-6 w-full" size="lg" loading={loading} onClick={launch}>
+            <Camera className="h-5 w-5" /> Launch Camera
+          </MagneticButton>
+        </div>
       </div>
     </div>
   )
