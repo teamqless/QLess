@@ -57,11 +57,22 @@ const ensureStorageBucket = async () => {
   }
 }
 
+// Keep-alive function to prevent Render free-tier from sleeping
+const startKeepAlive = (port) => {
+  const url = process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`
+  setInterval(() => {
+    fetch(`${url}/health`)
+      .then(res => console.log(`[Keep-Alive] Pinged ${url}/health - Status: ${res.status}`))
+      .catch(err => console.error(`[Keep-Alive] Ping failed:`, err.message))
+  }, 14 * 60 * 1000) // Ping every 14 minutes
+}
+
 const PORT = process.env.PORT || 5000
 server.listen(PORT, async () => {
   console.log(`\n🚀 EventFlow API v3.0 on port ${PORT}`)
   socketLib.init(server)
   await ensureStorageBucket()
+  startKeepAlive(PORT)
 })
 
 module.exports = { app, server }
